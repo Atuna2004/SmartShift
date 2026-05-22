@@ -10,6 +10,7 @@ export type ShiftSwapFinalStatus =
   | "cancelled";
 
 export interface IShiftSwapRequest extends Document {
+  organizationId: Types.ObjectId;
   branchId: Types.ObjectId;
 
   fromEmployeeId: Types.ObjectId;
@@ -34,6 +35,12 @@ export interface IShiftSwapRequest extends Document {
 
 const shiftSwapRequestSchema = new Schema<IShiftSwapRequest>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     branchId: {
       type: Schema.Types.ObjectId,
       ref: "Branch",
@@ -115,6 +122,7 @@ const shiftSwapRequestSchema = new Schema<IShiftSwapRequest>(
   }
 );
 
+shiftSwapRequestSchema.index({ organizationId: 1, finalStatus: 1 });
 shiftSwapRequestSchema.index({ branchId: 1, finalStatus: 1 });
 shiftSwapRequestSchema.index({ fromEmployeeId: 1 });
 shiftSwapRequestSchema.index({ toEmployeeId: 1 });

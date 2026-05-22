@@ -7,6 +7,7 @@ export type LeaveRequestStatus =
   | "cancelled";
 
 export interface ILeaveRequest extends Document {
+  organizationId: Types.ObjectId;
   branchId: Types.ObjectId;
   employeeId: Types.ObjectId;
   scheduleId: Types.ObjectId;
@@ -20,6 +21,12 @@ export interface ILeaveRequest extends Document {
 
 const leaveRequestSchema = new Schema<ILeaveRequest>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     branchId: {
       type: Schema.Types.ObjectId,
       ref: "Branch",
@@ -74,6 +81,7 @@ const leaveRequestSchema = new Schema<ILeaveRequest>(
   }
 );
 
+leaveRequestSchema.index({ organizationId: 1, status: 1 });
 leaveRequestSchema.index({ branchId: 1, status: 1 });
 leaveRequestSchema.index({ employeeId: 1 });
 leaveRequestSchema.index({ scheduleId: 1 });

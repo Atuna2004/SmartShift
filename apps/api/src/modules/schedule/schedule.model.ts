@@ -9,6 +9,7 @@ export type ScheduleStatus =
   | "leave_requested";
 
 export interface ISchedule extends Document {
+  organizationId: Types.ObjectId;
   branchId: Types.ObjectId;
   employeeId: Types.ObjectId;
   shiftTemplateId: Types.ObjectId;
@@ -19,10 +20,18 @@ export interface ISchedule extends Document {
   published: boolean;
   note?: string;
   assignedBy?: Types.ObjectId;
+  updatedBy?: Types.ObjectId;
+  deletedAt?: Date;
 }
 
 const scheduleSchema = new Schema<ISchedule>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     branchId: {
       type: Schema.Types.ObjectId,
       ref: "Branch",
@@ -83,6 +92,15 @@ const scheduleSchema = new Schema<ISchedule>(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+
+    updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    deletedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -90,6 +108,12 @@ const scheduleSchema = new Schema<ISchedule>(
 );
 
 scheduleSchema.index({
+  organizationId: 1,
+  branchId: 1,
+  workDate: 1,
+});
+
+scheduleSchema.index({
   employeeId: 1,
   workDate: 1,
 });
@@ -104,6 +128,8 @@ scheduleSchema.index({
   employeeId: 1,
   workDate: 1,
 });
+
+scheduleSchema.index({ deletedAt: 1 });
 
 export const ScheduleModel =
   mongoose.model<ISchedule>(

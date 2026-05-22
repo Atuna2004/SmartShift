@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "7fdc71bb-4f3d-4c87-8d86-02ab2f14c001",
-    "name": "SmartShift Auth, User & Branch API",
-    "description": "Postman collection with sample data for SmartShift Auth, User, and Branch APIs. Import this file, set baseUrl if needed, then run Auth/Register Owner or Auth/Login Owner first to populate accessToken and refreshToken. Branch and User requests use Bearer {{accessToken}}. Run Branches/Create Branch to populate {{branchId}} before branch-dependent requests.",
+    "name": "SmartShift Auth, User, Branch, Shift, Attendance, Leave & Swap API",
+    "description": "Postman collection for SmartShift core APIs including shift swap. Run Auth, Branches, Users, Shift Templates, and Schedules before Shift Swaps.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -1024,6 +1024,1141 @@
       ]
     },
     {
+      "name": "Shift Templates",
+      "description": "Owner/manager shift template APIs. Run Branches/Create Branch first so {{branchId}} is valid.",
+      "item": [
+        {
+          "name": "Create Shift Template",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('shiftTemplateCode', `PM-SH-${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('shiftTemplateId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"name\": \"Postman Morning Shift\",\n  \"code\": \"{{shiftTemplateCode}}\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"17:00\",\n  \"breakMinutes\": 60,\n  \"color\": \"#22C55E\",\n  \"description\": \"Created from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Shift Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates?page=1&limit=20&branchId={{branchId}}&status=active&search=Postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "search",
+                  "value": "Postman"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shift Template Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates/{{shiftTemplateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates",
+                "{{shiftTemplateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Shift Template",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Morning Shift Updated\",\n  \"startTime\": \"08:30\",\n  \"endTime\": \"17:30\",\n  \"breakMinutes\": 45,\n  \"color\": \"#0EA5E9\",\n  \"description\": \"Updated from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates/{{shiftTemplateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates",
+                "{{shiftTemplateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disable Shift Template",
+          "description": "Soft deletes the template by setting status=disabled and deletedAt. Run after schedule tests if you need the template active.",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates/{{shiftTemplateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates",
+                "{{shiftTemplateId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedules / Assigned Shifts",
+      "description": "Assigned shift APIs. Run Branches/Create Branch, Users/Create Staff, and Shift Templates/Create Shift Template first.",
+      "item": [
+        {
+          "name": "Create Assigned Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('assignedShiftId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"shiftTemplateId\": \"{{shiftTemplateId}}\",\n  \"workDate\": \"{{scheduleWorkDate}}\",\n  \"published\": true,\n  \"note\": \"Assigned from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Assigned Shift",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workDate\": \"{{scheduleWorkDate}}\",\n  \"shiftStartTime\": \"09:00\",\n  \"shiftEndTime\": \"18:00\",\n  \"published\": true,\n  \"note\": \"Updated from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules/{{assignedShiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "{{assignedShiftId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Weekly Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/weekly?weekStart={{scheduleWeekStart}}&branchId={{branchId}}&published=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "weekly"
+              ],
+              "query": [
+                {
+                  "key": "weekStart",
+                  "value": "{{scheduleWeekStart}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "published",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Weekly Schedule By Employee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/weekly?weekStart={{scheduleWeekStart}}&branchId={{branchId}}&employeeId={{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "weekly"
+              ],
+              "query": [
+                {
+                  "key": "weekStart",
+                  "value": "{{scheduleWeekStart}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "{{employeeId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "View My Schedule",
+          "description": "Returns schedules for the authenticated user. To see staff schedules, authenticate as that staff account.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/my?from={{scheduleFrom}}&to={{scheduleTo}}&published=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "my"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{scheduleFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{scheduleTo}}"
+                },
+                {
+                  "key": "published",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Assigned Shift",
+          "description": "Soft deletes the assigned shift by setting status=cancelled and deletedAt.",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/{{assignedShiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "{{assignedShiftId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Daily QR Codes",
+      "description": "Generate and verify daily QR codes. Run Branches/Create Branch first.",
+      "item": [
+        {
+          "name": "Generate Daily QR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('dailyQrCodeId', json.data.id);",
+                  "  pm.collectionVariables.set('qrToken', json.data.qrToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"validDate\": \"{{scheduleWorkDate}}\",\n  \"expiresInSeconds\": 3600\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/daily-qr-codes/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "daily-qr-codes",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"branchId\": \"{{branchId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/daily-qr-codes/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "daily-qr-codes",
+                "verify"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "description": "Attendance APIs. Run Create Assigned Shift and Generate Daily QR first.",
+      "item": [
+        {
+          "name": "Check-in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('attendanceId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"scheduleId\": \"{{assignedShiftId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "check-in"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check-out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"scheduleId\": \"{{assignedShiftId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/check-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "check-out"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manual Attendance Correction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200, 201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('attendanceId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"{{assignedShiftId}}\",\n  \"checkInTime\": \"{{manualCheckInTime}}\",\n  \"checkOutTime\": \"{{manualCheckOutTime}}\",\n  \"correctionReason\": \"Forgot to scan QR\",\n  \"note\": \"Submitted from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/manual-corrections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "manual-corrections"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Manual Attendance",
+          "description": "Owner/manager only. Staff-created manual corrections are pending; manager-created corrections are auto-approved.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": true,\n  \"note\": \"Approved from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/{{attendanceId}}/approve-manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "{{attendanceId}}",
+                "approve-manual"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Auto Mark Absent",
+          "description": "Owner/manager only. Marks published scheduled shifts without check-in as absent.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"workDate\": \"{{scheduleWorkDate}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/auto-mark-absent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "auto-mark-absent"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Attendance History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendances/history?from={{scheduleFrom}}&to={{scheduleTo}}&branchId={{branchId}}&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{scheduleFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{scheduleTo}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Attendance Reminder",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendances/reminders?workDate={{scheduleWorkDate}}&branchId={{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "reminders"
+              ],
+              "query": [
+                {
+                  "key": "workDate",
+                  "value": "{{scheduleWorkDate}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Late Warning",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendances/late-warnings?workDate={{scheduleWorkDate}}&branchId={{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "late-warnings"
+              ],
+              "query": [
+                {
+                  "key": "workDate",
+                  "value": "{{scheduleWorkDate}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave Requests",
+      "description": "Leave request APIs. Run Schedules/Create Assigned Shift first so {{assignedShiftId}} is valid.",
+      "item": [
+        {
+          "name": "Create Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('leaveRequestId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"{{assignedShiftId}}\",\n  \"reason\": \"Family matter from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests?page=1&limit=20&branchId={{branchId}}&status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List My Leave Requests",
+          "description": "When authenticated as staff, this returns only that staff user even without employeeId.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests?page=1&limit=20&employeeId={{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "{{employeeId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Leave Request Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Leave Request",
+          "description": "Only pending leave requests can be updated.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Updated leave reason from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Leave Request",
+          "description": "Owner/manager only. Updates assigned shift status to leave_requested.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"managerNote\": \"Approved from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Leave Request",
+          "description": "Owner/manager only. Use with another pending leave request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"managerNote\": \"Rejected from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}",
+                "reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Leave Request",
+          "description": "Only pending leave requests can be cancelled. Use before approve/reject.",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shift Swaps",
+      "description": "Shift swap APIs. Need requester staff schedule {{assignedShiftId}}, receiver {{swapReceiverId}}, and optionally receiver schedule {{targetAssignedShiftId}}.",
+      "item": [
+        {
+          "name": "Create Shift Swap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('shiftSwapId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toEmployeeId\": \"{{swapReceiverId}}\",\n  \"fromScheduleId\": \"{{assignedShiftId}}\",\n  \"toScheduleId\": \"{{targetAssignedShiftId}}\",\n  \"reason\": \"Need to swap shift from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Shift Swaps",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps?page=1&limit=20&branchId={{branchId}}&finalStatus=pending_receiver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "finalStatus",
+                  "value": "pending_receiver"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shift Swap Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Receiver Accept Shift Swap",
+          "description": "Authenticate as receiver staff before running this request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Accepted from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "accept"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Receiver Reject Shift Swap",
+          "description": "Authenticate as receiver staff. Use with another pending_receiver request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Rejected by receiver from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/reject-receiver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "reject-receiver"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manager Approve Shift Swap",
+          "description": "Owner/manager only. Request must be pending_manager. This swaps assigned shift employees.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Approved by manager from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manager Reject Shift Swap",
+          "description": "Owner/manager only. Use with another pending_manager request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Rejected by manager from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/reject-manager",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "reject-manager"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Shift Swap",
+          "description": "Requester staff can cancel pending request. Owner/manager can cancel pending request in scope.",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Validation Samples",
       "item": [
         {
@@ -1167,6 +2302,158 @@
               ]
             }
           }
+        },
+        {
+          "name": "Create Shift Template - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"not-a-valid-object-id\",\n  \"name\": \"A\",\n  \"startTime\": \"25:99\",\n  \"endTime\": \"17:00\",\n  \"breakMinutes\": -1,\n  \"color\": \"green\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Assigned Shift - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"not-a-valid-object-id\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"shiftTemplateId\": \"{{shiftTemplateId}}\",\n  \"workDate\": \"not-a-date\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Daily QR - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"not-a-valid-object-id\",\n  \"expiresInSeconds\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/daily-qr-codes/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "daily-qr-codes",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check-in - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"\",\n  \"scheduleId\": \"not-a-valid-object-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "check-in"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Leave Request - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"not-a-valid-object-id\",\n  \"reason\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Shift Swap - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toEmployeeId\": \"not-a-valid-object-id\",\n  \"fromScheduleId\": \"not-a-valid-object-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps"
+              ]
+            }
+          }
         }
       ]
     }
@@ -1259,6 +2546,86 @@
     },
     {
       "key": "targetBranchCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftTemplateId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftTemplateCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assignedShiftId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scheduleWorkDate",
+      "value": "2026-05-25T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "scheduleWeekStart",
+      "value": "2026-05-25T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "scheduleFrom",
+      "value": "2026-05-25T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "scheduleTo",
+      "value": "2026-05-31T23:59:59.999Z",
+      "type": "string"
+    },
+    {
+      "key": "dailyQrCodeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "qrToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attendanceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "manualCheckInTime",
+      "value": "2026-05-25T08:05:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "manualCheckOutTime",
+      "value": "2026-05-25T17:10:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "leaveRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftSwapId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "swapReceiverId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "targetAssignedShiftId",
       "value": "",
       "type": "string"
     }

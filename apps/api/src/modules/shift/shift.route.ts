@@ -2,21 +2,41 @@ import { Router } from "express";
 import { auth } from "../../common/middlewares/auth.middleware.js";
 import { validateRequest } from "../../common/middlewares/validateRequest.js";
 import {
-  createResourceSchema,
-  listResourceSchema,
-  resourceIdParamSchema,
-  updateResourceSchema,
-} from "../../common/validations/crud.validation.js";
+  createShiftTemplateSchema,
+  shiftTemplateIdParamSchema,
+  shiftTemplateListSchema,
+  updateShiftTemplateSchema,
+} from "./shift.validation.js";
 import { ShiftController } from "./shift.controller.js";
 
 const router = Router();
 
-router.use(auth());
+router.use(auth("owner", "manager"));
 
-router.post("/", validateRequest(createResourceSchema), ShiftController.create);
-router.get("/", validateRequest(listResourceSchema), ShiftController.list);
-router.get("/:id", validateRequest(resourceIdParamSchema), ShiftController.getById);
-router.patch("/:id", validateRequest(updateResourceSchema), ShiftController.update);
-router.delete("/:id", validateRequest(resourceIdParamSchema), ShiftController.remove);
+router.post(
+  "/",
+  validateRequest(createShiftTemplateSchema),
+  ShiftController.createShiftTemplate
+);
+router.get(
+  "/",
+  validateRequest(shiftTemplateListSchema),
+  ShiftController.getShiftTemplateList
+);
+router.get(
+  "/:shiftTemplateId",
+  validateRequest(shiftTemplateIdParamSchema),
+  ShiftController.getShiftTemplateById
+);
+router.patch(
+  "/:shiftTemplateId",
+  validateRequest(updateShiftTemplateSchema),
+  ShiftController.updateShiftTemplate
+);
+router.delete(
+  "/:shiftTemplateId",
+  validateRequest(shiftTemplateIdParamSchema),
+  ShiftController.disableShiftTemplate
+);
 
 export const ShiftRoutes = router;

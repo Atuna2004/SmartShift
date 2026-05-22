@@ -2,21 +2,57 @@ import { Router } from "express";
 import { auth } from "../../common/middlewares/auth.middleware.js";
 import { validateRequest } from "../../common/middlewares/validateRequest.js";
 import {
-  createResourceSchema,
-  listResourceSchema,
-  resourceIdParamSchema,
-  updateResourceSchema,
-} from "../../common/validations/crud.validation.js";
+  createShiftSwapSchema,
+  managerShiftSwapSchema,
+  receiverShiftSwapSchema,
+  shiftSwapIdParamSchema,
+  shiftSwapListSchema,
+} from "./shift-swap.validation.js";
 import { ShiftSwapController } from "./shift-swap.controller.js";
 
 const router = Router();
 
 router.use(auth());
 
-router.post("/", validateRequest(createResourceSchema), ShiftSwapController.create);
-router.get("/", validateRequest(listResourceSchema), ShiftSwapController.list);
-router.get("/:id", validateRequest(resourceIdParamSchema), ShiftSwapController.getById);
-router.patch("/:id", validateRequest(updateResourceSchema), ShiftSwapController.update);
-router.delete("/:id", validateRequest(resourceIdParamSchema), ShiftSwapController.remove);
+router.post(
+  "/",
+  validateRequest(createShiftSwapSchema),
+  ShiftSwapController.createShiftSwap
+);
+router.get(
+  "/",
+  validateRequest(shiftSwapListSchema),
+  ShiftSwapController.getShiftSwapList
+);
+router.get(
+  "/:shiftSwapId",
+  validateRequest(shiftSwapIdParamSchema),
+  ShiftSwapController.getShiftSwapById
+);
+router.patch(
+  "/:shiftSwapId/accept",
+  validateRequest(receiverShiftSwapSchema),
+  ShiftSwapController.acceptShiftSwap
+);
+router.patch(
+  "/:shiftSwapId/reject-receiver",
+  validateRequest(receiverShiftSwapSchema),
+  ShiftSwapController.rejectShiftSwapByReceiver
+);
+router.patch(
+  "/:shiftSwapId/approve",
+  validateRequest(managerShiftSwapSchema),
+  ShiftSwapController.approveShiftSwap
+);
+router.patch(
+  "/:shiftSwapId/reject-manager",
+  validateRequest(managerShiftSwapSchema),
+  ShiftSwapController.rejectShiftSwapByManager
+);
+router.patch(
+  "/:shiftSwapId/cancel",
+  validateRequest(shiftSwapIdParamSchema),
+  ShiftSwapController.cancelShiftSwap
+);
 
 export const ShiftSwapRoutes = router;
