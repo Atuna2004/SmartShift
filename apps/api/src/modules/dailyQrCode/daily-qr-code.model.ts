@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export type DailyQrCodeStatus = "active" | "expired" | "revoked";
 
 export interface IDailyQrCode extends Document {
+  organizationId: Types.ObjectId;
   branchId: Types.ObjectId;
   qrToken: string;
   validDate: Date;
@@ -13,6 +14,12 @@ export interface IDailyQrCode extends Document {
 
 const dailyQrCodeSchema = new Schema<IDailyQrCode>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     branchId: {
       type: Schema.Types.ObjectId,
       ref: "Branch",
@@ -52,6 +59,7 @@ const dailyQrCodeSchema = new Schema<IDailyQrCode>(
   }
 );
 
+dailyQrCodeSchema.index({ organizationId: 1, branchId: 1, validDate: 1 });
 dailyQrCodeSchema.index({ branchId: 1, validDate: 1 });
 dailyQrCodeSchema.index({ qrToken: 1 }, { unique: true });
 dailyQrCodeSchema.index({ expiresAt: 1 });

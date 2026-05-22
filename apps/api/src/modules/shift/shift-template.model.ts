@@ -1,21 +1,31 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
+export type ShiftTemplateStatus = "active" | "disabled";
+
 export interface IShiftTemplate extends Document {
+  organizationId: Types.ObjectId;
   branchId: Types.ObjectId;
   name: string;
   code?: string;
   startTime: string;
   endTime: string;
   breakMinutes: number;
-  lateThresholdMinutes: number;
-  maxStaffPerShift: number;
   color?: string;
-  isActive: boolean;
-  createdBy?: Types.ObjectId;
+  description?: string;
+  status: ShiftTemplateStatus;
+  createdBy: Types.ObjectId;
+  updatedBy?: Types.ObjectId;
+  deletedAt?: Date;
 }
 
 const shiftTemplateSchema = new Schema<IShiftTemplate>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     branchId: {
       type: Schema.Types.ObjectId,
       ref: "Branch",
@@ -48,29 +58,35 @@ const shiftTemplateSchema = new Schema<IShiftTemplate>(
       default: 0,
     },
 
-    lateThresholdMinutes: {
-      type: Number,
-      default: 15,
-    },
-
-    maxStaffPerShift: {
-      type: Number,
-      default: 1,
-    },
-
     color: {
       type: String,
       default: "#4F46E5",
     },
 
-    isActive: {
-      type: Boolean,
-      default: true,
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["active", "disabled"],
+      default: "active",
     },
 
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+
+    updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    deletedAt: {
+      type: Date,
     },
   },
   {
@@ -78,7 +94,18 @@ const shiftTemplateSchema = new Schema<IShiftTemplate>(
   }
 );
 
-shiftTemplateSchema.index({ branchId: 1 });
+shiftTemplateSchema.index({ organizationId: 1, branchId: 1, status: 1 });
+shiftTemplateSchema.index({ branchId: 1, deletedAt: 1 });
+shiftTemplateSchema.index(
+  { branchId: 1, code: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      code: { $exists: true },
+      deletedAt: { $exists: false },
+    },
+  }
+);
 shiftTemplateSchema.index({ branchId: 1, name: 1 });
 
 export const ShiftTemplateModel =

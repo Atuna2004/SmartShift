@@ -1,0 +1,2633 @@
+{
+  "info": {
+    "_postman_id": "7fdc71bb-4f3d-4c87-8d86-02ab2f14c001",
+    "name": "SmartShift Auth, User, Branch, Shift, Attendance, Leave & Swap API",
+    "description": "Postman collection for SmartShift core APIs including shift swap. Run Auth, Branches, Users, Shift Templates, and Schedules before Shift Swaps.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('ownerEmail')) {",
+          "  pm.collectionVariables.set('ownerEmail', `owner.${Date.now()}@smartshift.test`);",
+          "}",
+          "if (!pm.collectionVariables.get('ownerPassword')) {",
+          "  pm.collectionVariables.set('ownerPassword', 'Password123!');",
+          "}",
+          "if (!pm.collectionVariables.get('newPassword')) {",
+          "  pm.collectionVariables.set('newPassword', 'Password456!');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 or email already exists', function () {",
+                  "  pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "  pm.collectionVariables.set('ownerId', json.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Owner\",\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{ownerPassword}}\",\n  \"phone\": \"0900000001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register-owner",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register-owner"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login Owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "  pm.collectionVariables.set('ownerId', json.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{ownerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Owner Updated\",\n  \"phone\": \"0900000099\",\n  \"avatar\": \"https://example.com/avatar-owner.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "description": "This request invalidates the current refresh token. After it succeeds, run Login Owner with password {{newPassword}} or update ownerPassword to the new value.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{ownerPassword}}\",\n  \"newPassword\": \"{{newPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "description": "In non-production, the API returns data.resetToken. The test script stores it as {{resetToken}}.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data && json.data.resetToken) {",
+                  "    pm.collectionVariables.set('resetToken', json.data.resetToken);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "description": "Run Forgot Password first to fill {{resetToken}}. This changes the account password to {{newPassword}} and clears the refresh token.",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"{{newPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "description": "Clears the saved refresh token for the authenticated user.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users / Employees",
+      "item": [
+        {
+          "name": "Create Manager",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('managerEmail', `manager.${Date.now()}@smartshift.test`);",
+                  "pm.collectionVariables.set('managerCode', `PM-MGR-${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('managerId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Manager\",\n  \"email\": \"{{managerEmail}}\",\n  \"password\": \"Password123!\",\n  \"phone\": \"0900000003\",\n  \"avatar\": \"https://example.com/avatar-manager.png\",\n  \"role\": \"manager\",\n  \"employeeType\": \"full_time\",\n  \"employeeCode\": \"{{managerCode}}\",\n  \"joinDate\": \"2026-05-21T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Staff",
+          "description": "Owner creates staff only when {{branchId}} is a real branch owned by the owner or in the owner's organization.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('staffEmail', `staff.${Date.now()}@smartshift.test`);",
+                  "pm.collectionVariables.set('staffCode', `PM-STF-${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 when branchId exists', function () {",
+                  "  pm.expect([201, 400, 403, 404]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('employeeId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Staff\",\n  \"email\": \"{{staffEmail}}\",\n  \"password\": \"Password123!\",\n  \"phone\": \"0900000002\",\n  \"avatar\": \"https://example.com/avatar-staff.png\",\n  \"role\": \"staff\",\n  \"employeeType\": \"part_time\",\n  \"branchId\": \"{{branchId}}\",\n  \"employeeCode\": \"{{staffCode}}\",\n  \"joinDate\": \"2026-05-21T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20&role=staff&status=active&search=Postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "role",
+                  "value": "staff"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "search",
+                  "value": "Postman"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Employees By Branch",
+          "description": "Requires {{branchId}} to be a valid branch ObjectId in the user's scope.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20&branchId={{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Employee Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{employeeId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Employee",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Staff Updated\",\n  \"phone\": \"0900000088\",\n  \"avatar\": \"https://example.com/avatar-staff-updated.png\",\n  \"employeeType\": \"full_time\",\n  \"employeeCode\": \"{{staffCode}}-UPD\",\n  \"joinDate\": \"2026-05-21T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{employeeId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deactivate Employee",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{employeeId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{employeeId}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activate Employee",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{employeeId}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{employeeId}}",
+                "activate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Transfer Employee Branch",
+          "description": "Owner only. Requires {{employeeId}} to be staff and {{targetBranchId}} to be a real branch in scope.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{targetBranchId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{employeeId}}/transfer-branch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{employeeId}}",
+                "transfer-branch"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign Manager To Branch",
+          "description": "Owner only. Run Create Manager first and set {{branchId}} to a real branch in scope.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{managerId}}/assign-manager-branch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{managerId}}",
+                "assign-manager-branch"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Manager From Branch",
+          "description": "Owner only. Run after Assign Manager To Branch.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{managerId}}/remove-manager-branch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{managerId}}",
+                "remove-manager-branch"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Branches",
+      "description": "Owner/manager branch management APIs. Owner can create, enable, and disable branches. Manager can read/update only assigned branch.",
+      "item": [
+        {
+          "name": "Create Branch",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('branchCode', `PM-BR-${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.expect([201]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('branchId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Main Branch\",\n  \"code\": \"{{branchCode}}\",\n  \"address\": \"123 Nguyen Hue, District 1, Ho Chi Minh City\",\n  \"phone\": \"0900000101\",\n  \"description\": \"Created from Postman collection\",\n  \"location\": {\n    \"lat\": 10.7769,\n    \"lng\": 106.7009,\n    \"radiusMeters\": 150\n  },\n  \"settings\": {\n    \"timezone\": \"Asia/Ho_Chi_Minh\",\n    \"openingTime\": \"08:00\",\n    \"closingTime\": \"17:30\",\n    \"workingDays\": [\n      \"monday\",\n      \"tuesday\",\n      \"wednesday\",\n      \"thursday\",\n      \"friday\"\n    ],\n    \"allowEarlyCheckInMinutes\": 15,\n    \"allowLateCheckOutMinutes\": 10,\n    \"requireCheckout\": true\n  },\n  \"qrSettings\": {\n    \"enabled\": true,\n    \"refreshIntervalSeconds\": 60,\n    \"requireGps\": true,\n    \"qrExpiresInSeconds\": 60\n  },\n  \"attendanceSettings\": {\n    \"lateThresholdMinutes\": 15\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Target Branch",
+          "description": "Optional helper for user transfer tests. Stores created id as {{targetBranchId}}.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('targetBranchCode', `PM-BR-TGT-${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.expect([201]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('targetBranchId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Target Branch\",\n  \"code\": \"{{targetBranchCode}}\",\n  \"address\": \"456 Le Loi, District 1, Ho Chi Minh City\",\n  \"phone\": \"0900000102\",\n  \"location\": {\n    \"lat\": 10.7743,\n    \"lng\": 106.7038,\n    \"radiusMeters\": 120\n  },\n  \"settings\": {\n    \"timezone\": \"Asia/Ho_Chi_Minh\",\n    \"openingTime\": \"09:00\",\n    \"closingTime\": \"18:00\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Branches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches?page=1&limit=20&status=active&search=Postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "search",
+                  "value": "Postman"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Branch Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Branch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Main Branch Updated\",\n  \"address\": \"789 Pasteur, District 3, Ho Chi Minh City\",\n  \"phone\": \"0900000199\",\n  \"description\": \"Updated from Postman collection\",\n  \"location\": {\n    \"radiusMeters\": 200\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Configure Branch Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Asia/Ho_Chi_Minh\",\n  \"openingTime\": \"08:30\",\n  \"closingTime\": \"18:00\",\n  \"workingDays\": [\n    \"monday\",\n    \"tuesday\",\n    \"wednesday\",\n    \"thursday\",\n    \"friday\",\n    \"saturday\"\n  ],\n  \"allowEarlyCheckInMinutes\": 20,\n  \"allowLateCheckOutMinutes\": 15,\n  \"requireCheckout\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}",
+                "settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Configure QR Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"refreshIntervalSeconds\": 90,\n  \"requireGps\": true,\n  \"qrExpiresInSeconds\": 120\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}/qr-settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}",
+                "qr-settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Configure Late Threshold",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lateThresholdMinutes\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}/late-threshold",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}",
+                "late-threshold"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disable Branch",
+          "description": "Owner only.",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}/disable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}",
+                "disable"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enable Branch",
+          "description": "Owner only. Run after Disable Branch.",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches/{{branchId}}/enable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "{{branchId}}",
+                "enable"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shift Templates",
+      "description": "Owner/manager shift template APIs. Run Branches/Create Branch first so {{branchId}} is valid.",
+      "item": [
+        {
+          "name": "Create Shift Template",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('shiftTemplateCode', `PM-SH-${Date.now()}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('shiftTemplateId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"name\": \"Postman Morning Shift\",\n  \"code\": \"{{shiftTemplateCode}}\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"17:00\",\n  \"breakMinutes\": 60,\n  \"color\": \"#22C55E\",\n  \"description\": \"Created from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Shift Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates?page=1&limit=20&branchId={{branchId}}&status=active&search=Postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "search",
+                  "value": "Postman"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shift Template Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates/{{shiftTemplateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates",
+                "{{shiftTemplateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Shift Template",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Morning Shift Updated\",\n  \"startTime\": \"08:30\",\n  \"endTime\": \"17:30\",\n  \"breakMinutes\": 45,\n  \"color\": \"#0EA5E9\",\n  \"description\": \"Updated from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates/{{shiftTemplateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates",
+                "{{shiftTemplateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disable Shift Template",
+          "description": "Soft deletes the template by setting status=disabled and deletedAt. Run after schedule tests if you need the template active.",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates/{{shiftTemplateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates",
+                "{{shiftTemplateId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedules / Assigned Shifts",
+      "description": "Assigned shift APIs. Run Branches/Create Branch, Users/Create Staff, and Shift Templates/Create Shift Template first.",
+      "item": [
+        {
+          "name": "Create Assigned Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('assignedShiftId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"shiftTemplateId\": \"{{shiftTemplateId}}\",\n  \"workDate\": \"{{scheduleWorkDate}}\",\n  \"published\": true,\n  \"note\": \"Assigned from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Assigned Shift",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workDate\": \"{{scheduleWorkDate}}\",\n  \"shiftStartTime\": \"09:00\",\n  \"shiftEndTime\": \"18:00\",\n  \"published\": true,\n  \"note\": \"Updated from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules/{{assignedShiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "{{assignedShiftId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Weekly Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/weekly?weekStart={{scheduleWeekStart}}&branchId={{branchId}}&published=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "weekly"
+              ],
+              "query": [
+                {
+                  "key": "weekStart",
+                  "value": "{{scheduleWeekStart}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "published",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Weekly Schedule By Employee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/weekly?weekStart={{scheduleWeekStart}}&branchId={{branchId}}&employeeId={{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "weekly"
+              ],
+              "query": [
+                {
+                  "key": "weekStart",
+                  "value": "{{scheduleWeekStart}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "{{employeeId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "View My Schedule",
+          "description": "Returns schedules for the authenticated user. To see staff schedules, authenticate as that staff account.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/my?from={{scheduleFrom}}&to={{scheduleTo}}&published=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "my"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{scheduleFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{scheduleTo}}"
+                },
+                {
+                  "key": "published",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Assigned Shift",
+          "description": "Soft deletes the assigned shift by setting status=cancelled and deletedAt.",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedules/{{assignedShiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules",
+                "{{assignedShiftId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Daily QR Codes",
+      "description": "Generate and verify daily QR codes. Run Branches/Create Branch first.",
+      "item": [
+        {
+          "name": "Generate Daily QR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('dailyQrCodeId', json.data.id);",
+                  "  pm.collectionVariables.set('qrToken', json.data.qrToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"validDate\": \"{{scheduleWorkDate}}\",\n  \"expiresInSeconds\": 3600\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/daily-qr-codes/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "daily-qr-codes",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"branchId\": \"{{branchId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/daily-qr-codes/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "daily-qr-codes",
+                "verify"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "description": "Attendance APIs. Run Create Assigned Shift and Generate Daily QR first.",
+      "item": [
+        {
+          "name": "Check-in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('attendanceId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"scheduleId\": \"{{assignedShiftId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "check-in"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check-out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{qrToken}}\",\n  \"scheduleId\": \"{{assignedShiftId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/check-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "check-out"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manual Attendance Correction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200, 201].includes(pm.response.code)) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('attendanceId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"{{assignedShiftId}}\",\n  \"checkInTime\": \"{{manualCheckInTime}}\",\n  \"checkOutTime\": \"{{manualCheckOutTime}}\",\n  \"correctionReason\": \"Forgot to scan QR\",\n  \"note\": \"Submitted from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/manual-corrections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "manual-corrections"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Manual Attendance",
+          "description": "Owner/manager only. Staff-created manual corrections are pending; manager-created corrections are auto-approved.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": true,\n  \"note\": \"Approved from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/{{attendanceId}}/approve-manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "{{attendanceId}}",
+                "approve-manual"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Auto Mark Absent",
+          "description": "Owner/manager only. Marks published scheduled shifts without check-in as absent.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"workDate\": \"{{scheduleWorkDate}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/auto-mark-absent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "auto-mark-absent"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Attendance History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendances/history?from={{scheduleFrom}}&to={{scheduleTo}}&branchId={{branchId}}&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{scheduleFrom}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{scheduleTo}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Attendance Reminder",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendances/reminders?workDate={{scheduleWorkDate}}&branchId={{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "reminders"
+              ],
+              "query": [
+                {
+                  "key": "workDate",
+                  "value": "{{scheduleWorkDate}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Late Warning",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendances/late-warnings?workDate={{scheduleWorkDate}}&branchId={{branchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "late-warnings"
+              ],
+              "query": [
+                {
+                  "key": "workDate",
+                  "value": "{{scheduleWorkDate}}"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave Requests",
+      "description": "Leave request APIs. Run Schedules/Create Assigned Shift first so {{assignedShiftId}} is valid.",
+      "item": [
+        {
+          "name": "Create Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('leaveRequestId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"{{assignedShiftId}}\",\n  \"reason\": \"Family matter from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests?page=1&limit=20&branchId={{branchId}}&status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List My Leave Requests",
+          "description": "When authenticated as staff, this returns only that staff user even without employeeId.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests?page=1&limit=20&employeeId={{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "employeeId",
+                  "value": "{{employeeId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Leave Request Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Leave Request",
+          "description": "Only pending leave requests can be updated.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Updated leave reason from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Leave Request",
+          "description": "Owner/manager only. Updates assigned shift status to leave_requested.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"managerNote\": \"Approved from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Leave Request",
+          "description": "Owner/manager only. Use with another pending leave request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"managerNote\": \"Rejected from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}",
+                "reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Leave Request",
+          "description": "Only pending leave requests can be cancelled. Use before approve/reject.",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests/{{leaveRequestId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests",
+                "{{leaveRequestId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shift Swaps",
+      "description": "Shift swap APIs. Need requester staff schedule {{assignedShiftId}}, receiver {{swapReceiverId}}, and optionally receiver schedule {{targetAssignedShiftId}}.",
+      "item": [
+        {
+          "name": "Create Shift Swap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('shiftSwapId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toEmployeeId\": \"{{swapReceiverId}}\",\n  \"fromScheduleId\": \"{{assignedShiftId}}\",\n  \"toScheduleId\": \"{{targetAssignedShiftId}}\",\n  \"reason\": \"Need to swap shift from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Shift Swaps",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps?page=1&limit=20&branchId={{branchId}}&finalStatus=pending_receiver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "finalStatus",
+                  "value": "pending_receiver"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shift Swap Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Receiver Accept Shift Swap",
+          "description": "Authenticate as receiver staff before running this request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Accepted from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "accept"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Receiver Reject Shift Swap",
+          "description": "Authenticate as receiver staff. Use with another pending_receiver request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Rejected by receiver from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/reject-receiver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "reject-receiver"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manager Approve Shift Swap",
+          "description": "Owner/manager only. Request must be pending_manager. This swaps assigned shift employees.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Approved by manager from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manager Reject Shift Swap",
+          "description": "Owner/manager only. Use with another pending_manager request.",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Rejected by manager from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/reject-manager",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "reject-manager"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Shift Swap",
+          "description": "Requester staff can cancel pending request. Owner/manager can cancel pending request in scope.",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps/{{shiftSwapId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps",
+                "{{shiftSwapId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation Samples",
+      "item": [
+        {
+          "name": "Login - Wrong Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register Owner - Invalid Payload",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"A\",\n  \"email\": \"not-an-email\",\n  \"password\": \"short\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register-owner",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register-owner"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Employee - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"A\",\n  \"email\": \"not-an-email\",\n  \"password\": \"short\",\n  \"role\": \"admin\",\n  \"branchId\": \"not-a-valid-object-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Employee - Invalid ObjectId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/not-a-valid-object-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "not-a-valid-object-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Branch - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"A\",\n  \"code\": \"\",\n  \"location\": {\n    \"lat\": 999,\n    \"lng\": 999,\n    \"radiusMeters\": 0\n  },\n  \"settings\": {\n    \"openingTime\": \"25:99\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Branch - Invalid ObjectId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches/not-a-valid-object-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                "not-a-valid-object-id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Shift Template - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"not-a-valid-object-id\",\n  \"name\": \"A\",\n  \"startTime\": \"25:99\",\n  \"endTime\": \"17:00\",\n  \"breakMinutes\": -1,\n  \"color\": \"green\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Assigned Shift - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"not-a-valid-object-id\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"shiftTemplateId\": \"{{shiftTemplateId}}\",\n  \"workDate\": \"not-a-date\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Daily QR - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"not-a-valid-object-id\",\n  \"expiresInSeconds\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/daily-qr-codes/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "daily-qr-codes",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check-in - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"\",\n  \"scheduleId\": \"not-a-valid-object-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendances/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendances",
+                "check-in"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Leave Request - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduleId\": \"not-a-valid-object-id\",\n  \"reason\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leave-requests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Shift Swap - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toEmployeeId\": \"not-a-valid-object-id\",\n  \"fromScheduleId\": \"not-a-valid-object-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shift-swaps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shift-swaps"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "ownerEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerPassword",
+      "value": "Password123!",
+      "type": "string"
+    },
+    {
+      "key": "newPassword",
+      "value": "Password456!",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "managerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "branchId",
+      "value": "665000000000000000000001",
+      "type": "string"
+    },
+    {
+      "key": "targetBranchId",
+      "value": "665000000000000000000002",
+      "type": "string"
+    },
+    {
+      "key": "managerEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "staffEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "managerCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "staffCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "branchCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "targetBranchCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftTemplateId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftTemplateCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assignedShiftId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scheduleWorkDate",
+      "value": "2026-05-25T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "scheduleWeekStart",
+      "value": "2026-05-25T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "scheduleFrom",
+      "value": "2026-05-25T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "scheduleTo",
+      "value": "2026-05-31T23:59:59.999Z",
+      "type": "string"
+    },
+    {
+      "key": "dailyQrCodeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "qrToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attendanceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "manualCheckInTime",
+      "value": "2026-05-25T08:05:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "manualCheckOutTime",
+      "value": "2026-05-25T17:10:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "leaveRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftSwapId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "swapReceiverId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "targetAssignedShiftId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

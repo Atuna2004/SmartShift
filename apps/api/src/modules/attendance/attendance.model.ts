@@ -7,7 +7,11 @@ export type AttendanceStatus =
   | "early_leave"
   | "overtime";
 
+export type AttendanceSource = "qr" | "manual" | "system";
+export type ManualCorrectionStatus = "none" | "pending" | "approved" | "rejected";
+
 export interface IAttendance extends Document {
+  organizationId: Types.ObjectId;
   branchId: Types.ObjectId;
   employeeId: Types.ObjectId;
   scheduleId: Types.ObjectId;
@@ -28,13 +32,24 @@ export interface IAttendance extends Document {
 
   qrCodeId?: Types.ObjectId;
 
+  source: AttendanceSource;
+  manualCorrectionStatus: ManualCorrectionStatus;
   note?: string;
+  correctionReason?: string;
+  correctedBy?: Types.ObjectId;
 
   approvedBy?: Types.ObjectId;
+  approvedAt?: Date;
 }
 
 const attendanceSchema = new Schema<IAttendance>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+
     branchId: {
       type: Schema.Types.ObjectId,
       ref: "Branch",
@@ -114,20 +129,52 @@ const attendanceSchema = new Schema<IAttendance>(
       ref: "DailyQrCode",
     },
 
+    source: {
+      type: String,
+      enum: ["qr", "manual", "system"],
+      default: "qr",
+    },
+
+    manualCorrectionStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+    },
+
     note: {
       type: String,
       trim: true,
+    },
+
+    correctionReason: {
+      type: String,
+      trim: true,
+    },
+
+    correctedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
 
     approvedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+
+    approvedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+attendanceSchema.index({
+  organizationId: 1,
+  branchId: 1,
+  workDate: 1,
+});
 
 attendanceSchema.index({
   employeeId: 1,
@@ -142,6 +189,8 @@ attendanceSchema.index({
 attendanceSchema.index({
   scheduleId: 1
 });
+
+attendanceSchema.index({ manualCorrectionStatus: 1 });
 
 export const AttendanceModel =
   mongoose.model<IAttendance>(
