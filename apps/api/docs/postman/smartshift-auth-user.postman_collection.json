@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "7fdc71bb-4f3d-4c87-8d86-02ab2f14c001",
-    "name": "SmartShift Auth, User, Branch, Shift, Attendance, Leave & Swap API",
-    "description": "Postman collection for SmartShift core APIs including shift swap. Run Auth, Branches, Users, Shift Templates, and Schedules before Shift Swaps.",
+    "name": "SmartShift Core API",
+    "description": "Postman collection for SmartShift core APIs including notifications. Run Auth first; notification list/read endpoints use the authenticated user.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -2159,6 +2159,242 @@
       ]
     },
     {
+      "name": "Notifications",
+      "description": "User notification APIs. Owner/manager can create notifications for users in scope or broadcast to a branch. Staff can only list/read/archive their own notifications.",
+      "item": [
+        {
+          "name": "Create Notification To User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data.data && json.data.data.length) {",
+                  "    pm.collectionVariables.set('notificationId', json.data.data[0].id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [\"{{employeeId}}\"],\n  \"title\": \"Postman notification\",\n  \"message\": \"Created from Postman collection\",\n  \"type\": \"system\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Broadcast Notification To Branch",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.data.data && json.data.data.length) {",
+                  "    pm.collectionVariables.set('notificationId', json.data.data[0].id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"title\": \"Schedule update\",\n  \"message\": \"Please check your latest schedule\",\n  \"type\": \"schedule_published\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=1&limit=20&includeArchived=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "includeArchived",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List My Unread Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=1&limit=20&isRead=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "isRead",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification Unread",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}/unread",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}",
+                "unread"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/mark-all-read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "mark-all-read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Archive Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Validation Samples",
       "item": [
         {
@@ -2454,6 +2690,31 @@
               ]
             }
           }
+        },
+        {
+          "name": "Create Notification - Invalid Payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"message\": \"Missing recipients\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          }
         }
       ]
     }
@@ -2626,6 +2887,11 @@
     },
     {
       "key": "targetAssignedShiftId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
       "value": "",
       "type": "string"
     }

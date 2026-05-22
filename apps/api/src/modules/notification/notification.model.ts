@@ -15,6 +15,7 @@ export type NotificationType =
   | "system";
 
 export interface INotification extends Document {
+  organizationId?: Types.ObjectId;
   userId: Types.ObjectId;
   branchId?: Types.ObjectId;
   title: string;
@@ -24,10 +25,16 @@ export interface INotification extends Document {
   relatedModel?: string;
   isRead: boolean;
   readAt?: Date;
+  archivedAt?: Date;
 }
 
 const notificationSchema = new Schema<INotification>(
   {
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+    },
+
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -87,15 +94,21 @@ const notificationSchema = new Schema<INotification>(
     readAt: {
       type: Date,
     },
+
+    archivedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+notificationSchema.index({ organizationId: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, isRead: 1 });
 notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index({ branchId: 1 });
+notificationSchema.index({ archivedAt: 1 });
 
 export const NotificationModel =
   mongoose.model<INotification>("Notification", notificationSchema);
