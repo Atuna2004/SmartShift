@@ -26,12 +26,21 @@ export const validateRequest = (schema: ZodSchema) => {
 
     const data = result.data as ValidatedRequest;
 
-    if (data.body) {
+    if (data.body !== undefined) {
       req.body = data.body;
     }
 
-    if (data.params) {
+    if (data.params !== undefined) {
       req.params = data.params;
+    }
+
+    if (data.query !== undefined) {
+      Object.defineProperty(req, "query", {
+        value: data.query,
+        writable: true,
+        configurable: true,
+        enumerable: true,
+      });
     }
 
     next();
