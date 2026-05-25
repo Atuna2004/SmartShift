@@ -7,6 +7,7 @@ import {
   forgotPasswordValidationSchema,
   loginValidationSchema,
   logoutValidationSchema,
+  registerAdminValidationSchema,
   refreshTokenValidationSchema,
   registerOwnerValidationSchema,
   resetPasswordValidationSchema,
@@ -14,6 +15,12 @@ import {
 } from "./auth.validation.js";
 
 const router = Router();
+
+router.post(
+  "/register-admin",
+  validateRequest(registerAdminValidationSchema),
+  AuthController.registerAdmin
+);
 
 router.post(
   "/register-owner",

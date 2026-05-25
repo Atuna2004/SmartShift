@@ -86,7 +86,25 @@ const assertOwnerBranchAccess = async (owner: IUser, branchId: string) => {
   return branch;
 };
 
+const assertAdminBranchAccess = async (organizationId: string | undefined, branchId: string) => {
+  const branch = await BranchModel.findById(branchId);
+
+  if (!branch) {
+    throw new AppError(404, "Branch not found");
+  }
+
+  if (organizationId && !branch.organizationId.equals(asObjectId(organizationId))) {
+    throw new AppError(403, "Branch is outside the selected organization");
+  }
+
+  return branch;
+};
+
 const assertEmployeeAccess = (actor: IUser, employee: IUser) => {
+  if (actor.role === "admin") {
+    return;
+  }
+
   if (actor.role === "owner") {
     const sameOrganization =
       actor.organizationId &&
@@ -111,6 +129,23 @@ const assertEmployeeAccess = (actor: IUser, employee: IUser) => {
 };
 
 const assertCreatePermission = async (actor: IUser, payload: CreateEmployeeInput) => {
+  if (actor.role === "admin") {
+    if (!payload.organizationId) {
+      throw new AppError(400, "Organization is required when admin creates employees");
+    }
+
+    if (payload.branchId) {
+      await assertAdminBranchAccess(payload.organizationId, payload.branchId);
+      return asObjectId(payload.branchId);
+    }
+
+    if (payload.role === "staff") {
+      throw new AppError(400, "Branch is required when creating staff");
+    }
+
+    return undefined;
+  }
+
   if (payload.role === "manager" && actor.role !== "owner") {
     throw new AppError(403, "Managers cannot create managers");
   }
@@ -154,7 +189,9 @@ const createEmployee = async (actorPayload: AuthTokenPayload, payload: CreateEmp
   const branchId = await assertCreatePermission(actor, payload);
   const hashedPassword = await hashPassword(payload.password);
   const organizationId =
-    actor.organizationId ?? (payload.organizationId ? asObjectId(payload.organizationId) : undefined);
+    actor.role === "admin"
+      ? asObjectId(payload.organizationId as string)
+      : actor.organizationId ?? (payload.organizationId ? asObjectId(payload.organizationId) : undefined);
 
   const user = await UserModel.create({
     fullName: payload.fullName,
@@ -195,7 +232,11 @@ const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeLi
   const skip = (page - 1) * limit;
   const filter: Record<string, unknown> = {};
 
-  if (actor.role === "owner") {
+  if (actor.role === "admin") {
+    if (query.organizationId) {
+      filter.organizationId = asObjectId(query.organizationId);
+    }
+  } else if (actor.role === "owner") {
     Object.assign(filter, getOwnerScopeFilter(actor));
   } else {
     if (!actor.branchId) {
@@ -225,6 +266,8 @@ const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeLi
 
     if (actor.role === "owner") {
       await assertOwnerBranchAccess(actor, query.branchId);
+    } else if (actor.role === "admin") {
+      await assertAdminBranchAccess(query.organizationId, query.branchId);
     }
 
     filter.branchId = asObjectId(query.branchId);
@@ -285,6 +328,8 @@ const updateEmployee = async (
 
   if (actor.role === "owner" && payload.branchId) {
     await assertOwnerBranchAccess(actor, payload.branchId);
+  } else if (actor.role === "admin" && payload.branchId) {
+    await assertAdminBranchAccess(payload.organizationId, payload.branchId);
   }
 
   if (payload.fullName !== undefined) employee.fullName = payload.fullName;
@@ -333,8 +378,8 @@ const transferEmployeeBranch = async (
 ) => {
   const actor = await ensureActor(actorPayload);
 
-  if (actor.role !== "owner") {
-    throw new AppError(403, "Only owners can transfer employees between branches");
+  if (!["admin", "owner"].includes(actor.role)) {
+    throw new AppError(403, "Only owners or admins can transfer employees between branches");
   }
 
   const employee = await UserModel.findById(employeeId);
@@ -349,7 +394,11 @@ const transferEmployeeBranch = async (
     throw new AppError(400, "Only staff can be transferred between branches");
   }
 
-  await assertOwnerBranchAccess(actor, payload.branchId);
+  if (actor.role === "admin") {
+    await assertAdminBranchAccess(employee.organizationId?.toString(), payload.branchId);
+  } else {
+    await assertOwnerBranchAccess(actor, payload.branchId);
+  }
 
   employee.branchId = asObjectId(payload.branchId);
   await employee.save();
@@ -364,8 +413,8 @@ const assignManagerToBranch = async (
 ) => {
   const actor = await ensureActor(actorPayload);
 
-  if (actor.role !== "owner") {
-    throw new AppError(403, "Only owners can assign managers to branches");
+  if (!["admin", "owner"].includes(actor.role)) {
+    throw new AppError(403, "Only owners or admins can assign managers to branches");
   }
 
   const manager = await UserModel.findById(managerId);
@@ -380,7 +429,10 @@ const assignManagerToBranch = async (
     throw new AppError(400, "User is not a manager");
   }
 
-  const branch = await assertOwnerBranchAccess(actor, payload.branchId);
+  const branch =
+    actor.role === "admin"
+      ? await assertAdminBranchAccess(manager.organizationId?.toString(), payload.branchId)
+      : await assertOwnerBranchAccess(actor, payload.branchId);
 
   if (branch.managerId && !branch.managerId.equals(manager._id)) {
     throw new AppError(409, "Branch already has another manager");
@@ -416,8 +468,8 @@ const removeManagerFromBranch = async (
 ) => {
   const actor = await ensureActor(actorPayload);
 
-  if (actor.role !== "owner") {
-    throw new AppError(403, "Only owners can remove managers from branches");
+  if (!["admin", "owner"].includes(actor.role)) {
+    throw new AppError(403, "Only owners or admins can remove managers from branches");
   }
 
   const manager = await UserModel.findById(managerId);
@@ -432,7 +484,10 @@ const removeManagerFromBranch = async (
     throw new AppError(400, "User is not a manager");
   }
 
-  const branch = await assertOwnerBranchAccess(actor, payload.branchId);
+  const branch =
+    actor.role === "admin"
+      ? await assertAdminBranchAccess(manager.organizationId?.toString(), payload.branchId)
+      : await assertOwnerBranchAccess(actor, payload.branchId);
 
   if (!branch.managerId || !branch.managerId.equals(manager._id)) {
     throw new AppError(400, "Manager is not assigned to this branch");

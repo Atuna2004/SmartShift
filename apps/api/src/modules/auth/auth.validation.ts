@@ -11,6 +11,18 @@ export const registerOwnerValidationSchema = z.object({
   query: z.object({}).optional(),
 });
 
+export const registerAdminValidationSchema = z.object({
+  body: z.object({
+    fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
+    email: z.string().trim().email("Invalid email address").toLowerCase(),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    phone: z.string().trim().optional(),
+    setupSecret: z.string().min(1, "Setup secret is required"),
+  }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
+});
+
 export const loginValidationSchema = z.object({
   body: z.object({
     email: z.string().trim().email("Invalid email address").toLowerCase(),
@@ -76,6 +88,9 @@ export const updateProfileValidationSchema = z.object({
 
 export type RegisterOwnerInput = z.infer<
   typeof registerOwnerValidationSchema
+>["body"];
+export type RegisterAdminInput = z.infer<
+  typeof registerAdminValidationSchema
 >["body"];
 
 export type LoginInput = z.infer<typeof loginValidationSchema>["body"];

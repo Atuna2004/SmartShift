@@ -13,7 +13,7 @@ import {
 
 const router = Router();
 
-router.use(auth("owner", "manager"));
+router.use(auth("admin", "owner", "manager"));
 
 router.post("/", validateRequest(createEmployeeSchema), UserController.createEmployee);
 

@@ -5,6 +5,7 @@ const objectIdSchema = z
   .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ObjectId");
 
 const roleSchema = z.enum(["manager", "staff"]);
+const listRoleSchema = z.enum(["owner", "manager", "staff"]);
 const employeeTypeSchema = z.enum(["full_time", "part_time"]);
 
 export const createEmployeeSchema = z.object({
@@ -59,9 +60,10 @@ export const employeeListSchema = z.object({
   body: z.object({}).optional(),
   params: z.object({}).optional(),
   query: z.object({
-    role: roleSchema.optional(),
+    role: listRoleSchema.optional(),
     status: z.enum(["active", "inactive"]).optional(),
     branchId: objectIdSchema.optional(),
+    organizationId: objectIdSchema.optional(),
     search: z.string().trim().optional(),
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(20),

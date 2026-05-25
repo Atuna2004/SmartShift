@@ -14,6 +14,7 @@ import type {
   LoginInput,
   RefreshTokenInput,
   RegisterOwnerInput,
+  RegisterAdminInput,
   ResetPasswordInput,
   UpdateProfileInput,
 } from "./auth.validation.js";
@@ -92,6 +93,37 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
   };
 
   const user = await UserModel.create(userPayload);
+
+  const tokens = await buildTokenPair(user);
+
+  return {
+    ...tokens,
+    user: toPublicUser(user),
+  };
+};
+
+const registerAdmin = async (payload: RegisterAdminInput) => {
+  const setupSecret = process.env.ADMIN_SETUP_SECRET;
+
+  if (!setupSecret || payload.setupSecret !== setupSecret) {
+    throw new AppError(403, "Invalid admin setup secret");
+  }
+
+  const existingUser = await UserModel.findOne({ email: payload.email });
+
+  if (existingUser) {
+    throw new AppError(409, "Email already exists");
+  }
+
+  const hashedPassword = await hashPassword(payload.password);
+  const user = await UserModel.create({
+    fullName: payload.fullName,
+    email: payload.email,
+    password: hashedPassword,
+    role: "admin" as const,
+    status: "active" as const,
+    ...(payload.phone ? { phone: payload.phone } : {}),
+  });
 
   const tokens = await buildTokenPair(user);
 
@@ -302,6 +334,7 @@ const updateProfile = async (
 };
 
 export const AuthService = {
+  registerAdmin,
   registerOwner,
   login,
   logout,
