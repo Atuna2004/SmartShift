@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift - Registration Success</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#ebe7e6",
+                      "tertiary-fixed": "#e6e1df",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed-variant": "#474646",
+                      "surface-dim": "#ddd9d8",
+                      "on-surface": "#1c1b1b",
+                      "surface-container-highest": "#e5e2e1",
+                      "outline-variant": "#c4c7c7",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "tertiary-fixed-dim": "#cac6c3",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "surface-dark": "#101010",
+                      "success": "#10b981",
+                      "surface-variant": "#e5e2e1",
+                      "primary-fixed": "#e5e2e1",
+                      "on-tertiary-container": "#868381",
+                      "outline": "#747878",
+                      "hairline": "#e5e7eb",
+                      "secondary-container": "#2170e4",
+                      "on-tertiary-fixed": "#1d1b1a",
+                      "surface-card": "#f5f5f5",
+                      "error": "#ef4444",
+                      "surface-tint": "#5f5e5e",
+                      "on-tertiary": "#ffffff",
+                      "surface-bright": "#fdf8f8",
+                      "surface": "#fdf8f8",
+                      "tertiary-container": "#1d1b1a",
+                      "on-error-container": "#93000a",
+                      "on-secondary-container": "#fefcff",
+                      "canvas": "#ffffff",
+                      "primary-fixed-dim": "#c8c6c5",
+                      "inverse-on-surface": "#f4f0ef",
+                      "on-background": "#1c1b1b",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#f1edec",
+                      "tertiary": "#000000",
+                      "on-secondary-fixed-variant": "#004395",
+                      "inverse-surface": "#313030",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed": "#001a42",
+                      "on-surface-variant": "#444748",
+                      "surface-container-low": "#f7f3f2",
+                      "on-primary-fixed": "#1c1b1b",
+                      "on-tertiary-fixed-variant": "#484645",
+                      "on-primary-container": "#858383",
+                      "secondary-fixed": "#d8e2ff",
+                      "primary": "#000000",
+                      "background": "#fdf8f8",
+                      "primary-container": "#1c1b1b",
+                      "secondary": "#0058be",
+                      "inverse-primary": "#c8c6c5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "xl": "32px",
+                      "3xl": "64px",
+                      "sm": "8px",
+                      "base": "4px",
+                      "lg": "24px",
+                      "2xl": "48px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "headline-sm": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-md": ["Inter"],
+                      "button": ["Inter"],
+                      "display-md": ["Inter"],
+                      "caption": ["Inter"],
+                      "display-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                      "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        @keyframes scale-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale-in {
+            animation: scale-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface font-body-md selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg py-md max-w-7xl mx-auto bg-canvas border-b border-hairline">
+<div class="text-headline-sm font-headline-sm font-black text-on-surface">SmartShift</div>
+<div class="hidden md:flex gap-lg items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Step 4 of 4</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="min-h-screen flex items-center justify-center pt-3xl px-md">
+<div class="w-full max-w-xl text-center space-y-xl">
+<!-- Progress Indicator (Mobile & Tablet) -->
+<div class="md:hidden flex flex-col items-center gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Setup Complete</span>
+<div class="flex gap-xs">
+<div class="w-8 h-1.5 rounded-full bg-primary"></div>
+<div class="w-8 h-1.5 rounded-full bg-primary"></div>
+<div class="w-8 h-1.5 rounded-full bg-primary"></div>
+<div class="w-8 h-1.5 rounded-full bg-primary"></div>
+</div>
+</div>
+<!-- Success Visual Section -->
+<div class="relative flex flex-col items-center">
+<!-- Decorative background pulse -->
+<div class="absolute -z-10 w-48 h-48 bg-success/10 rounded-full blur-3xl animate-pulse"></div>
+<div class="animate-scale-in bg-success/10 p-lg rounded-full mb-md">
+<span class="material-symbols-outlined text-[80px] text-success" style="font-variation-settings: 'FILL' 1;">
+                        check_circle
+                    </span>
+</div>
+<div class="space-y-sm">
+<h1 class="font-display-md text-display-md text-primary tracking-tight">Welcome to SmartShift!</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto">
+                        Your account has been successfully configured. You're ready to optimize your workforce scheduling.
+                    </p>
+</div>
+</div>
+<!-- Feature Preview / Bento Style Hint -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md py-lg animate-float">
+<div class="bg-surface-card p-md rounded-xl border border-hairline text-left flex items-start gap-md">
+<span class="material-symbols-outlined text-primary bg-white p-xs rounded-lg shadow-sm" data-icon="dashboard">dashboard</span>
+<div>
+<p class="font-label-md text-label-md">Real-time Insights</p>
+<p class="font-caption text-caption text-on-surface-variant">Monitor daily shifts and labor costs at a glance.</p>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline text-left flex items-start gap-md">
+<span class="material-symbols-outlined text-primary bg-white p-xs rounded-lg shadow-sm" data-icon="group">group</span>
+<div>
+<p class="font-label-md text-label-md">Team Management</p>
+<p class="font-caption text-caption text-on-surface-variant">Easily manage availability and swap requests.</p>
+</div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="flex flex-col gap-md pt-md">
+<a class="inline-flex items-center justify-center px-2xl py-md bg-primary text-on-primary rounded-lg font-button text-button hover:bg-zinc-800 transition-all duration-200 transform hover:scale-[1.02] shadow-lg" href="/dashboard">
+                    Go to Dashboard
+                    <span class="material-symbols-outlined ml-sm text-md" data-icon="arrow_forward">arrow_forward</span>
+</a>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors">
+                    Take a quick tour
+                </button>
+</div>
+</div>
+</main>
+<!-- Visual Background Elements (Subtle) -->
+<div class="fixed top-0 right-0 -z-20 w-1/3 h-full opacity-5 pointer-events-none">
+<img class="w-full h-full object-cover" data-alt="A sophisticated and clean minimalist background for a modern SaaS platform, featuring subtle abstract shapes and soft gray gradients. The aesthetic is professional, airy, and high-tech, with ample white space and sharp focus. The lighting is bright and uniform, reflecting a premium enterprise tool design. The overall mood is calm, reliable, and forward-thinking." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-sBP4mqPs1qjPphNA94fbJ0DEv2Uwz2QE-sqNcEjO0Zc2BrqkBiOBsjrFzVYeJiUJQFFhcpW0Za4RuH0hqczKOovHN9o93wE0KUNRDEK59tOyqvvVvGK6Ne6kprwjnnFMDIn1eEFpHBc6h6Ya8w9mx3dRAdtUuEkCrvyCvkYbzS8jGkuPJbPoAmikVSXFvlMyAdXT26xHgUGoawa-OclfOC2-u52TUm1UGFYtIeMUkzSDJec6bJ7_0cuQS_tPyW9C7a8yDW9lgm7a"/>
+</div>
+<!-- Footer Anchor -->
+<footer class="w-full px-lg py-xl flex flex-col md:flex-row justify-between items-center gap-md bg-canvas border-t border-hairline">
+<div class="font-label-md text-label-md font-bold text-on-surface">SmartShift</div>
+<div class="flex gap-lg font-caption text-caption text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+<a class="hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms</a>
+</div>
+<div class="font-caption text-caption text-on-surface-variant">
+            © 2024 SmartShift. All rights reserved.
+        </div>
+</footer>
+<script>
+        // Micro-interaction for the success icon
+        document.addEventListener('DOMContentLoaded', () => {
+            const icon = document.querySelector('.material-symbols-outlined.text-success');
+            if (icon) {
+                icon.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                setTimeout(() => {
+                    icon.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        icon.style.transform = 'scale(1)';
+                    }, 200);
+                }, 300);
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift | Employee Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#cac6c3",
+                      "outline": "#747878",
+                      "primary-fixed-dim": "#c8c6c5",
+                      "outline-variant": "#c4c7c7",
+                      "on-primary-container": "#858383",
+                      "on-surface-variant": "#444748",
+                      "on-secondary": "#ffffff",
+                      "canvas": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#868381",
+                      "success": "#10b981",
+                      "surface-card": "#f5f5f5",
+                      "primary-fixed": "#e5e2e1",
+                      "on-secondary-fixed-variant": "#004395",
+                      "primary": "#000000",
+                      "background": "#fdf8f8",
+                      "surface-container": "#f1edec",
+                      "hairline": "#e5e7eb",
+                      "inverse-primary": "#c8c6c5",
+                      "surface-tint": "#5f5e5e",
+                      "surface-dim": "#ddd9d8",
+                      "inverse-surface": "#313030",
+                      "tertiary-fixed": "#e6e1df",
+                      "tertiary": "#000000",
+                      "surface-container-high": "#ebe7e6",
+                      "surface-dark": "#101010",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#484645",
+                      "inverse-on-surface": "#f4f0ef",
+                      "tertiary-container": "#1d1b1a",
+                      "surface-container-highest": "#e5e2e1",
+                      "primary-container": "#1c1b1b",
+                      "surface-variant": "#e5e2e1",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed": "#001a42",
+                      "secondary": "#0058be",
+                      "error": "#ef4444",
+                      "on-surface": "#1c1b1b",
+                      "surface-bright": "#fdf8f8",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#d8e2ff",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#f7f3f2",
+                      "on-secondary-container": "#fefcff",
+                      "on-background": "#1c1b1b",
+                      "on-primary-fixed": "#1c1b1b",
+                      "on-primary-fixed-variant": "#474646",
+                      "secondary-container": "#2170e4",
+                      "on-tertiary-fixed": "#1d1b1a",
+                      "surface": "#fdf8f8",
+                      "secondary-fixed-dim": "#adc6ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "2xl": "48px",
+                      "3xl": "64px",
+                      "xs": "4px",
+                      "xl": "32px",
+                      "base": "4px",
+                      "sm": "8px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "display-md": ["Inter"],
+                      "caption": ["Inter"],
+                      "button": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Inter"]
+              },
+              "fontSize": {
+                      "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                      "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface antialiased">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-md px-sm border-r border-hairline dark:border-outline-variant bg-canvas dark:bg-surface-dark w-64 z-50">
+<div class="px-md mb-xl">
+<h1 class="font-headline-sm text-headline-sm font-black text-primary dark:text-primary-fixed">SmartShift</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Enterprise Admin</p>
+</div>
+<nav class="flex-1 overflow-y-auto no-scrollbar space-y-1">
+<!-- Navigation Items Mapping -->
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-sm px-md py-sm bg-surface-container dark:bg-surface-container-high text-primary dark:text-primary-fixed font-bold rounded-lg transition-all font-label-md text-label-md scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span> Employees
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">store</span> Branches
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">layers</span> Shift Templates
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span> Schedules
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">clock_loader_60</span> Attendance
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span> QR Check-in
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">swap_horiz</span> Shift Swap
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">event_busy</span> Leave Requests
+            </a>
+<div class="pt-xl pb-sm px-md">
+<p class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant opacity-50">System</p>
+</div>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span> Reports
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+</nav>
+<div class="mt-auto px-md py-md border-t border-hairline">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a business executive with a warm, confident expression. The lighting is soft and high-key, emphasizing a clean and modern professional aesthetic. The background is a blurred office environment with white and light gray tones, keeping the focus entirely on the subject. The overall mood is sophisticated and reliable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_MRPnbf_-GUGO122mjlOydW7_GBq7xoQPzolxmKbqDpT1hgXGjTn-9I4wu6oADRdWnjft4xGwLM2TxLYDDYvPk3hFvtYldKq5BlPso59qk2JnV8xdfAaKtkywc_Ds70hi8eu6OSzg8RmLTGoXcqC8zi2d1Wclbps9qeMCTm9l1UqPNClZ7NvaS95SYPJnj2lojHbi_ShTNdfdeG_bhHzDlzb2KADX35fhlBJnOfw-1G1kOSe8YxYn78mZKB0ccfLGtOSFpljYjKRs"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="font-label-md text-label-md truncate">Elena Rodriguez</p>
+<p class="text-[11px] text-on-surface-variant truncate">elena@smartshift.io</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar Header -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-lg h-16 bg-canvas border-b border-hairline dark:border-outline-variant">
+<div class="flex items-center gap-lg">
+<h2 class="font-headline-sm text-headline-sm font-bold text-primary">Employees</h2>
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-10 pl-10 pr-md bg-surface-card border border-hairline rounded-lg focus:outline-none focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md" placeholder="Search by name, role or email..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="flex items-center gap-xs px-sm py-sm text-on-surface-variant hover:text-primary transition-colors scale-95 active:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-px bg-hairline"></div>
+<button class="flex items-center gap-sm px-md h-10 bg-primary text-on-primary rounded-lg font-button text-button hover:opacity-90 transition-all scale-[0.98] active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    Add Employee
+                </button>
+</div>
+</header>
+<!-- Content Area -->
+<section class="p-lg flex-1">
+<!-- Filter Bar -->
+<div class="flex justify-between items-center mb-lg">
+<div class="flex items-center gap-sm">
+<button class="px-md py-sm rounded-full bg-surface-container text-primary font-label-md text-label-md border border-hairline">All Staff</button>
+<button class="px-md py-sm rounded-full text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors">Managers</button>
+<button class="px-md py-sm rounded-full text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors">Front Desk</button>
+<button class="px-md py-sm rounded-full text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors">Support</button>
+<div class="h-6 w-px bg-hairline mx-sm"></div>
+<button class="flex items-center gap-xs px-md py-sm text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors rounded-lg">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        More Filters
+                    </button>
+</div>
+<div class="flex items-center bg-surface-card rounded-lg p-1 border border-hairline">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-canvas shadow-sm text-primary">
+<span class="material-symbols-outlined">view_list</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+</div>
+</div>
+<!-- Management Table -->
+<div class="bg-canvas border border-hairline rounded-xl overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-card border-b border-hairline">
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant w-1/4">Photo &amp; Name</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Role</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Branch</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Status</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-hairline">
+<!-- Table Row 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img alt="Marcus Thorne" class="w-10 h-10 rounded-lg object-cover" data-alt="A detailed portrait of a professional man in his 30s with a sharp, groomed beard and a crisp white shirt. He is set against a soft, neutral studio background with daylight-simulating lighting. The aesthetic is clean and modern, representing a professional enterprise environment. The colors are muted with high contrast in the black and white details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGw0aN_e0T2iueIkEVjJrLkQ0aR7pg9b1k6ApavS3dJWDGD_EvGC6m1Rp3JzUmL0UKyeHPP5zaCiavd-97VGtGfbziDgFv8uAr1D-aaGwMc1AcjkMPwSleye-dbIt-6SoI361TIleHq7lYdSkcfuxbqMm9CPbvPgxLz4xywHDcukTrvWpoPb2N2j8Bmax5KdUvb9CnDKimksvmtGdMK5GN6vIlu2if31Uy-fxWnuqujKtI85O6xjKeGdWt4DDiPVhAr69SDk2ztJUI"/>
+<div>
+<p class="font-label-md text-label-md text-primary">Marcus Thorne</p>
+<p class="text-caption text-on-surface-variant">marcus.t@smartshift.io</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Senior Shift Manager</span>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Downtown Hub</span>
+</td>
+<td class="px-lg py-md">
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-success/10 text-success rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Active</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-sm hover:bg-surface-container rounded-lg text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Table Row 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img alt="Sarah Jenkins" class="w-10 h-10 rounded-lg object-cover" data-alt="A portrait of a confident female executive in a modern business suit. She has a friendly but professional demeanor, with soft studio lighting that creates a clean, corporate atmosphere. The background is a minimalist, light-filled office space with architectural glass elements. The color palette is composed of blacks, grays, and whites for a high-end SaaS feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2-W5iryVB8BleTwnG6tgcW-X2J7DGdYj7urdvsF0oDDqLYiiT3DK0-SMvwCj-0Mb321E5BY4-U4WPPVGm-mTEO4ZOcBt0ZZ8AlsOpGOwL9YORHDaW7T-QpbbmWkpnUbGm5w_UPG6V7S7hP73UqIUF3ZtHcN7yeWsyg9Oko34XmjSvK-91iz8aro5Mb8Z6uK3qi8i2ne7DaozcIRrstK5e2kmx-u1aj4uKe-kArs7L2Dtb00Ey-lO5QzdxiTbUydmdWI7bS2Cb1Bxw"/>
+<div>
+<p class="font-label-md text-label-md text-primary">Sarah Jenkins</p>
+<p class="text-caption text-on-surface-variant">s.jenkins@smartshift.io</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Front Desk Supervisor</span>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Westside Annex</span>
+</td>
+<td class="px-lg py-md">
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-secondary/10 text-secondary rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-[11px] font-bold uppercase tracking-wider">On Leave</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-sm hover:bg-surface-container rounded-lg text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Table Row 3 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant font-bold">AL</div>
+<div>
+<p class="font-label-md text-label-md text-primary">Arthur Lofton</p>
+<p class="text-caption text-on-surface-variant">a.lofton@smartshift.io</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Logistics Coordinator</span>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">North Plaza</span>
+</td>
+<td class="px-lg py-md">
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-outline-variant/30 text-on-surface-variant rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Inactive</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-sm hover:bg-surface-container rounded-lg text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Table Row 4 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img alt="Nina Kim" class="w-10 h-10 rounded-lg object-cover" data-alt="A modern professional portrait of a woman with a creative but professional style. The lighting is natural and bright, suggesting a workspace with large windows. The overall aesthetic is minimalist and high-contrast, following the black-and-white theme of the UI. The background is a neutral, slightly out-of-focus modern architecture detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtQoPPt-Ky1HhuknP6GQABOCO-xkgYbIzNSFdGzixDXce4vZchqoGq_xTCNpSgh6bLz8_VraIzcC9YW4jIji-WLegdfS-v2Es8mV8J7zrkRuOnzPSoLKoX8GReqQBkSZswxd_ZEjIla6oUK3rjbmtk-n_0L7V5zdJ2Es2tboFF8lbXlwnHy4UYOJZnrB61Z0RG8dDNEzwbvtCoUrYAjXqh5HQIC7QnCMlnUElX167paNBG8KE1Wc1s9HKTQar306jWqZI7lFtXrDFR"/>
+<div>
+<p class="font-label-md text-label-md text-primary">Nina Kim</p>
+<p class="text-caption text-on-surface-variant">nina.k@smartshift.io</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Human Resources</span>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Main Office</span>
+</td>
+<td class="px-lg py-md">
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-success/10 text-success rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Active</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-sm hover:bg-surface-container rounded-lg text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Table Row 5 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<img alt="David Chen" class="w-10 h-10 rounded-lg object-cover" data-alt="A professional headshot of a friendly man in his late 20s. He is wearing a professional polo shirt. The lighting is clean and direct, highlighting a reliable and approachable professional. The background is a subtle, light-gray textured wall. The visual style matches a clean enterprise SaaS application with high-key lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB56ELbBE1haKd29ql22DN5_QCZOK5fD_tQ3bzA7whJmdTUiTUIPOVNplplXvH086iDppSO-w25dCNmjAqE6e4_j2DuyW9mJlAchFX1SujTFC-3-mD1cXAkxQSQM3QKi23j1nV3OQBstvlOh-s366zeIi26jQmGlvvReweu3jBXhcyYrxH8UtCDykAWSthsxsBXpsWhenIMm3sS855uroQDvKqKEum4NvIoLvEmkkdqpXip7Tmk3I3Cm4dTQFrkJZhojblBbPB-MCSb"/>
+<div>
+<p class="font-label-md text-label-md text-primary">David Chen</p>
+<p class="text-caption text-on-surface-variant">d.chen@smartshift.io</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Service Desk Lead</span>
+</td>
+<td class="px-lg py-md">
+<span class="font-body-md text-body-md">Downtown Hub</span>
+</td>
+<td class="px-lg py-md">
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-success/10 text-success rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+<span class="text-[11px] font-bold uppercase tracking-wider">Active</span>
+</div>
+</td>
+<td class="px-lg py-md text-right">
+<button class="p-sm hover:bg-surface-container rounded-lg text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-lg py-md flex justify-between items-center bg-canvas border-t border-hairline">
+<p class="font-caption text-caption text-on-surface-variant">Showing 1 to 5 of 42 employees</p>
+<div class="flex items-center gap-xs">
+<button class="w-8 h-8 flex items-center justify-center border border-hairline rounded-lg text-on-surface-variant hover:bg-surface-card transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center bg-primary text-on-primary rounded-lg font-label-md text-label-md">1</button>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-card rounded-lg font-label-md text-label-md">2</button>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-card rounded-lg font-label-md text-label-md">3</button>
+<span class="px-1 text-on-surface-variant">...</span>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-card rounded-lg font-label-md text-label-md">9</button>
+<button class="w-8 h-8 flex items-center justify-center border border-hairline rounded-lg text-on-surface-variant hover:bg-surface-card transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bento Stats Grid (Extra Visual Quality) -->
+<div class="mt-lg grid grid-cols-4 gap-lg">
+<div class="bg-surface-card p-md rounded-xl border border-hairline">
+<p class="font-label-md text-label-md text-on-surface-variant">Total Headcount</p>
+<div class="flex items-end justify-between mt-sm">
+<p class="text-[32px] font-black leading-none">128</p>
+<span class="text-success font-bold text-caption flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                            +4%
+                        </span>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline">
+<p class="font-label-md text-label-md text-on-surface-variant">Average Tenure</p>
+<div class="flex items-end justify-between mt-sm">
+<p class="text-[32px] font-black leading-none">2.4y</p>
+<span class="text-on-surface-variant text-caption">Stable</span>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline">
+<p class="font-label-md text-label-md text-on-surface-variant">Shift Coverage</p>
+<div class="flex items-end justify-between mt-sm">
+<p class="text-[32px] font-black leading-none">98.2%</p>
+<div class="w-16 h-1.5 bg-hairline rounded-full overflow-hidden">
+<div class="w-full h-full bg-primary"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline">
+<p class="font-label-md text-label-md text-on-surface-variant">Active Leaves</p>
+<div class="flex items-end justify-between mt-sm">
+<p class="text-[32px] font-black leading-none">6</p>
+<span class="text-error font-bold text-caption">Action Required</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<script>
+        // Simple micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // Mimic row selection or opening details
+                console.log('Opening employee details...');
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-primary/10');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-primary/10');
+        });
+    </script>
+</body></html>

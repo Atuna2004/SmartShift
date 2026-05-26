@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Types } from "mongoose";
 import { AppError } from "../../common/errors/AppError.js";
 import { comparePassword, hashPassword } from "../../common/utils/hash.js";
 import {
@@ -6,6 +7,8 @@ import {
   createToken,
   verifyRefreshToken,
 } from "../../common/utils/jwt.js";
+import { BranchModel } from "../branch/branch.model.js";
+import { OrganizationModel } from "../organization/organization.model.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import type {
@@ -93,6 +96,77 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
   };
 
   const user = await UserModel.create(userPayload);
+
+  try {
+    const userId = user._id as Types.ObjectId;
+
+    if (payload.organization) {
+      const organizationPayload: Record<string, unknown> = {
+        name: payload.organization.name,
+        ownerId: userId,
+        createdBy: userId,
+        status: "active",
+      };
+
+      if (payload.organization.businessType) {
+        organizationPayload.businessType = payload.organization.businessType;
+      }
+
+      if (payload.organization.phone) {
+        organizationPayload.phone = payload.organization.phone;
+      }
+
+      if (payload.organization.email) {
+        organizationPayload.email = payload.organization.email;
+      }
+
+      if (payload.organization.address) {
+        organizationPayload.address = payload.organization.address;
+      }
+
+      if (payload.subscription) {
+        organizationPayload.subscription = payload.subscription;
+      }
+
+      const organization = await OrganizationModel.create(organizationPayload);
+
+      const organizationId = organization._id as Types.ObjectId;
+
+      user.organizationId = organizationId;
+
+      if (payload.branch) {
+        const branchPayload: Record<string, unknown> = {
+          organizationId,
+          name: payload.branch.name,
+          ownerId: userId,
+          createdBy: userId,
+          status: "active",
+        };
+
+        if (payload.branch.address) {
+          branchPayload.address = payload.branch.address;
+        }
+
+        if (payload.branch.phone) {
+          branchPayload.phone = payload.branch.phone;
+        }
+
+        const branch = await BranchModel.create(branchPayload);
+
+        user.branchId = branch._id as Types.ObjectId;
+      }
+
+      await user.save();
+    }
+  } catch (error) {
+    await Promise.allSettled([
+      BranchModel.deleteMany({ ownerId: user._id }),
+      OrganizationModel.deleteMany({ ownerId: user._id }),
+      UserModel.findByIdAndDelete(user._id),
+    ]);
+
+    throw error;
+  }
 
   const tokens = await buildTokenPair(user);
 

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift Attendance Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f1edec",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "background": "#fdf8f8",
+                        "tertiary-container": "#1d1b1a",
+                        "on-tertiary-container": "#868381",
+                        "on-primary-fixed-variant": "#474646",
+                        "tertiary": "#000000",
+                        "success": "#10b981",
+                        "primary-fixed": "#e5e2e1",
+                        "on-primary-container": "#858383",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-variant": "#e5e2e1",
+                        "primary-container": "#1c1b1b",
+                        "on-secondary-fixed-variant": "#004395",
+                        "outline-variant": "#c4c7c7",
+                        "on-secondary-container": "#fefcff",
+                        "hairline": "#e5e7eb",
+                        "outline": "#747878",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface": "#fdf8f8",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface-variant": "#444748",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f7f3f2",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "surface-container-high": "#ebe7e6",
+                        "surface-dim": "#ddd9d8",
+                        "error": "#ef4444",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#c8c6c5",
+                        "on-background": "#1c1b1b",
+                        "inverse-surface": "#313030",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "surface-tint": "#5f5e5e",
+                        "on-secondary": "#ffffff",
+                        "surface-card": "#f5f5f5",
+                        "secondary": "#0058be",
+                        "surface-dark": "#101010",
+                        "canvas": "#ffffff",
+                        "primary": "#000000",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#fdf8f8",
+                        "tertiary-fixed": "#e6e1df",
+                        "on-surface": "#1c1b1b",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#f4f0ef",
+                        "tertiary-fixed-dim": "#cac6c3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "3xl": "64px",
+                        "2xl": "48px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .hairline-border { border: 1px solid #e5e7eb; }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+<!-- Sidebar Navigation Shell -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest dark:bg-surface-dark border-r border-hairline dark:border-outline-variant p-md z-50">
+<div class="flex items-center gap-sm mb-xl">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-black text-primary dark:text-on-primary-fixed">SmartShift</h1>
+<p class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Workforce Hub</p>
+</div>
+</div>
+<nav class="flex-grow space-y-xs">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-outline hover:bg-surface-container dark:hover:bg-surface-variant transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container dark:bg-primary-fixed text-on-primary-container dark:text-on-primary-fixed font-bold rounded-lg transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+<span>Attendance</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-outline hover:bg-surface-container dark:hover:bg-surface-variant transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span>Schedules</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-outline hover:bg-surface-container dark:hover:bg-surface-variant transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Staff</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant dark:text-outline hover:bg-surface-container dark:hover:bg-surface-variant transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="pt-md mt-md border-t border-hairline space-y-xs">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-error hover:bg-error-container/20 transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-lg h-16 bg-canvas dark:bg-surface-dark border-b border-hairline dark:border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-md w-1/2">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-md py-2 text-body-md focus:ring-2 focus:ring-primary/10 transition-all" placeholder="Search attendance records..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden lg:flex flex-col items-end mr-sm">
+<span class="text-label-md font-bold text-primary">Alex Sterling</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-tight">Branch Manager</span>
+</div>
+<div class="flex items-center gap-xs">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+<img alt="User profile" class="w-10 h-10 rounded-full border border-hairline object-cover" data-alt="A professional headshot of a young male branch manager with a focused and confident expression. He is wearing a crisp black shirt, and the background is a blurred high-end corporate office setting with warm ambient lighting. The overall style is clean, modern, and trustworthy, fitting a sophisticated SaaS dashboard environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaFtakG8gd11xj65BysEBNJ3JdOS7RJ-QJMv-KeGCtUdHIt3j6owSDiaI6JGkhSIJhD-idYqQnINSZlKw4UnarXgYKklHKMup3ULTwSyFnqv1ZoQ-A5fduYMtrBDhnkdsP8SE-5tRHqhshIVH-J4L-K40whPE9tOot29SBU3RN8UD9H8GHMz3_Oec2luwsDdt4o0ZimULFrvht27M_RievYymO9aO9hnOyZZXFNxCrAxyUjb7tmMGy2zKiakHy3KwoOdHS7bPGYcGT"/>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-lg space-y-lg flex-grow">
+<!-- Page Title & Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h2 class="font-display-md text-display-md text-primary">Attendance Monitoring</h2>
+<p class="text-body-md text-on-surface-variant">Real-time status for Central Branch • Today, Oct 24</p>
+</div>
+<div class="flex items-center gap-sm">
+<button class="flex items-center gap-xs px-md py-sm hairline-border rounded-lg bg-canvas text-button hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                        Filter View
+                    </button>
+<button class="flex items-center gap-xs px-md py-sm bg-primary text-on-primary rounded-lg text-button hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+                        Export CSV
+                    </button>
+</div>
+</div>
+<!-- KPI Row (Bento Style) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+<div class="bg-surface-card p-md rounded-xl hairline-border flex flex-col justify-between h-32 hover:border-primary/20 transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Attendance Rate</span>
+<div class="p-2 bg-success/10 text-success rounded-lg">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+<div>
+<span class="text-display-md font-bold text-primary">94.2%</span>
+<p class="text-caption text-success font-bold">+2.4% vs last week</p>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl hairline-border flex flex-col justify-between h-32 hover:border-primary/20 transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Late Today</span>
+<div class="p-2 bg-error/10 text-error rounded-lg">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+</div>
+</div>
+<div>
+<span class="text-display-md font-bold text-primary">08</span>
+<p class="text-caption text-error font-bold">Requires attention</p>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl hairline-border flex flex-col justify-between h-32 hover:border-primary/20 transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Absent Today</span>
+<div class="p-2 bg-on-surface-variant/10 text-on-surface-variant rounded-lg">
+<span class="material-symbols-outlined" data-icon="person_off">person_off</span>
+</div>
+</div>
+<div>
+<span class="text-display-md font-bold text-primary">03</span>
+<p class="text-caption text-on-surface-variant font-bold">Planned: 02</p>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl hairline-border flex flex-col justify-between h-32 hover:border-primary/20 transition-colors">
+<div class="flex justify-between items-start">
+<span class="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Total Hours</span>
+<div class="p-2 bg-secondary/10 text-secondary rounded-lg">
+<span class="material-symbols-outlined" data-icon="timer">timer</span>
+</div>
+</div>
+<div>
+<span class="text-display-md font-bold text-primary">412h</span>
+<p class="text-caption text-secondary font-bold">Projected: 440h</p>
+</div>
+</div>
+</div>
+<!-- Main Dashboard Layout (Table + Sidebar) -->
+<div class="grid grid-cols-12 gap-lg">
+<!-- Attendance Table Section -->
+<div class="col-span-12 xl:col-span-9 bg-canvas rounded-xl hairline-border overflow-hidden flex flex-col shadow-sm">
+<div class="p-md border-b border-hairline flex flex-col sm:flex-row justify-between items-center gap-sm bg-surface-container-lowest">
+<h3 class="font-headline-sm text-headline-sm text-primary">Today's Attendance</h3>
+<div class="flex gap-xs">
+<select class="text-button hairline-border rounded-lg px-sm py-1 bg-canvas focus:ring-0">
+<option>All Branches</option>
+<option>Central Branch</option>
+<option>Westside Hub</option>
+</select>
+<select class="text-button hairline-border rounded-lg px-sm py-1 bg-canvas focus:ring-0">
+<option>All Roles</option>
+<option>Kitchen</option>
+<option>Service</option>
+<option>Delivery</option>
+</select>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-hairline text-label-md text-on-surface-variant uppercase tracking-wider">
+<th class="px-md py-sm font-bold">Employee</th>
+<th class="px-md py-sm font-bold">Branch</th>
+<th class="px-md py-sm font-bold">Schedule</th>
+<th class="px-md py-sm font-bold text-center">Check-in</th>
+<th class="px-md py-sm font-bold text-center">Check-out</th>
+<th class="px-md py-sm font-bold text-right">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-hairline">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">JD</div>
+<div>
+<p class="font-bold text-primary">Jameson Dun</p>
+<p class="text-caption text-on-surface-variant">Senior Chef</p>
+</div>
+</td>
+<td class="px-md py-md text-body-md text-on-surface-variant">Central</td>
+<td class="px-md py-md text-body-md">08:00 - 16:00</td>
+<td class="px-md py-md text-center text-body-md font-bold">07:55</td>
+<td class="px-md py-md text-center text-body-md text-outline">--:--</td>
+<td class="px-md py-md text-right">
+<span class="px-3 py-1 bg-success/10 text-success text-[10px] font-black rounded-full uppercase">On Time</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">SK</div>
+<div>
+<p class="font-bold text-primary">Sarah Kinsley</p>
+<p class="text-caption text-on-surface-variant">Floor Manager</p>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant">Central</td>
+<td class="px-md py-md">09:00 - 17:00</td>
+<td class="px-md py-md text-center text-body-md font-bold text-error">09:22</td>
+<td class="px-md py-md text-center text-body-md text-outline">--:--</td>
+<td class="px-md py-md text-right">
+<span class="px-3 py-1 bg-error/10 text-error text-[10px] font-black rounded-full uppercase">Late</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">MR</div>
+<div>
+<p class="font-bold text-primary">Marcus Reed</p>
+<p class="text-caption text-on-surface-variant">Host</p>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant">Central</td>
+<td class="px-md py-md">08:00 - 16:00</td>
+<td class="px-md py-md text-center text-body-md text-outline">--:--</td>
+<td class="px-md py-md text-center text-body-md text-outline">--:--</td>
+<td class="px-md py-md text-right">
+<span class="px-3 py-1 bg-on-surface-variant/10 text-on-surface-variant text-[10px] font-black rounded-full uppercase">Absent</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">EL</div>
+<div>
+<p class="font-bold text-primary">Elena Lu</p>
+<p class="text-caption text-on-surface-variant">Sous Chef</p>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant">Central</td>
+<td class="px-md py-md">06:00 - 14:00</td>
+<td class="px-md py-md text-center text-body-md font-bold">05:58</td>
+<td class="px-md py-md text-center text-body-md font-bold">14:05</td>
+<td class="px-md py-md text-right">
+<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-black rounded-full uppercase">Completed</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">TB</div>
+<div>
+<p class="font-bold text-primary">Tom Berenger</p>
+<p class="text-caption text-on-surface-variant">Cleaning Crew</p>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant">Central</td>
+<td class="px-md py-md">10:00 - 18:00</td>
+<td class="px-md py-md text-center text-body-md font-bold">10:00</td>
+<td class="px-md py-md text-center text-body-md text-outline">--:--</td>
+<td class="px-md py-md text-right">
+<span class="px-3 py-1 bg-success/10 text-success text-[10px] font-black rounded-full uppercase">On Time</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md bg-surface-container-low border-t border-hairline text-center">
+<button class="text-button text-primary hover:underline">View 18 more entries</button>
+</div>
+</div>
+<!-- Recent Alerts Sidebar -->
+<div class="col-span-12 xl:col-span-3 space-y-md">
+<div class="bg-canvas p-md rounded-xl hairline-border shadow-sm">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-sm text-headline-sm text-primary">Recent Alerts</h3>
+<span class="px-2 py-1 bg-error text-white text-[10px] font-black rounded">NEW</span>
+</div>
+<div class="space-y-md">
+<!-- Alert Item -->
+<div class="flex gap-sm p-sm bg-error-container/10 rounded-lg border-l-4 border-error">
+<div class="mt-1">
+<span class="material-symbols-outlined text-error" data-icon="error_outline">error_outline</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-primary">Late Arrival: Sarah Kinsley</p>
+<p class="text-caption text-on-surface-variant">22 minutes late for shift at Central Branch.</p>
+<button class="mt-xs text-button text-error hover:underline flex items-center gap-xs">
+                                        Take Action <span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Alert Item -->
+<div class="flex gap-sm p-sm bg-surface-container-low rounded-lg border-l-4 border-outline">
+<div class="mt-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications_paused">notifications_paused</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-primary">Missing Check-out</p>
+<p class="text-caption text-on-surface-variant">David Chen didn't clock out for yesterday's shift.</p>
+<button class="mt-xs text-button text-on-surface-variant hover:underline flex items-center gap-xs">
+                                        Resolve <span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Alert Item -->
+<div class="flex gap-sm p-sm bg-surface-container-low rounded-lg border-l-4 border-outline">
+<div class="mt-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-primary">Schedule Change</p>
+<p class="text-caption text-on-surface-variant">Shift swap requested by Leo Vance and Mia Wong.</p>
+<button class="mt-xs text-button text-on-surface-variant hover:underline flex items-center gap-xs">
+                                        Review <span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Additional Context Card -->
+<div class="bg-primary p-md rounded-xl text-white relative overflow-hidden group">
+<div class="relative z-10">
+<h4 class="font-headline-sm text-white mb-xs">Optimization Tip</h4>
+<p class="text-caption text-primary-fixed/80 leading-relaxed mb-md">Attendance rate is 4% higher during morning shifts compared to evenings. Consider adjusting staffing levels.</p>
+<button class="text-button text-white border border-white/30 rounded-lg px-md py-sm hover:bg-white/10 transition-colors">See Insights</button>
+</div>
+<!-- Abstract Pattern -->
+<div class="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+<div class="absolute -top-4 -left-4 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Action Area for Mobile -->
+<footer class="md:hidden fixed bottom-0 left-0 right-0 bg-canvas border-t border-hairline px-md py-sm flex justify-around items-center z-50">
+<button class="flex flex-col items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-xs text-primary">
+<span class="material-symbols-outlined" data-icon="event_available" style="font-variation-settings: 'FILL' 1;">event_available</span>
+<span class="text-[10px] font-bold">Attendance</span>
+</button>
+<button class="flex flex-col items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="text-[10px] font-bold">Schedules</span>
+</button>
+<button class="flex flex-col items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="text-[10px] font-bold">Staff</span>
+</button>
+</footer>
+</main>
+<script>
+        // Simple micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('scale-[0.99]');
+                setTimeout(() => row.classList.remove('scale-[0.99]'), 100);
+            });
+        });
+
+        // Hover effect for KPI cards
+        const kpiCards = document.querySelectorAll('.bg-surface-card');
+        kpiCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>
