@@ -135,12 +135,82 @@ const getLeaveRequestForActor = async (
   return leaveRequest;
 };
 
-const toPublicLeaveRequest = (leaveRequest: ILeaveRequest) => ({
+const toPublicScheduleSummary = (
+  schedule: ISchedule,
+  branchesById?: Map<string, IBranch>
+) => ({
+  id: getDocumentId(schedule).toString(),
+  branchId: schedule.branchId.toString(),
+  ...(branchesById?.get(schedule.branchId.toString())?.name
+    ? { branchName: branchesById.get(schedule.branchId.toString())?.name }
+    : {}),
+  employeeId: schedule.employeeId.toString(),
+  workDate: schedule.workDate,
+  shiftStartTime: schedule.shiftStartTime,
+  shiftEndTime: schedule.shiftEndTime,
+  status: schedule.status,
+});
+
+const getBranchesById = async (branchIds: Array<string | Types.ObjectId | undefined>) => {
+  const ids = [...new Set(branchIds.filter(Boolean).map((id) => id?.toString() as string))];
+
+  if (ids.length === 0) {
+    return new Map<string, IBranch>();
+  }
+
+  const branches = await BranchModel.find({ _id: { $in: ids.map(asObjectId) } });
+  return new Map(branches.map((branch) => [getDocumentId(branch).toString(), branch]));
+};
+
+const getSchedulesById = async (scheduleIds: Array<string | Types.ObjectId | undefined>) => {
+  const ids = [...new Set(scheduleIds.filter(Boolean).map((id) => id?.toString() as string))];
+
+  if (ids.length === 0) {
+    return new Map<string, ISchedule>();
+  }
+
+  const schedules = await ScheduleModel.find({ _id: { $in: ids.map(asObjectId) } });
+  return new Map(schedules.map((schedule) => [getDocumentId(schedule).toString(), schedule]));
+};
+
+const getUsersById = async (userIds: Array<string | Types.ObjectId | undefined>) => {
+  const ids = [...new Set(userIds.filter(Boolean).map((id) => id?.toString() as string))];
+
+  if (ids.length === 0) {
+    return new Map<string, IUser>();
+  }
+
+  const users = await UserModel.find({ _id: { $in: ids.map(asObjectId) } });
+  return new Map(users.map((user) => [getDocumentId(user).toString(), user]));
+};
+
+const toPublicLeaveRequest = (
+  leaveRequest: ILeaveRequest,
+  options?: {
+    branchesById?: Map<string, IBranch>;
+    schedulesById?: Map<string, ISchedule>;
+    usersById?: Map<string, IUser>;
+  }
+) => ({
   id: getDocumentId(leaveRequest).toString(),
   organizationId: leaveRequest.organizationId.toString(),
   branchId: leaveRequest.branchId.toString(),
+  ...(options?.branchesById?.get(leaveRequest.branchId.toString())?.name
+    ? { branchName: options.branchesById.get(leaveRequest.branchId.toString())?.name }
+    : {}),
   employeeId: leaveRequest.employeeId.toString(),
+  ...(options?.usersById?.get(leaveRequest.employeeId.toString())?.fullName
+    ? { employeeName: options.usersById.get(leaveRequest.employeeId.toString())?.fullName }
+    : {}),
   scheduleId: leaveRequest.scheduleId.toString(),
+  ...(options?.schedulesById?.get(leaveRequest.scheduleId.toString())
+    ? {
+        schedule: toPublicScheduleSummary(
+          options.schedulesById.get(leaveRequest.scheduleId.toString()) as ISchedule,
+          options.branchesById
+        ),
+      }
+    : {}),
   reason: leaveRequest.reason,
   status: leaveRequest.status,
   requestedAt: leaveRequest.requestedAt,
@@ -192,7 +262,11 @@ const createLeaveRequest = async (
     requestedAt: new Date(),
   });
 
-  return toPublicLeaveRequest(leaveRequest);
+  const branchesById = await getBranchesById([leaveRequest.branchId]);
+  const schedulesById = new Map([[getDocumentId(schedule).toString(), schedule]]);
+  const usersById = new Map([[getDocumentId(actor).toString(), actor]]);
+
+  return toPublicLeaveRequest(leaveRequest, { branchesById, schedulesById, usersById });
 };
 
 const updateLeaveRequest = async (
@@ -217,7 +291,13 @@ const updateLeaveRequest = async (
 
   await leaveRequest.save();
 
-  return toPublicLeaveRequest(leaveRequest);
+  const [branchesById, schedulesById, usersById] = await Promise.all([
+    getBranchesById([leaveRequest.branchId]),
+    getSchedulesById([leaveRequest.scheduleId]),
+    getUsersById([leaveRequest.employeeId]),
+  ]);
+
+  return toPublicLeaveRequest(leaveRequest, { branchesById, schedulesById, usersById });
 };
 
 const cancelLeaveRequest = async (
@@ -235,7 +315,13 @@ const cancelLeaveRequest = async (
   leaveRequest.respondedAt = new Date();
   await leaveRequest.save();
 
-  return toPublicLeaveRequest(leaveRequest);
+  const [branchesById, schedulesById, usersById] = await Promise.all([
+    getBranchesById([leaveRequest.branchId]),
+    getSchedulesById([leaveRequest.scheduleId]),
+    getUsersById([leaveRequest.employeeId]),
+  ]);
+
+  return toPublicLeaveRequest(leaveRequest, { branchesById, schedulesById, usersById });
 };
 
 const reviewLeaveRequest = async (
@@ -274,7 +360,13 @@ const reviewLeaveRequest = async (
     syncScheduleAfterReview(schedule, status),
   ]);
 
-  return toPublicLeaveRequest(leaveRequest);
+  const [branchesById, usersById] = await Promise.all([
+    getBranchesById([leaveRequest.branchId]),
+    getUsersById([leaveRequest.employeeId]),
+  ]);
+  const schedulesById = new Map([[getDocumentId(schedule).toString(), schedule]]);
+
+  return toPublicLeaveRequest(leaveRequest, { branchesById, schedulesById, usersById });
 };
 
 const getLeaveRequestById = async (
@@ -284,7 +376,13 @@ const getLeaveRequestById = async (
   const actor = await ensureActor(actorPayload);
   const leaveRequest = await getLeaveRequestForActor(actor, leaveRequestId);
 
-  return toPublicLeaveRequest(leaveRequest);
+  const [branchesById, schedulesById, usersById] = await Promise.all([
+    getBranchesById([leaveRequest.branchId]),
+    getSchedulesById([leaveRequest.scheduleId]),
+    getUsersById([leaveRequest.employeeId]),
+  ]);
+
+  return toPublicLeaveRequest(leaveRequest, { branchesById, schedulesById, usersById });
 };
 
 const getLeaveRequestList = async (
@@ -333,6 +431,12 @@ const getLeaveRequestList = async (
     LeaveRequestModel.find(filter).sort({ requestedAt: -1 }).skip(skip).limit(limit),
     LeaveRequestModel.countDocuments(filter),
   ]);
+  const schedulesById = await getSchedulesById(items.map((item) => item.scheduleId));
+  const branchesById = await getBranchesById([
+    ...items.map((item) => item.branchId),
+    ...Array.from(schedulesById.values()).map((schedule) => schedule.branchId),
+  ]);
+  const usersById = await getUsersById(items.map((item) => item.employeeId));
 
   return {
     meta: {
@@ -341,7 +445,7 @@ const getLeaveRequestList = async (
       total,
       totalPages: Math.ceil(total / limit),
     },
-    data: items.map(toPublicLeaveRequest),
+    data: items.map((item) => toPublicLeaveRequest(item, { branchesById, schedulesById, usersById })),
   };
 };
 

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, BriefcaseBusiness, Check, ShieldCheck, Zap } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -39,16 +39,16 @@ export const AuthFooter = () => (
       </Link>
       <div className="flex gap-6">
         <a className="transition hover:text-black" href="#terms">
-          Terms
+          Điều khoản
         </a>
         <a className="transition hover:text-black" href="#privacy">
-          Privacy
+          Quyền riêng tư
         </a>
         <a className="transition hover:text-black" href="#support">
-          Support
+          Hỗ trợ
         </a>
       </div>
-      <span>© 2024 SmartShift. All rights reserved.</span>
+      <span>Â© 2024 SmartShift. Bảo lưu mọi quyền.</span>
     </div>
   </footer>
 );
@@ -68,13 +68,13 @@ export const AuthTopBar = ({
       {backTo ? (
         <Link className="inline-flex items-center gap-2 text-sm font-semibold text-[#444748] hover:text-black" to={backTo}>
           <ArrowLeft className="h-4 w-4" />
-          Back to Sign In
+          Quay lại đăng nhập
         </Link>
       ) : null}
       {actionLabel && actionTo ? (
         <div className="hidden items-center gap-6 md:flex">
           <span className="text-sm font-semibold text-[#444748]">
-            {actionLabel === "Sign In" ? "Already have an account?" : "New to SmartShift?"}
+            {actionLabel === "Đăng nhập" ? "Bạn đã có tài khoản?" : "Bạn mới dùng SmartShift?"}
           </span>
           <Link
             className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold text-[#1c1b1b] transition hover:bg-[#f5f5f5]"
@@ -102,10 +102,10 @@ export const AuthShell = ({ children, mode = "simple" }: AuthShellProps) => {
               </Link>
               <div className="max-w-md">
                 <h1 className="mb-4 text-4xl font-semibold leading-tight tracking-tight text-white">
-                  Manage your team with precision.
+                  Quản lý đội ngũ với độ chính xác cao.
                 </h1>
                 <p className="text-lg leading-8 text-white/80">
-                  The high-utility toolkit for service industry owners. Streamline schedules, track performance, and grow your business.
+                  Bộ công cụ hữu ích cho chủ doanh nghiệp dịch vụ. Tối ưu lịch làm, theo dõi hiệu suất và phát triển kinh doanh.
                 </p>
               </div>
             </div>
@@ -119,28 +119,28 @@ export const AuthShell = ({ children, mode = "simple" }: AuthShellProps) => {
   if (mode === "register") {
     return (
       <div className="min-h-screen bg-white text-[#1c1b1b]">
-        <AuthTopBar actionLabel="Sign In" actionTo="/login" />
+        <AuthTopBar actionLabel="Đăng nhập" actionTo="/login" />
         <main className="flex min-h-screen flex-col pt-[73px] md:flex-row">
           <section className="relative flex w-full flex-col justify-center overflow-hidden bg-[#f1edec] p-6 md:w-5/12 md:p-16">
             <img className="absolute inset-0 h-full w-full object-cover opacity-5" src={registerImage} alt="" />
             <div className="relative z-10 max-w-md space-y-6">
               <span className="inline-flex rounded-full bg-black px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white">
-                Growth Engine
+                Công cụ tăng trưởng
               </span>
               <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
-                Join SmartShift to streamline your workforce.
+                Tham gia SmartShift để tối ưu lực lượng nhân sự.
               </h1>
               <p className="text-lg leading-8 text-[#444748]">
-                Experience the next generation of staff scheduling, real-time analytics, and automated compliance.
+                Trải nghiệm thế hệ mới của lập lịch nhân sự, phân tích thời gian thực và tự động tuân thủ.
               </p>
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="rounded-xl border border-[#e5e7eb] bg-white p-4">
                   <BriefcaseBusiness className="mb-2 h-6 w-6 text-[#0058be]" />
-                  <p className="text-sm font-semibold">99.9% Uptime</p>
+                  <p className="text-sm font-semibold">Độ ổn định 99.9%</p>
                 </div>
                 <div className="rounded-xl border border-[#e5e7eb] bg-white p-4">
                   <ShieldCheck className="mb-2 h-6 w-6 text-[#0058be]" />
-                  <p className="text-sm font-semibold">Enterprise Security</p>
+                  <p className="text-sm font-semibold">Bảo mật doanh nghiệp</p>
                 </div>
               </div>
             </div>
@@ -176,3 +176,5 @@ export const StepItem = ({ active, done, label }: { active?: boolean; done?: boo
     <span className={cn("text-sm", active ? "font-bold text-[#1c1b1b]" : "font-semibold text-[#444748]")}>{label}</span>
   </div>
 );
+
+

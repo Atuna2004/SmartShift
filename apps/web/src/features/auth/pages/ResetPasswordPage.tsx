@@ -1,10 +1,10 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import axios from "axios";
 import { CheckCircle2, Lock, ShieldCheck } from "lucide-react";
+import { authApi } from "@/features/auth/auth.api";
 import { AuthShell } from "@/features/auth/components/AuthShell";
+import { getApiErrorMessage } from "@/shared/api";
 import { cn } from "@/shared/utils/cn";
-import { api } from "@/services/api";
 
 export const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -27,25 +27,21 @@ export const ResetPasswordPage = () => {
     setError("");
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Mật khẩu không khớp.");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      await api.post<null>("/auth/reset-password", {
+      await authApi.resetPassword({
         token,
         newPassword,
       });
 
       setIsDone(true);
     } catch (err) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        setError(err.response?.data?.message ?? "Unable to reset password. Please try again.");
-      } else {
-        setError("Unable to reset password. Please try again.");
-      }
+      setError(getApiErrorMessage(err, "Không thể đặt lại mật khẩu. Vui lòng thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -57,17 +53,17 @@ export const ResetPasswordPage = () => {
         {!isDone ? (
           <section className="animate-[fadeIn_0.4s_ease-out]">
             <div className="mb-8 text-center">
-              <h1 className="mb-2 text-4xl font-semibold tracking-tight text-black">Reset password</h1>
-              <p className="text-base leading-7 text-[#444748]">Please enter a new password for your SmartShift account.</p>
+              <h1 className="mb-2 text-4xl font-semibold tracking-tight text-black">Đặt lại mật khẩu</h1>
+              <p className="text-base leading-7 text-[#444748]">Vui lòng nhập mật khẩu mới cho tài khoản SmartShift của bạn.</p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <label className="block space-y-1">
-                <span className="text-sm font-semibold">Reset Token</span>
+                <span className="text-sm font-semibold">Mã đặt lại</span>
                 <input
                   className="h-12 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black"
                   onChange={(event) => setToken(event.target.value)}
-                  placeholder="Paste your reset token"
+                  placeholder="Dán mã đặt lại"
                   required
                   value={token}
                 />
@@ -75,24 +71,24 @@ export const ResetPasswordPage = () => {
 
               <PasswordField
                 icon={<Lock className="h-5 w-5" />}
-                label="New Password"
+                label="Mật khẩu mới"
                 onChange={setNewPassword}
-                placeholder="Min. 8 characters"
+                placeholder="Tối thiểu 8 ký tự"
                 value={newPassword}
               />
               <div className="space-y-1">
-                <ValidationHint active={isLongEnough}>8 or more characters</ValidationHint>
-                <ValidationHint active={hasNumberOrSymbol}>Includes a number or symbol</ValidationHint>
+                <ValidationHint active={isLongEnough}>Có từ 8 ký tự trở lên</ValidationHint>
+                <ValidationHint active={hasNumberOrSymbol}>Có số hoặc ký tự đặc biệt</ValidationHint>
               </div>
 
               <PasswordField
                 icon={<ShieldCheck className="h-5 w-5" />}
-                label="Confirm Password"
+                label="Xác nhận mật khẩu"
                 onChange={setConfirmPassword}
-                placeholder="Re-enter password"
+                placeholder="Nhập lại mật khẩu"
                 value={confirmPassword}
               />
-              {!passwordsMatch ? <p className="text-xs text-[#ef4444]">Passwords do not match</p> : null}
+              {!passwordsMatch ? <p className="text-xs text-[#ef4444]">Mật khẩu không khớp</p> : null}
               {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
 
               <button
@@ -100,13 +96,13 @@ export const ResetPasswordPage = () => {
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Resetting..." : "Reset Password"}
+                {isSubmitting ? "Đang đặt lại..." : "Đặt lại mật khẩu"}
               </button>
             </form>
 
             <div className="mt-8 text-center">
               <Link className="text-sm font-semibold text-[#444748] hover:text-black" to="/login">
-                Back to login
+                Quay lại đăng nhập
               </Link>
             </div>
           </section>
@@ -115,12 +111,12 @@ export const ResetPasswordPage = () => {
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#10b981]/10 text-[#10b981]">
               <CheckCircle2 className="h-10 w-10 fill-current" />
             </div>
-            <h1 className="mb-2 text-2xl font-semibold tracking-tight">Password reset successful</h1>
+            <h1 className="mb-2 text-2xl font-semibold tracking-tight">Đặt lại mật khẩu thành công</h1>
             <p className="mb-8 text-base leading-7 text-[#444748]">
-              Your password has been updated. You can now log in with your new credentials.
+              Mật khẩu của bạn đã được cập nhật. Bạn có thể đăng nhập bằng thông tin mới.
             </p>
             <Link className="flex h-12 w-full items-center justify-center rounded-lg bg-black text-sm font-semibold text-white" to="/login">
-              Log in to SmartShift
+              Đăng nhập vào SmartShift
             </Link>
           </section>
         )}

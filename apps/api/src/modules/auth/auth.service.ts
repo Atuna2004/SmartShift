@@ -22,7 +22,8 @@ import type {
   UpdateProfileInput,
 } from "./auth.validation.js";
 
-const toPublicUser = (user: IUser) => {
+const toPublicUser = async (user: IUser) => {
+  const branch = user.branchId ? await BranchModel.findById(user.branchId) : null;
   const publicUser = {
     id: user._id.toString(),
     fullName: user.fullName,
@@ -40,6 +41,7 @@ const toPublicUser = (user: IUser) => {
     ...(user.phone ? { phone: user.phone } : {}),
     ...(user.avatar ? { avatar: user.avatar } : {}),
     ...(user.branchId ? { branchId: user.branchId.toString() } : {}),
+    ...(branch ? { branchName: branch.name } : {}),
     ...(user.organizationId
       ? { organizationId: user.organizationId.toString() }
       : {}),
@@ -172,7 +174,7 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
 
   return {
     ...tokens,
-    user: toPublicUser(user),
+    user: await toPublicUser(user),
   };
 };
 
@@ -203,7 +205,7 @@ const registerAdmin = async (payload: RegisterAdminInput) => {
 
   return {
     ...tokens,
-    user: toPublicUser(user),
+    user: await toPublicUser(user),
   };
 };
 
@@ -232,7 +234,7 @@ const login = async (payload: LoginInput) => {
 
   return {
     ...tokens,
-    user: toPublicUser(user),
+    user: await toPublicUser(user),
   };
 };
 
@@ -369,7 +371,7 @@ const getMe = async (userId: string) => {
     throw new AppError(403, "User account is inactive");
   }
 
-  return toPublicUser(user);
+  return await toPublicUser(user);
 };
 
 const viewProfile = async (userId: string) => {
@@ -404,7 +406,7 @@ const updateProfile = async (
 
   await user.save();
 
-  return toPublicUser(user);
+  return await toPublicUser(user);
 };
 
 export const AuthService = {

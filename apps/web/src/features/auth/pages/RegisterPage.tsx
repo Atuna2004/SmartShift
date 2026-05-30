@@ -1,6 +1,5 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,29 +13,18 @@ import {
 } from "lucide-react";
 import { AuthShell } from "@/features/auth/components/AuthShell";
 import { cn } from "@/shared/utils/cn";
-import { api } from "@/services/api";
-import { useAuthStore, type AuthUser } from "@/store";
-
-type RegisterResponse = {
-  accessToken: string;
-  refreshToken: string;
-  user: AuthUser;
-};
+import { authApi } from "@/features/auth/auth.api";
+import { getApiErrorMessage } from "@/shared/api";
+import { useAuthStore } from "@/store";
 
 const inputClass =
   "h-12 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black";
 const iconInputClass =
   "h-12 w-full rounded-lg border border-[#e5e7eb] bg-white py-3 pl-12 pr-4 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black";
 
-const toOrganizationBusinessType = (value: string) => {
-  if (["cafe", "restaurant", "retail"].includes(value)) {
-    return value;
-  }
-
-  if (value === "nail-salon" || value === "healthcare") {
-    return "service";
-  }
-
+const toOrganizationBusinessType = (value: string): "cafe" | "restaurant" | "retail" | "service" | "other" => {
+  if (value === "cafe" || value === "restaurant" || value === "retail") return value;
+  if (value === "nail-salon" || value === "healthcare") return "service";
   return "other";
 };
 
@@ -57,6 +45,7 @@ const toMaxEmployees = (value: string) => {
 };
 
 export const RegisterPage = () => {
+  const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
@@ -92,7 +81,7 @@ export const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await api.post<RegisterResponse>("/auth/register-owner", {
+      const result = await authApi.registerOwner({
         fullName,
         email,
         password,
@@ -121,13 +110,9 @@ export const RegisterPage = () => {
       });
 
       setAuth(result);
-      window.location.assign("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        setError(err.response?.data?.message ?? "Unable to create account. Please try again.");
-      } else {
-        setError("Unable to create account. Please try again.");
-      }
+      setError(getApiErrorMessage(err, "Không thể tạo tài khoản. Vui lòng thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -138,8 +123,8 @@ export const RegisterPage = () => {
       <div className="w-full max-w-lg">
         {step === 1 ? (
           <form className="space-y-6" onSubmit={handleNext}>
-            <ProgressHeader percent={25} stepLabel="Step 1 of 4: Personal Information" />
-            <IconField icon={<User className="h-5 w-5" />} label="Full Name">
+            <ProgressHeader percent={25} stepLabel="Bước 1/4: Thông tin cá nhân" />
+            <IconField icon={<User className="h-5 w-5" />} label="Họ và tên">
               <input
                 className={iconInputClass}
                 onChange={(event) => setFullName(event.target.value)}
@@ -148,7 +133,7 @@ export const RegisterPage = () => {
                 value={fullName}
               />
             </IconField>
-            <IconField icon={<Mail className="h-5 w-5" />} label="Email Address">
+            <IconField icon={<Mail className="h-5 w-5" />} label="Địa chỉ email">
               <input
                 className={iconInputClass}
                 onChange={(event) => setEmail(event.target.value)}
@@ -158,7 +143,7 @@ export const RegisterPage = () => {
                 value={email}
               />
             </IconField>
-            <IconField icon={<Phone className="h-5 w-5" />} label="Phone Number">
+            <IconField icon={<Phone className="h-5 w-5" />} label="Số điện thoại">
               <input
                 className={iconInputClass}
                 onChange={(event) => setPhone(event.target.value)}
@@ -168,7 +153,7 @@ export const RegisterPage = () => {
                 value={phone}
               />
             </IconField>
-            <IconField icon={<Lock className="h-5 w-5" />} label="Create Password">
+            <IconField icon={<Lock className="h-5 w-5" />} label="Tạo mật khẩu">
               <input
                 className={iconInputClass}
                 onChange={(event) => setPassword(event.target.value)}
@@ -179,60 +164,60 @@ export const RegisterPage = () => {
               />
             </IconField>
             <PasswordStrength score={strength} hasValue={password.length > 0} />
-            <PrimaryButton>Next Step</PrimaryButton>
+            <PrimaryButton>Bước tiếp theo</PrimaryButton>
             <p className="text-center text-xs leading-5 text-[#444748]">
-              By continuing, you agree to our <a className="text-black underline" href="#terms">Terms of Service</a> and{" "}
-              <a className="text-black underline" href="#privacy">Privacy Policy</a>.
+              Bằng cách tiếp tục, bạn đồng ý với <a className="text-black underline" href="#terms">Điều khoản dịch vụ</a> và{" "}
+              <a className="text-black underline" href="#privacy">Chính sách quyền riêng tư</a>.
             </p>
           </form>
         ) : null}
 
         {step === 2 ? (
           <form className="space-y-6" onSubmit={handleNext}>
-            <ProgressHeader percent={50} stepLabel="Step 2 of 4: Business Information" />
+            <ProgressHeader percent={50} stepLabel="Bước 2/4: Thông tin doanh nghiệp" />
             <div className="rounded-xl border border-[#e5e7eb] bg-white p-6">
-              <h2 className="mb-1 text-2xl font-semibold tracking-tight">Business Information</h2>
-              <p className="mb-6 text-sm text-[#444748]">Configure your branch details.</p>
+              <h2 className="mb-1 text-2xl font-semibold tracking-tight">Thông tin doanh nghiệp</h2>
+              <p className="mb-6 text-sm text-[#444748]">Thiết lập thông tin chi nhánh của bạn.</p>
               <div className="space-y-5">
                 <label className="block space-y-2">
-                  <span className="text-sm font-semibold">Branch Name</span>
+                  <span className="text-sm font-semibold">Tên chi nhánh</span>
                   <input
                     className={inputClass}
                     onChange={(event) => setBranchName(event.target.value)}
-                    placeholder="Downtown Flagship"
+                    placeholder="Chi nhánh trung tâm"
                     required
                     value={branchName}
                   />
                 </label>
-                <IconField icon={<MapPin className="h-5 w-5" />} label="Branch Address">
+                <IconField icon={<MapPin className="h-5 w-5" />} label="Địa chỉ chi nhánh">
                   <input
                     className={iconInputClass}
                     onChange={(event) => setBranchAddress(event.target.value)}
-                    placeholder="Start typing address..."
+                    placeholder="Bắt đầu nhập địa chỉ..."
                     required
                     value={branchAddress}
                   />
                 </IconField>
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold">Business Type</span>
+                    <span className="text-sm font-semibold">Loại hình kinh doanh</span>
                     <select className={inputClass} onChange={(event) => setBusinessType(event.target.value)} required value={businessType}>
-                      <option value="">Select Type</option>
-                      <option value="cafe">Cafe</option>
-                      <option value="restaurant">Restaurant</option>
-                      <option value="nail-salon">Nail Salon</option>
-                      <option value="retail">Retail</option>
-                      <option value="healthcare">Healthcare</option>
+                      <option value="">Chọn loại hình</option>
+                      <option value="cafe">Quán cà phê</option>
+                      <option value="restaurant">Nhà hàng</option>
+                      <option value="nail-salon">Tiệm nail</option>
+                      <option value="retail">Bán lẻ</option>
+                      <option value="healthcare">Y tế</option>
                     </select>
                   </label>
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold">Employee Size</span>
+                    <span className="text-sm font-semibold">Quy mô nhân sự</span>
                     <select className={inputClass} onChange={(event) => setEmployeeSize(event.target.value)} required value={employeeSize}>
-                      <option value="">Staff Count</option>
-                      <option value="1-5">1-5 Employees</option>
-                      <option value="6-20">6-20 Employees</option>
-                      <option value="21-50">21-50 Employees</option>
-                      <option value="50+">50+ Employees</option>
+                      <option value="">Chọn quy mô</option>
+                      <option value="1-5">1-5 nhân viên</option>
+                      <option value="6-20">6-20 nhân viên</option>
+                      <option value="21-50">21-50 nhân viên</option>
+                      <option value="50+">Từ 50 nhân viên trở lên</option>
                     </select>
                   </label>
                 </div>
@@ -244,27 +229,27 @@ export const RegisterPage = () => {
 
         {step === 3 ? (
           <form className="space-y-8" onSubmit={handleSubmit}>
-            <ProgressHeader percent={75} stepLabel="Step 3 of 4: Choose Plan" />
+            <ProgressHeader percent={75} stepLabel="Bước 3/4: Chọn gói" />
             <div className="text-center">
-              <h1 className="mb-2 text-4xl font-semibold tracking-tight">Select Your Experience</h1>
+              <h1 className="mb-2 text-4xl font-semibold tracking-tight">Chọn gói phù hợp</h1>
               <p className="text-base leading-7 text-[#444748]">
-                Flexible plans designed to scale with your business.
+                Các gói linh hoạt được thiết kế để phát triển cùng doanh nghiệp của bạn.
               </p>
             </div>
             <div className="grid gap-4">
               <PlanCard
-                features={["Up to 10 staff members", "Basic automated scheduling", "Mobile app access for team", "Email support"]}
-                label="FOR INDIVIDUALS"
-                name="Basic Plan"
+                features={["Tối đa 10 nhân viên", "Lập lịch tự động cơ bản", "Truy cập ứng dụng di động cho đội ngũ", "Hỗ trợ qua email"]}
+                label="Dành cho cá nhân"
+                name="Gói cơ bản"
                 price="$29"
                 selected={plan === "basic"}
                 onClick={() => setPlan("basic")}
               />
               <PlanCard
                 badge="Most Popular"
-                features={["Unlimited staff members", "AI-powered smart scheduling", "Advanced analytics dashboard", "Priority 24/7 support"]}
-                label="FOR TEAMS"
-                name="Organization Plan"
+                features={["Không giới hạn nhân viên", "Lập lịch thông minh bằng AI", "Bảng phân tích nâng cao", "Hỗ trợ ưu tiên 24/7"]}
+                label="Dành cho đội nhóm"
+                name="Gói tổ chức"
                 price="$89"
                 selected={plan === "organization"}
                 onClick={() => setPlan("organization")}
@@ -273,11 +258,11 @@ export const RegisterPage = () => {
             {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
             <div className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4">
               <p className="mb-4 text-sm font-semibold text-[#444748]">
-                {plan ? <>Selected: <span className="text-black">{plan === "basic" ? "Basic Plan" : "Organization Plan"}</span></> : "Please select a plan to continue"}
+                {plan ? <>Đã chọn: <span className="text-black">{plan === "basic" ? "Gói cơ bản" : "Gói tổ chức"}</span></> : "Vui lòng chọn một gói để tiếp tục"}
               </p>
               <StepActions
                 disabled={!plan || isSubmitting}
-                nextLabel={isSubmitting ? "Creating account..." : "Finish"}
+                nextLabel={isSubmitting ? "Đang tạo tài khoản..." : "Hoàn tất"}
                 onBack={() => setStep(2)}
                 submit
               />
@@ -286,9 +271,9 @@ export const RegisterPage = () => {
         ) : null}
 
         <p className="mt-8 text-center text-sm text-[#444748] md:hidden">
-          Already have an account?{" "}
+          Bạn đã có tài khoản?{" "}
           <Link className="font-semibold text-black underline" to="/login">
-            Sign In
+            Đăng nhập
           </Link>
         </p>
       </div>
@@ -300,10 +285,10 @@ const ProgressHeader = ({ percent, stepLabel }: { percent: number; stepLabel: st
   <div className="mb-8">
     <div className="mb-2 flex items-end justify-between gap-4">
       <div>
-        <span className="text-sm font-semibold uppercase tracking-wider text-[#444748]">Onboarding</span>
+        <span className="text-sm font-semibold uppercase tracking-wider text-[#444748]">Thiết lập ban đầu</span>
         <h1 className="text-2xl font-semibold tracking-tight text-[#1c1b1b]">{stepLabel}</h1>
       </div>
-      <span className="shrink-0 text-sm font-semibold text-black">{percent}% Complete</span>
+      <span className="shrink-0 text-sm font-semibold text-black">{percent}% hoàn tất</span>
     </div>
     <div className="h-1 w-full overflow-hidden rounded-full bg-[#f1edec]">
       <div className="h-full rounded-full bg-black transition-all" style={{ width: `${percent}%` }} />
@@ -323,7 +308,7 @@ const IconField = ({ children, icon, label }: { children: ReactNode; icon: React
 
 const PasswordStrength = ({ hasValue, score }: { hasValue: boolean; score: number }) => {
   const colors = ["bg-[#ef4444]", "bg-orange-500", "bg-yellow-500", "bg-[#10b981]"];
-  const labels = ["Weak", "Fair", "Good", "Strong"];
+  const labels = ["Yếu", "Trung bình", "Tốt", "Mạnh"];
   return (
     <div>
       <div className="flex h-1 gap-1">
@@ -335,7 +320,7 @@ const PasswordStrength = ({ hasValue, score }: { hasValue: boolean; score: numbe
         ))}
       </div>
       <p className={cn("mt-1 text-xs", score > 2 ? "text-[#10b981]" : score === 1 ? "text-[#ef4444]" : "text-[#444748]")}>
-        {hasValue ? `Password strength: ${labels[Math.max(score - 1, 0)]}` : "Use 8 or more characters with a mix of letters, numbers & symbols."}
+        {hasValue ? `Độ mạnh mật khẩu: ${labels[Math.max(score - 1, 0)]}` : "Dùng từ 8 ký tự trở lên, kết hợp chữ, số và ký hiệu."}
       </p>
     </div>
   );
@@ -354,7 +339,7 @@ const PrimaryButton = ({ children, disabled }: { children: ReactNode; disabled?:
 
 const StepActions = ({
   disabled,
-  nextLabel = "Next Step",
+  nextLabel = "Bước tiếp theo",
   onBack,
   submit = false,
 }: {
@@ -370,7 +355,7 @@ const StepActions = ({
       type="button"
     >
       <ArrowLeft className="h-4 w-4" />
-      Back
+      Quay lại
     </button>
     <button
       className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-black px-6 text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 md:flex-1"

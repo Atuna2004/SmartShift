@@ -24,8 +24,16 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { FormEvent, ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { branchApi } from "@/features/employeeBranch/branch.api";
+import type { Branch, BranchStatus } from "@/features/employeeBranch/branch.types";
+import { employeeApi } from "@/features/employeeBranch/employee.api";
+import type { EditableEmployeeRole, Employee, EmployeeRole, EmployeeStatus, EmployeeType } from "@/features/employeeBranch/employee.types";
+import { getApiErrorMessage } from "@/shared/api";
+import { useAuthStore } from "@/store";
 
 const colors = {
   blue: "#0058be",
@@ -61,282 +69,415 @@ const managerPhotos = [
 ];
 
 const employees = [
-  { name: "Marcus Thorne", email: "marcus.t@smartshift.io", role: "Senior Shift Manager", branch: "Downtown Hub", status: "Active", photo: employeePhotos[0] },
-  { name: "Sarah Jenkins", email: "s.jenkins@smartshift.io", role: "Front Desk Supervisor", branch: "Westside Annex", status: "On Leave", photo: employeePhotos[1] },
-  { name: "Arthur Lofton", email: "a.lofton@smartshift.io", role: "Logistics Coordinator", branch: "North Plaza", status: "Inactive" },
-  { name: "Nina Kim", email: "nina.k@smartshift.io", role: "Human Resources", branch: "Main Office", status: "Active", photo: employeePhotos[3] },
-  { name: "David Chen", email: "d.chen@smartshift.io", role: "Service Desk Lead", branch: "Downtown Hub", status: "Active", photo: employeePhotos[4] },
+  { name: "Marcus Thorne", email: "marcus.t@smartshift.io", role: "Quản lý ca cấp cao", branch: "Trung tâm Downtown", status: "Đang hoạt động", photo: employeePhotos[0] },
+  { name: "Sarah Jenkins", email: "s.jenkins@smartshift.io", role: "Giám sát lễ tân", branch: "Chi nhánh Westside", status: "Đang nghỉ phép", photo: employeePhotos[1] },
+  { name: "Arthur Lofton", email: "a.lofton@smartshift.io", role: "Điều phối logistics", branch: "North Plaza", status: "Ngừng hoạt động" },
+  { name: "Nina Kim", email: "nina.k@smartshift.io", role: "Nhân sự", branch: "Văn phòng chính", status: "Đang hoạt động", photo: employeePhotos[3] },
+  { name: "David Chen", email: "d.chen@smartshift.io", role: "Trưởng bộ phận hỗ trợ", branch: "Trung tâm Downtown", status: "Đang hoạt động", photo: employeePhotos[4] },
 ];
 
 const branches = [
-  { name: "Main St. Downtown", address: "742 Main St, New York, NY", manager: "Alex Rivera", staff: 86, tag: "FLAGSHIP", image: branchPhotos[0], managerPhoto: managerPhotos[0] },
-  { name: "Eastside Retail Hub", address: "2200 East Pkwy, Brooklyn, NY", manager: "Marcus Chen", staff: 42, image: branchPhotos[1], managerPhoto: managerPhotos[1] },
-  { name: "Upper West Medical", address: "102 W 86th St, New York, NY", manager: "Sarah Jenkins", staff: 12, tag: "UNDERSTAFFED", tagTone: "error", image: branchPhotos[2], managerPhoto: managerPhotos[2] },
-  { name: "Airport Logistics North", address: "10 Terminal Dr, Queens, NY", manager: "David Miller", staff: 156, image: branchPhotos[3], managerPhoto: managerPhotos[3] },
+  { name: "Trung tâm Main St.", address: "742 Main St, New York, NY", manager: "Alex Rivera", staff: 86, tag: "CHI NHÁNH CHÍNH", image: branchPhotos[0], managerPhoto: managerPhotos[0] },
+  { name: "Trung tâm bán lẻ Eastside", address: "2200 East Pkwy, Brooklyn, NY", manager: "Marcus Chen", staff: 42, image: branchPhotos[1], managerPhoto: managerPhotos[1] },
+  { name: "Y tế Upper West", address: "102 W 86th St, New York, NY", manager: "Sarah Jenkins", staff: 12, tag: "THIẾU NHÂN SỰ", tagTone: "error", image: branchPhotos[2], managerPhoto: managerPhotos[2] },
+  { name: "Kho vận sân bay Bắc", address: "10 Terminal Dr, Queens, NY", manager: "David Miller", staff: 156, image: branchPhotos[3], managerPhoto: managerPhotos[3] },
 ];
 
-export const EmployeeListPage = () => (
-  <ShellTopBar
-    action={
-      <Link className="inline-flex h-10 items-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-90" to="/dashboard/employees/new">
-        <Plus className="h-5 w-5" />
-        Add Employee
-      </Link>
-    }
-    searchPlaceholder="Search by name, role or email..."
-    title="Employees"
-  >
-    <section className="p-6">
-      <div className="mb-6 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-        <div className="flex flex-wrap items-center gap-2">
-          {["All Staff", "Managers", "Front Desk", "Support"].map((filter, index) => (
-            <button className={index === 0 ? "rounded-full border border-[#e5e7eb] bg-[#f1edec] px-4 py-2 text-sm font-semibold text-black" : "rounded-full px-4 py-2 text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2]"} key={filter}>
-              {filter}
-            </button>
-          ))}
-          <span className="mx-2 hidden h-6 w-px bg-[#e5e7eb] sm:block" />
-          <button className="inline-flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2]">
-            <Filter className="h-4 w-4" />
-            More Filters
-          </button>
+export const EmployeeListPage = () => {
+  const queryClient = useQueryClient();
+  const currentUser = useAuthStore((state) => state.user);
+  const [search, setSearch] = useState("");
+  const [role, setRole] = useState<EditableEmployeeRole | "all">("all");
+  const [status, setStatus] = useState<EmployeeStatus | "all">("all");
+  const [branchId, setBranchId] = useState("all");
+  const employeesQuery = useQuery({
+    queryKey: ["employees", { branchId, role, search, status }],
+    queryFn: () =>
+      employeeApi.list({
+        limit: 50,
+        ...(search ? { search } : {}),
+        ...(role !== "all" ? { role } : {}),
+        ...(status !== "all" ? { status } : {}),
+        ...(branchId !== "all" ? { branchId } : {}),
+      }),
+  });
+  const branchesQuery = useQuery({
+    queryKey: ["branches", { employeeFilter: true }],
+    queryFn: () => branchApi.list({ limit: 100 }),
+  });
+  const statusMutation = useMutation({
+    mutationFn: ({ employeeId, nextStatus }: { employeeId: string; nextStatus: EmployeeStatus }) =>
+      employeeApi.setStatus(employeeId, nextStatus),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+  });
+  const employeeList = (employeesQuery.data?.data ?? []).filter((employee) => employee.role !== "owner");
+  const branchesById = useMemo(
+    () => new Map((branchesQuery.data?.data ?? []).map((branch) => [branch.id, branch.name])),
+    [branchesQuery.data?.data]
+  );
+
+  return (
+    <ShellTopBar
+      action={
+        <Link className="inline-flex h-10 items-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-90" to="/dashboard/employees/new">
+          <Plus className="h-5 w-5" />
+          Thêm nhân viên
+        </Link>
+      }
+      searchPlaceholder="Tìm theo tên, email, số điện thoại hoặc mã..."
+      searchValue={search}
+      onSearchChange={setSearch}
+      title="Nhân viên"
+    >
+      <section className="p-6">
+        <div className="mb-6 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <select className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => setRole(event.target.value as EditableEmployeeRole | "all")} value={role}>
+              <option value="all">Tất cả vai trò</option>
+              <option value="manager">Quản lý</option>
+              <option value="staff">Nhân viên</option>
+            </select>
+            <select className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => setStatus(event.target.value as EmployeeStatus | "all")} value={status}>
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Ngừng hoạt động</option>
+            </select>
+            <select className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => setBranchId(event.target.value)} value={branchId}>
+              <option value="all">Tất cả chi nhánh</option>
+              {(branchesQuery.data?.data ?? []).map((branch) => (
+                <option key={branch.id} value={branch.id}>{branch.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex w-fit items-center rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] p-1">
+            <button className="flex h-8 w-8 items-center justify-center rounded bg-white text-black shadow-sm"><List className="h-4 w-4" /></button>
+            <button className="flex h-8 w-8 items-center justify-center text-[#444748]"><Grid3X3 className="h-4 w-4" /></button>
+          </div>
         </div>
-        <div className="flex w-fit items-center rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] p-1">
-          <button className="flex h-8 w-8 items-center justify-center rounded bg-white text-black shadow-sm"><List className="h-4 w-4" /></button>
-          <button className="flex h-8 w-8 items-center justify-center text-[#444748]"><Grid3X3 className="h-4 w-4" /></button>
-        </div>
-      </div>
-      <EmployeeTable />
-      <EmployeeStatsGrid />
-    </section>
-  </ShellTopBar>
-);
+        {employeesQuery.isLoading ? (
+          <StatePanel title="Đang tải nhân viên..." description="Đang lấy danh sách nhân viên từ API." />
+        ) : employeesQuery.isError ? (
+          <StatePanel title="Không thể tải nhân viên" description={getApiErrorMessage(employeesQuery.error, "Vui lòng thử lại sau.")} />
+        ) : employeeList.length === 0 ? (
+          <StatePanel title="Không tìm thấy nhân viên" description="Hãy thêm nhân viên mới hoặc điều chỉnh bộ lọc hiện tại." />
+        ) : (
+            <EmployeeTable
+              branchesById={branchesById}
+              currentUserId={currentUser?.id}
+              employees={employeeList}
+              isUpdating={statusMutation.isPending}
+            onToggleStatus={(employee) =>
+              statusMutation.mutate({
+                employeeId: employee.id,
+                nextStatus: employee.status === "active" ? "inactive" : "active",
+              })
+            }
+          />
+        )}
+        <EmployeeStatsGrid employees={employeeList} total={employeeList.length} />
+      </section>
+    </ShellTopBar>
+  );
+};
 
 export const EmployeeCreatePage = () => (
   <EmployeeListPageWithModal>
-    <Modal title="Create New Employee" subtitle="Fill in the details to add a new member to the team." closeTo="/dashboard/employees">
-      <div className="space-y-4 p-6">
-        <Field label="Full Name" placeholder="e.g. John Smith" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Email Address" placeholder="john@company.com" type="email" />
-          <Field label="Phone Number" placeholder="+1 (555) 000-0000" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField label="Role" options={["Select Role", "Senior Manager", "Supervisor", "General Staff"]} />
-          <SelectField label="Branch" options={["Select Branch", "Downtown Hub", "Westside Annex", "North Plaza"]} />
-        </div>
-      </div>
-      <ModalFooter cancelTo="/dashboard/employees" primary="Add Employee" />
-    </Modal>
+    <EmployeeCreateModal />
   </EmployeeListPageWithModal>
 );
 
-export const EmployeeDetailsPage = () => (
-  <DetailFrame>
-    <section className="p-6">
-      <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <div className="flex items-start gap-6">
-          <div className="relative">
-            <img alt="" className="h-32 w-32 rounded-xl border border-[#e5e7eb] object-cover shadow-sm" src={employeePhotos[2]} />
-            <span className="absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-white bg-[#10b981] shadow-sm" />
-          </div>
-          <div className="pt-2">
-            <h1 className="mb-1 text-4xl font-semibold tracking-tight text-black">Marcus Thompson</h1>
-            <div className="mb-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-[#444748]">
-              <span className="inline-flex items-center gap-1"><Badge className="h-4 w-4" />Senior Shift Lead</span>
-              <span className="h-1 w-1 rounded-full bg-[#c4c7c7]" />
-              <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" />Downtown Branch</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-[#10b981]/20 bg-[#10b981]/10 px-2 py-1 text-xs font-bold text-[#10b981]">Active Now</span>
-              <span className="text-xs text-[#444748]">ID: EMP-8829</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#e5e7eb] px-4 text-sm font-semibold text-black hover:bg-[#f7f3f2]"><Edit3 className="h-4 w-4" />Edit Profile</button>
-          <Link className="inline-flex h-10 items-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white hover:opacity-90" to="/dashboard/employees/marcus/deactivate"><UserMinus className="h-4 w-4" />Deactivate</Link>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-4">
-          <Panel title="Attendance KPI" icon={<TrendingUp />}>
-            <KpiLine label="On-time Rate" value="98.4%" icon={<CheckCircle2 />} tone="success" />
-            <KpiLine label="Total Hours (MTD)" value="142.5h" icon={<Clock3 />} tone="blue" />
-            <div className="pt-2">
-              <p className="mb-2 text-xs text-[#444748]">Performance Score</p>
-              <div className="h-2 overflow-hidden rounded-full bg-[#f1edec]"><div className="h-full w-[92%] rounded-full bg-black" /></div>
-              <div className="mt-1 flex justify-between text-xs"><b>Excellent</b><span className="text-[#444748]">92/100</span></div>
-            </div>
-          </Panel>
-        </div>
-        <div className="lg:col-span-5">
-          <Panel title="Assigned Shifts" action={<button className="text-sm font-semibold text-[#0058be]">View Calendar</button>}>
-            {["Closing Shift|24|May|04:00 PM - 12:00 AM", "Afternoon Cover|25|May|12:00 PM - 08:00 PM", "Morning Rush|28|May|06:00 AM - 02:00 PM"].map((item) => {
-              const [name, day, month, time] = item.split("|");
-              return <ShiftItem day={day} key={item} month={month} name={name} time={time} />;
-            })}
-            <button className="mt-2 h-10 w-full rounded-lg border border-[#e5e7eb] text-sm font-semibold text-[#444748] transition hover:bg-[#f7f3f2]">
-              Assign New Shift
-            </button>
-          </Panel>
-        </div>
-        <div className="lg:col-span-3">
-          <RecentActivityPanel />
-        </div>
-        <div className="lg:col-span-8">
-          <PersonalInfoPanel />
-        </div>
-        <div className="lg:col-span-4">
-          <PayrollCard />
-        </div>
-      </div>
-    </section>
-  </DetailFrame>
-);
+export const EmployeeDetailsPage = () => {
+  const { employeeId } = useParams();
+  const queryClient = useQueryClient();
+  const currentUser = useAuthStore((state) => state.user);
+  const [isEditing, setIsEditing] = useState(false);
+  const employeeQuery = useQuery({
+    enabled: Boolean(employeeId),
+    queryKey: ["employee", employeeId],
+    queryFn: () => employeeApi.detail(employeeId as string),
+  });
+  const branchesQuery = useQuery({
+    queryKey: ["branches", { employeeDetail: true }],
+    queryFn: () => branchApi.list({ limit: 100 }),
+  });
+  const branchesById = useMemo(
+    () => new Map((branchesQuery.data?.data ?? []).map((branch) => [branch.id, branch.name])),
+    [branchesQuery.data?.data]
+  );
 
-export const EmployeeDeactivatePage = () => (
-  <EmployeeDetailsPageWithModal>
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-2xl">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#ef4444]/10 text-[#ef4444]">
-          <AlertTriangle className="h-7 w-7" />
-        </div>
-        <h3 className="mb-2 text-2xl font-semibold tracking-tight text-black">Deactivate Employee</h3>
-        <p className="mb-8 text-base leading-6 text-[#444748]">Are you sure you want to deactivate Marcus Thompson? This will revoke their access to all SmartShift features.</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Link className="rounded-lg px-4 py-2 text-center text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2]" to="/dashboard/employees/marcus">Cancel</Link>
-          <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#ef4444] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"><UserMinus className="h-4 w-4" />Deactivate</button>
-        </div>
-      </div>
-    </div>
-  </EmployeeDetailsPageWithModal>
-);
+  if (!employeeId) {
+    return <Navigate replace to="/dashboard/employees" />;
+  }
 
-export const BranchManagementPage = () => (
-  <BranchFrame>
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h2 className="text-4xl font-semibold tracking-tight text-black">Branches</h2>
-          <p className="text-base text-[#444748]">Manage and monitor operations across all your locations.</p>
-        </div>
-        <div className="flex gap-2">
-          <button className="inline-flex h-10 items-center gap-1 rounded-lg border border-[#e5e7eb] px-4 text-sm font-semibold hover:bg-[#f7f3f2]"><Filter className="h-4 w-4" />Filters</button>
-          <Link className="inline-flex h-10 items-center gap-1 rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-sm hover:opacity-90" to="/dashboard/branches/new"><Plus className="h-4 w-4" />Add Branch</Link>
-        </div>
-      </div>
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <StatCard icon={<Store />} label="Total Branches" value="24" meta="+2 this mo" />
-        <StatCard icon={<UsersRound />} label="Total Employees" value="412" />
-        <StatCard icon={<CheckCircle2 />} label="Avg. Attendance" value="94.2%" meta="OPTIMAL" />
-        <StatCard icon={<Badge />} label="Operating Costs" value="$284k/mo" />
-      </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {branches.map((branch) => <BranchCard branch={branch} key={branch.name} />)}
-        <Link
-          className="group flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-[#e5e7eb] bg-[#f7f3f2] p-8 text-center transition duration-300 hover:border-black hover:bg-[#f1edec]"
-          to="/dashboard/branches/new"
-        >
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#e5e7eb] bg-white transition group-hover:scale-110">
-            <Plus className="h-8 w-8 text-[#444748] group-hover:text-black" />
+  return (
+    <DetailFrame employeeName={employeeQuery.data?.fullName}>
+      <section className="p-6">
+        {employeeQuery.isLoading ? (
+          <StatePanel title="Đang tải nhân viên..." description="Đang lấy hồ sơ nhân viên từ API." />
+        ) : employeeQuery.isError ? (
+          <StatePanel title="Unable to load employee" description={getApiErrorMessage(employeeQuery.error, "Please try again later.")} />
+        ) : employeeQuery.data ? (
+          <>
+            <EmployeeProfileHeader
+              branchName={employeeQuery.data.branchId ? branchesById.get(employeeQuery.data.branchId) : undefined}
+              currentUserId={currentUser?.id}
+              employee={employeeQuery.data}
+              onEdit={() => setIsEditing(true)}
+            />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              <div className="space-y-6 lg:col-span-4">
+                <Panel title="Trạng thái tài khoản" icon={<TrendingUp />}>
+                  <KpiLine label="Trạng thái" value={toEmployeeStatusLabel(employeeQuery.data.status)} icon={<CheckCircle2 />} tone="success" />
+                  <KpiLine label="Vai trò" value={toEmployeeRoleLabel(employeeQuery.data.role)} icon={<Badge />} tone="blue" />
+                </Panel>
+              </div>
+              <div className="lg:col-span-5">
+                <EmployeeInfoPanel employee={employeeQuery.data} branchName={employeeQuery.data.branchId ? branchesById.get(employeeQuery.data.branchId) : undefined} />
+              </div>
+              <div className="lg:col-span-3">
+                <RecentActivityPanel />
+              </div>
+            </div>
+          </>
+        ) : null}
+      </section>
+      {isEditing && employeeQuery.data ? (
+        <EmployeeEditModal
+          branches={branchesQuery.data?.data ?? []}
+          employee={employeeQuery.data}
+          onClose={() => setIsEditing(false)}
+          onSaved={() => {
+            setIsEditing(false);
+            void queryClient.invalidateQueries({ queryKey: ["employee", employeeId] });
+            void queryClient.invalidateQueries({ queryKey: ["employees"] });
+          }}
+        />
+      ) : null}
+    </DetailFrame>
+  );
+};
+
+export const EmployeeDeactivatePage = () => {
+  const { employeeId } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const currentUser = useAuthStore((state) => state.user);
+  const employeeQuery = useQuery({
+    enabled: Boolean(employeeId),
+    queryKey: ["employee", employeeId],
+    queryFn: () => employeeApi.detail(employeeId as string),
+  });
+  const deactivateMutation = useMutation({
+    mutationFn: () => employeeApi.setStatus(employeeId as string, "inactive"),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["employee", employeeId] }),
+        queryClient.invalidateQueries({ queryKey: ["employees"] }),
+      ]);
+      navigate(`/dashboard/employees/${employeeId}`, { replace: true });
+    },
+  });
+
+  if (!employeeId) {
+    return <Navigate replace to="/dashboard/employees" />;
+  }
+
+  if (employeeId === currentUser?.id) {
+    return <Navigate replace to={`/dashboard/employees/${employeeId}`} />;
+  }
+
+  return (
+    <EmployeeDetailsPageWithModal>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-2xl">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#ef4444]/10 text-[#ef4444]">
+            <AlertTriangle className="h-7 w-7" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-black">Register New Branch</p>
-            <p className="text-xs text-[#444748]">Expand your business network</p>
-          </div>
-        </Link>
-      </div>
-      <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#e5e7eb] pt-6 md:flex-row">
-        <p className="text-xs text-[#444748]">Showing 1 to 4 of 24 branches</p>
-        <div className="flex items-center gap-1">
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#e5e7eb] opacity-30" disabled>
-            <ChevronRight className="h-4 w-4 rotate-180" />
-          </button>
-          {[1, 2, 3].map((page) => (
+          <h3 className="mb-2 text-2xl font-semibold tracking-tight text-black">Ngừng kích hoạt nhân viên</h3>
+          <p className="mb-8 text-base leading-6 text-[#444748]">
+            Bạn có chắc muốn ngừng kích hoạt {employeeQuery.data?.fullName ?? "nhân viên này"} không? Thao tác này sẽ thu hồi quyền truy cập SmartShift.
+          </p>
+          {deactivateMutation.isError ? (
+            <p className="mb-4 rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">
+              {getApiErrorMessage(deactivateMutation.error, "Không thể ngừng kích hoạt nhân viên.")}
+            </p>
+          ) : null}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Link className="rounded-lg px-4 py-2 text-center text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2]" to={`/dashboard/employees/${employeeId}`}>Hủy</Link>
             <button
-              className={page === 1 ? "flex h-10 w-10 items-center justify-center rounded-lg bg-black text-sm font-semibold text-white" : "flex h-10 w-10 items-center justify-center rounded-lg border border-[#e5e7eb] text-sm font-semibold hover:bg-[#f7f3f2]"}
-              key={page}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#ef4444] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              disabled={deactivateMutation.isPending}
+              onClick={() => deactivateMutation.mutate()}
+              type="button"
             >
-              {page}
+              <UserMinus className="h-4 w-4" />
+              {deactivateMutation.isPending ? "Đang ngừng kích hoạt..." : "Ngừng kích hoạt"}
             </button>
-          ))}
-          <span className="px-2 text-[#444748]">...</span>
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#e5e7eb] text-sm font-semibold hover:bg-[#f7f3f2]">6</button>
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#e5e7eb] hover:bg-[#f7f3f2]">
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          </div>
         </div>
       </div>
-    </div>
-  </BranchFrame>
-);
+    </EmployeeDetailsPageWithModal>
+  );
+};
+
+export const BranchManagementPage = () => {
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<BranchStatus | "all">("all");
+  const branchesQuery = useQuery({
+    queryKey: ["branches", { search, status }],
+    queryFn: () =>
+      branchApi.list({
+        limit: 50,
+        ...(search ? { search } : {}),
+        ...(status !== "all" ? { status } : {}),
+      }),
+  });
+  const statusMutation = useMutation({
+    mutationFn: ({ branchId, nextStatus }: { branchId: string; nextStatus: BranchStatus }) =>
+      branchApi.setStatus(branchId, nextStatus),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["branches"] });
+    },
+  });
+
+  const branchList = branchesQuery.data?.data ?? [];
+  const activeCount = branchList.filter((branch) => branch.status === "active").length;
+  const disabledCount = branchList.filter((branch) => branch.status === "disabled").length;
+
+  return (
+    <BranchFrame search={search} onSearchChange={setSearch}>
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <h2 className="text-4xl font-semibold tracking-tight text-black">Chi nhánh</h2>
+            <p className="text-base text-[#444748]">Quản lý thông tin chi nhánh, thiết lập vận hành và chính sách chấm công.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <select
+              className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-black"
+              onChange={(event) => setStatus(event.target.value as BranchStatus | "all")}
+              value={status}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="disabled">Vô hiệu</option>
+            </select>
+            <Link className="inline-flex h-10 items-center gap-1 rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-sm hover:opacity-90" to="/dashboard/branches/new"><Plus className="h-4 w-4" />Thêm chi nhánh</Link>
+          </div>
+        </div>
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <StatCard icon={<Store />} label="Tổng chi nhánh" value={String(branchesQuery.data?.meta.total ?? branchList.length)} />
+          <StatCard icon={<CheckCircle2 />} label="Chi nhánh hoạt động" value={String(activeCount)} meta="TRỰC TIẾP" />
+          <StatCard icon={<AlertTriangle />} label="Chi nhánh vô hiệu" value={String(disabledCount)} />
+          <StatCard icon={<Badge />} label="Current Page" value={`${branchesQuery.data?.meta.page ?? 1}/${branchesQuery.data?.meta.totalPages ?? 1}`} />
+        </div>
+        {branchesQuery.isLoading ? (
+          <StatePanel title="Đang tải chi nhánh..." description="Đang lấy dữ liệu chi nhánh từ API." />
+        ) : branchesQuery.isError ? (
+          <StatePanel title="Không thể tải chi nhánh" description={getApiErrorMessage(branchesQuery.error, "Vui lòng thử lại sau.")} />
+        ) : branchList.length === 0 ? (
+          <StatePanel title="Không tìm thấy chi nhánh" description="Hãy tạo chi nhánh đầu tiên hoặc điều chỉnh bộ lọc hiện tại." />
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {branchList.map((branch, index) => (
+              <BranchCard
+                branch={branch}
+                index={index}
+                isUpdating={statusMutation.isPending}
+                key={branch.id}
+                onToggleStatus={() =>
+                  statusMutation.mutate({
+                    branchId: branch.id,
+                    nextStatus: branch.status === "active" ? "disabled" : "active",
+                  })
+                }
+              />
+            ))}
+            <Link
+              className="group flex min-h-[260px] flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-[#e5e7eb] bg-[#f7f3f2] p-8 text-center transition duration-300 hover:border-black hover:bg-[#f1edec]"
+              to="/dashboard/branches/new"
+            >
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#e5e7eb] bg-white transition group-hover:scale-110">
+                <Plus className="h-8 w-8 text-[#444748] group-hover:text-black" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-black">Đăng ký chi nhánh mới</p>
+                <p className="text-xs text-[#444748]">Expand your business network</p>
+              </div>
+            </Link>
+          </div>
+        )}
+      </div>
+    </BranchFrame>
+  );
+};
 
 export const BranchCreatePage = () => (
   <BranchManagementPageWithModal>
-    <Modal title="Register New Branch" closeTo="/dashboard/branches">
-      <div className="space-y-4 p-6">
-        <Field label="Branch Name" placeholder="e.g. West Coast Distribution" />
-        <Field label="Physical Address" placeholder="Enter full street address" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField label="Business Type" options={["Select type", "Logistics", "Retail", "Medical", "Corporate Office"]} />
-          <SelectField label="Timezone" options={["EST (UTC-5)", "PST (UTC-8)", "GMT (UTC+0)"]} />
-        </div>
-      </div>
-      <ModalFooter cancelTo="/dashboard/branches" primary="Register Branch" />
-    </Modal>
+    <BranchCreateModal />
   </BranchManagementPageWithModal>
 );
 
-export const BranchSettingsPage = () => (
-  <ShellTopBar breadcrumbs={["Settings", "Branch Configuration"]}>
-    <main className="min-h-screen bg-white p-6">
-      <div className="mx-auto max-w-3xl py-8">
-        <header className="mb-12">
-          <h2 className="mb-2 text-4xl font-semibold tracking-tight text-black">Branch Configuration</h2>
-          <p className="text-base text-[#444748]">Manage your branch details, QR check-in preferences, and attendance policies.</p>
-        </header>
-        <div className="space-y-8">
-          <SettingsSection icon={<Store />} title="Branch Information">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Field label="Branch Name" value="Downtown Hub" />
-              <SelectField label="Business Type" options={["Retail & Sales", "Hospitality", "Healthcare", "Logistics & Warehouse"]} />
-              <div className="md:col-span-2"><Field label="Physical Address" value="782 Industrial Pkwy, Suite 400, Chicago, IL" /></div>
-            </div>
-          </SettingsSection>
-          <SettingsSection icon={<Badge />} title="QR Check-in" toggle>
-            <div className="flex flex-col items-center gap-8 md:flex-row">
-              <div className="flex-1">
-                <p className="mb-4 text-base leading-6 text-[#444748]">Enabling QR Check-in allows employees to clock in by scanning a unique code at the branch location. This ensures physical presence.</p>
-                <button className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 text-sm font-semibold hover:bg-[#f1edec]">Download Branch QR Code</button>
-              </div>
-              <div className="flex h-40 w-40 items-center justify-center rounded-xl border border-[#e5e7eb] bg-white p-2">
-                <div className="h-full w-full bg-[repeating-linear-gradient(45deg,#000_0_6px,#fff_6px_12px)] opacity-70" />
-              </div>
-            </div>
-          </SettingsSection>
-          <SettingsSection icon={<Clock3 />} title="Attendance Policy">
-            <div className="flex flex-col items-end gap-8 md:flex-row">
-              <div className="flex-1">
-                <Field label="Late Grace Period (Minutes)" value="15" />
-              </div>
-              <div className="rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] p-4 text-xs leading-5 text-[#444748]">Recommended: 10-15 minutes for most service-based businesses to account for transit variance.</div>
-            </div>
-          </SettingsSection>
-          <footer className="flex flex-col items-center justify-end gap-4 border-t border-[#e5e7eb] pt-8 sm:flex-row">
-            <button className="w-full rounded-lg px-8 py-3 text-sm font-semibold text-[#444748] hover:bg-[#f1edec] sm:w-auto">Discard Changes</button>
-            <button className="w-full rounded-lg bg-black px-12 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto">Save Changes</button>
-          </footer>
-        </div>
-      </div>
-    </main>
-  </ShellTopBar>
-);
+export const BranchSettingsPage = () => {
+  const { branchId } = useParams();
+  const branchesQuery = useQuery({
+    enabled: !branchId,
+    queryKey: ["branches", { first: true }],
+    queryFn: () => branchApi.list({ limit: 1 }),
+  });
+  const resolvedBranchId = branchId ?? branchesQuery.data?.data[0]?.id;
+
+  if (!branchId && branchesQuery.isLoading) {
+    return (
+      <ShellTopBar breadcrumbs={["Cài đặt", "Cấu hình chi nhánh"]}>
+        <main className="min-h-screen bg-white p-6">
+          <StatePanel title="Đang tải cài đặt chi nhánh..." description="Đang tìm chi nhánh mặc định của bạn." />
+        </main>
+      </ShellTopBar>
+    );
+  }
+
+  if (!resolvedBranchId) {
+    return (
+      <ShellTopBar breadcrumbs={["Cài đặt", "Cấu hình chi nhánh"]}>
+        <main className="min-h-screen bg-white p-6">
+          <StatePanel title="Chưa có chi nhánh" description="Hãy tạo chi nhánh trước khi cấu hình cài đặt chi nhánh." />
+        </main>
+      </ShellTopBar>
+    );
+  }
+
+  if (!branchId) {
+    return <Navigate replace to={`/dashboard/branches/${resolvedBranchId}/settings`} />;
+  }
+
+  return <BranchSettingsForm branchId={resolvedBranchId} />;
+};
 
 const EmployeeListPageWithModal = ({ children }: { children: ReactNode }) => <><EmployeeListPage />{children}</>;
 const EmployeeDetailsPageWithModal = ({ children }: { children: ReactNode }) => <><EmployeeDetailsPage />{children}</>;
 const BranchManagementPageWithModal = ({ children }: { children: ReactNode }) => <><BranchManagementPage />{children}</>;
 
-const ShellTopBar = ({ action, breadcrumbs, children, searchPlaceholder, title }: { action?: ReactNode; breadcrumbs?: string[]; children: ReactNode; searchPlaceholder?: string; title?: string }) => (
+const ShellTopBar = ({
+  action,
+  breadcrumbs,
+  children,
+  onSearchChange,
+  searchPlaceholder,
+  searchValue,
+  title,
+}: {
+  action?: ReactNode;
+  breadcrumbs?: string[];
+  children: ReactNode;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  title?: string;
+}) => (
   <div className="min-h-screen bg-white">
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
       <div className="flex min-w-0 items-center gap-6">
@@ -345,7 +486,12 @@ const ShellTopBar = ({ action, breadcrumbs, children, searchPlaceholder, title }
         {searchPlaceholder ? (
           <div className="relative hidden w-96 lg:block">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#444748]" />
-            <input className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] pl-10 pr-4 outline-none focus:ring-1 focus:ring-black" placeholder={searchPlaceholder} />
+            <input
+              className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] pl-10 pr-4 outline-none focus:ring-1 focus:ring-black"
+              onChange={(event) => onSearchChange?.(event.target.value)}
+              placeholder={searchPlaceholder}
+              value={searchValue ?? ""}
+            />
           </div>
         ) : null}
       </div>
@@ -358,12 +504,12 @@ const ShellTopBar = ({ action, breadcrumbs, children, searchPlaceholder, title }
   </div>
 );
 
-const DetailFrame = ({ children }: { children: ReactNode }) => (
+const DetailFrame = ({ children, employeeName = "Nhân viên" }: { children: ReactNode; employeeName?: string }) => (
   <div className="min-h-screen bg-white">
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
       <div className="flex items-center gap-4">
         <Link className="rounded-full p-2 hover:bg-[#f1edec]" to="/dashboard/employees"><ArrowLeft className="h-5 w-5" /></Link>
-        <div className="flex items-center gap-2 text-sm font-semibold"><span className="text-[#444748]">Employees</span><span className="text-[#c4c7c7]">/</span><b>Marcus Thompson</b></div>
+        <div className="flex items-center gap-2 text-sm font-semibold"><span className="text-[#444748]">Nhân viên</span><span className="text-[#c4c7c7]">/</span><b>{employeeName}</b></div>
       </div>
       <Bell className="h-5 w-5 text-[#444748]" />
     </header>
@@ -371,15 +517,28 @@ const DetailFrame = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
-const BranchFrame = ({ children }: { children: ReactNode }) => (
+const BranchFrame = ({
+  children,
+  onSearchChange,
+  search,
+}: {
+  children: ReactNode;
+  onSearchChange?: (value: string) => void;
+  search?: string;
+}) => (
   <div className="min-h-screen bg-white">
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
       <div className="relative w-full max-w-xl">
         <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#747878]" />
-        <input className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] pl-10 pr-4 outline-none focus:ring-2 focus:ring-black" placeholder="Search branches..." />
+        <input
+          className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] pl-10 pr-4 outline-none focus:ring-2 focus:ring-black"
+          onChange={(event) => onSearchChange?.(event.target.value)}
+          placeholder="Tìm chi nhánh..."
+          value={search ?? ""}
+        />
       </div>
       <div className="flex items-center gap-4">
-        <div className="hidden text-right md:block"><p className="text-sm font-semibold">Main St. Downtown</p><p className="text-xs text-[#444748]">Branch Switcher</p></div>
+        <div className="hidden text-right md:block"><p className="text-sm font-semibold">Trung tâm Main St.</p><p className="text-xs text-[#444748]">Chuyển chi nhánh</p></div>
         <Bell className="h-5 w-5 text-[#444748]" />
       </div>
     </header>
@@ -387,20 +546,42 @@ const BranchFrame = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
-const EmployeeTable = () => (
+const EmployeeTable = ({
+  branchesById,
+  currentUserId,
+  employees,
+  isUpdating,
+  onToggleStatus,
+}: {
+  branchesById: Map<string, string>;
+  currentUserId?: string;
+  employees: Employee[];
+  isUpdating: boolean;
+  onToggleStatus: (employee: Employee) => void;
+}) => (
   <div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
     <div className="overflow-x-auto">
       <table className="w-full min-w-[850px] text-left">
         <thead className="border-b border-[#e5e7eb] bg-[#f5f5f5] text-sm font-semibold text-[#444748]">
-          <tr><th className="px-6 py-4">Photo & Name</th><th className="px-6 py-4">Role</th><th className="px-6 py-4">Branch</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Actions</th></tr>
+          <tr><th className="px-6 py-4">Ảnh & tên</th><th className="px-6 py-4">Vai trò</th><th className="px-6 py-4">Chi nhánh</th><th className="px-6 py-4">Trạng thái</th><th className="px-6 py-4 text-right">Thao tác</th></tr>
         </thead>
         <tbody className="divide-y divide-[#e5e7eb]">
-          {employees.map((employee) => <EmployeeRow employee={employee} key={employee.email} />)}
+          {employees.map((employee, index) => (
+            <EmployeeRow
+              branchName={employee.branchId ? branchesById.get(employee.branchId) : undefined}
+              currentUserId={currentUserId}
+              employee={employee}
+              index={index}
+              isUpdating={isUpdating}
+              key={employee.id}
+              onToggleStatus={() => onToggleStatus(employee)}
+            />
+          ))}
         </tbody>
       </table>
     </div>
     <div className="flex items-center justify-between border-t border-[#e5e7eb] bg-white px-6 py-4">
-      <p className="text-xs text-[#444748]">Showing 1 to 5 of 42 employees</p>
+      <p className="text-xs text-[#444748]">Đang hiển thị {employees.length} nhân viên</p>
       <div className="flex items-center gap-1">
         <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e5e7eb] text-[#444748] hover:bg-[#f5f5f5]">
           <ChevronRight className="h-4 w-4 rotate-180" />
@@ -420,34 +601,73 @@ const EmployeeTable = () => (
   </div>
 );
 
-const EmployeeRow = ({ employee }: { employee: (typeof employees)[number] }) => (
+const EmployeeRow = ({
+  branchName,
+  currentUserId,
+  employee,
+  index,
+  isUpdating,
+  onToggleStatus,
+}: {
+  branchName?: string;
+  currentUserId?: string;
+  employee: Employee;
+  index: number;
+  isUpdating: boolean;
+  onToggleStatus: () => void;
+}) => (
   <tr className="hover:bg-[#fdf8f8]">
     <td className="px-6 py-4">
-      <Link className="flex items-center gap-4" to="/dashboard/employees/marcus">
-        {employee.photo ? <img alt="" className="h-10 w-10 rounded-lg object-cover" src={employee.photo} /> : <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f1edec] font-bold text-[#444748]">AL</div>}
-        <div><p className="text-sm font-semibold text-black">{employee.name}</p><p className="text-xs text-[#444748]">{employee.email}</p></div>
+      <Link className="flex items-center gap-4" to={`/dashboard/employees/${employee.id}`}>
+        {employee.avatar ? <img alt="" className="h-10 w-10 rounded-lg object-cover" src={employee.avatar} /> : <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f1edec] font-bold text-[#444748]">{getInitials(employee.fullName)}</div>}
+        <div><p className="text-sm font-semibold text-black">{employee.fullName}</p><p className="text-xs text-[#444748]">{employee.email}</p></div>
       </Link>
     </td>
-    <td className="px-6 py-4 text-base">{employee.role}</td>
-    <td className="px-6 py-4 text-base">{employee.branch}</td>
-    <td className="px-6 py-4"><StatusBadge status={employee.status} /></td>
-    <td className="px-6 py-4 text-right"><button className="rounded-lg p-2 text-[#444748] hover:bg-[#f1edec]"><MoreVertical className="h-5 w-5" /></button></td>
+    <td className="px-6 py-4 text-base">{toEmployeeRoleLabel(employee.role)}</td>
+    <td className="px-6 py-4 text-base">{branchName ?? "Chưa gán"}</td>
+    <td className="px-6 py-4"><StatusBadge status={toEmployeeStatusLabel(employee.status)} /></td>
+    <td className="px-6 py-4 text-right">
+      <div className="flex justify-end gap-2">
+        {employee.id === currentUserId ? (
+          <span className="rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs font-bold text-[#747878]">Current user</span>
+        ) : (
+          <button
+            className={employee.status === "active" ? "rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs font-bold text-[#ef4444] hover:bg-[#ef4444]/10" : "rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs font-bold text-[#10b981] hover:bg-[#10b981]/10"}
+            disabled={isUpdating}
+            onClick={onToggleStatus}
+            type="button"
+          >
+            {employee.status === "active" ? "Ngừng kích hoạt" : "Kích hoạt"}
+          </button>
+        )}
+        <Link className="rounded-lg p-2 text-[#444748] hover:bg-[#f1edec]" to={`/dashboard/employees/${employee.id}`}>
+          <MoreVertical className="h-5 w-5" />
+        </Link>
+      </div>
+    </td>
   </tr>
 );
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const tone = status === "Active" ? "bg-[#10b981]/10 text-[#10b981]" : status === "On Leave" ? "bg-[#0058be]/10 text-[#0058be]" : "bg-[#c4c7c7]/30 text-[#444748]";
+  const tone = status === "Đang hoạt động" ? "bg-[#10b981]/10 text-[#10b981]" : status === "Đang nghỉ phép" ? "bg-[#0058be]/10 text-[#0058be]" : "bg-[#c4c7c7]/30 text-[#444748]";
   return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${tone}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{status}</span>;
 };
 
-const EmployeeStatsGrid = () => (
+const EmployeeStatsGrid = ({ employees, total }: { employees: Employee[]; total: number }) => {
+  const active = employees.filter((employee) => employee.status === "active").length;
+  const managers = employees.filter((employee) => employee.role === "manager").length;
+  const staff = employees.filter((employee) => employee.role === "staff").length;
+  const inactive = employees.filter((employee) => employee.status === "inactive").length;
+
+  return (
   <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-    <EmployeeStat label="Total Headcount" meta="+4%" value="128" trend />
-    <EmployeeStat label="Average Tenure" meta="Stable" value="2.4y" />
-    <EmployeeStat label="Shift Coverage" value="98.2%" progress />
-    <EmployeeStat label="Active Leaves" meta="Action Required" metaTone="danger" value="6" />
+    <EmployeeStat label="Tổng nhân viên" value={String(total)} />
+    <EmployeeStat label="Tài khoản hoạt động" meta={`${active} đang hiển thị`} value={String(active)} trend />
+    <EmployeeStat label="Quản lý / Nhân viên" value={`${managers}/${staff}`} />
+    <EmployeeStat label="Tài khoản ngừng hoạt động" meta={inactive ? "Cần xem lại" : "Ổn"} metaTone={inactive ? "danger" : "success"} value={String(inactive)} />
   </div>
-);
+  );
+};
 
 const EmployeeStat = ({
   label,
@@ -504,12 +724,402 @@ const ModalFooter = ({ cancelTo, primary }: { cancelTo: string; primary: string 
   </div>
 );
 
+const EmployeeCreateModal = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState<EditableEmployeeRole>("staff");
+  const [employeeType, setEmployeeType] = useState<EmployeeType>("full_time");
+  const [branchId, setBranchId] = useState("");
+  const [employeeCode, setEmployeeCode] = useState("");
+  const [joinDate, setJoinDate] = useState("");
+  const [error, setError] = useState("");
+  const branchesQuery = useQuery({
+    queryKey: ["branches", { employeeCreate: true }],
+    queryFn: () => branchApi.list({ limit: 100, status: "active" }),
+  });
+  const createMutation = useMutation({
+    mutationFn: () =>
+      employeeApi.create({
+        fullName,
+        email,
+        password,
+        role,
+        employeeType,
+        ...(phone ? { phone } : {}),
+        ...(branchId ? { branchId } : {}),
+        ...(employeeCode ? { employeeCode } : {}),
+        ...(joinDate ? { joinDate } : {}),
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["employees"] });
+      navigate("/dashboard/employees", { replace: true });
+    },
+    onError: (err) => setError(getApiErrorMessage(err, "Unable to create employee.")),
+  });
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    createMutation.mutate();
+  };
+
+  const branchRequired = role === "staff";
+
+  return (
+    <Modal title="Tạo nhân viên mới" subtitle="Nhập thông tin để thêm thành viên mới vào đội ngũ." closeTo="/dashboard/employees">
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-4 p-6">
+          <InputField label="Full Name" onChange={setFullName} placeholder="e.g. John Smith" required value={fullName} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InputField label="Email Address" onChange={setEmail} placeholder="john@company.com" required type="email" value={email} />
+            <InputField label="Temporary Password" onChange={setPassword} placeholder="Minimum 8 characters" required type="password" value={password} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InputField label="Phone Number" onChange={setPhone} placeholder="+84 900 000 000" value={phone} />
+            <InputField label="Mã nhân viên" onChange={setEmployeeCode} placeholder="EMP-001" value={employeeCode} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectControl label="Vai trò" onChange={(value) => setRole(value as EditableEmployeeRole)} value={role}>
+              <option value="staff">Nhân viên</option>
+              <option value="manager">Quản lý</option>
+            </SelectControl>
+            <SelectControl label="Loại nhân viên" onChange={(value) => setEmployeeType(value as EmployeeType)} value={employeeType}>
+              <option value="full_time">Full-time</option>
+              <option value="part_time">Part-time</option>
+            </SelectControl>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectControl label={branchRequired ? "Chi nhánh" : "Chi nhánh được gán"} onChange={setBranchId} required={branchRequired} value={branchId}>
+              <option value="">{branchRequired ? "Chọn chi nhánh" : "Chưa gán"}</option>
+              {(branchesQuery.data?.data ?? []).map((branch) => (
+                <option key={branch.id} value={branch.id}>{branch.name}</option>
+              ))}
+            </SelectControl>
+            <InputField label="Join Date" onChange={setJoinDate} type="date" value={joinDate} />
+          </div>
+          {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
+        </div>
+        <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
+          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/employees">Cancel</Link>
+          <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={createMutation.isPending} type="submit">
+            {createMutation.isPending ? "Đang thêm..." : "Thêm nhân viên"}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+const BranchCreateModal = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [timezone, setTimezone] = useState("Asia/Ho_Chi_Minh");
+  const [openingTime, setOpeningTime] = useState("08:00");
+  const [closingTime, setClosingTime] = useState("18:00");
+  const [lateThresholdMinutes, setLateThresholdMinutes] = useState(15);
+  const [error, setError] = useState("");
+  const createMutation = useMutation({
+    mutationFn: () =>
+      branchApi.create({
+        name,
+        ...(code ? { code } : {}),
+        ...(address ? { address } : {}),
+        ...(phone ? { phone } : {}),
+        settings: {
+          timezone,
+          openingTime,
+          closingTime,
+          requireCheckout: true,
+        },
+        qrSettings: {
+          enabled: true,
+          requireGps: false,
+          refreshIntervalSeconds: 60,
+          qrExpiresInSeconds: 120,
+        },
+        attendanceSettings: {
+          lateThresholdMinutes,
+        },
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["branches"] });
+      navigate("/dashboard/branches", { replace: true });
+    },
+    onError: (err) => setError(getApiErrorMessage(err, "Unable to create branch.")),
+  });
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    createMutation.mutate();
+  };
+
+  return (
+    <Modal title="Đăng ký chi nhánh mới" closeTo="/dashboard/branches">
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-4 p-6">
+          <InputField label="Tên chi nhánh" onChange={setName} placeholder="Ví dụ: Chi nhánh chính Downtown" required value={name} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InputField label="Mã chi nhánh" onChange={setCode} placeholder="DOWNTOWN" value={code} />
+            <InputField label="Phone" onChange={setPhone} placeholder="+84 900 000 000" value={phone} />
+          </div>
+          <InputField label="Physical Address" onChange={setAddress} placeholder="Enter full street address" value={address} />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <InputField label="Timezone" onChange={setTimezone} required value={timezone} />
+            <InputField label="Opening Time" onChange={setOpeningTime} required type="time" value={openingTime} />
+            <InputField label="Closing Time" onChange={setClosingTime} required type="time" value={closingTime} />
+          </div>
+          <InputField
+            label="Late Grace Period"
+            onChange={(value) => setLateThresholdMinutes(Number(value))}
+            required
+            type="number"
+            value={String(lateThresholdMinutes)}
+          />
+          {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
+        </div>
+        <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
+          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/branches">Cancel</Link>
+          <button
+            className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
+            disabled={createMutation.isPending}
+            type="submit"
+          >
+            {createMutation.isPending ? "Đang đăng ký..." : "Đăng ký chi nhánh"}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
 const Field = ({ label, placeholder, type = "text", value }: { label: string; placeholder?: string; type?: string; value?: string }) => (
   <label className="block space-y-1">
     <span className="text-sm font-semibold text-[#444748]">{label}</span>
     <input className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] px-4 outline-none focus:border-black focus:ring-2 focus:ring-black/10" defaultValue={value} placeholder={placeholder} type={type} />
   </label>
 );
+
+const InputField = ({
+  label,
+  onChange,
+  placeholder,
+  required,
+  type = "text",
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+  type?: string;
+  value: string;
+}) => (
+  <label className="block space-y-1">
+    <span className="text-sm font-semibold text-[#444748]">{label}</span>
+    <input
+      className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] px-4 outline-none focus:border-black focus:ring-2 focus:ring-black/10"
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      required={required}
+      type={type}
+      value={value}
+    />
+  </label>
+);
+
+const SelectControl = ({
+  children,
+  label,
+  onChange,
+  required,
+  value,
+}: {
+  children: ReactNode;
+  label: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  value: string;
+}) => (
+  <label className="block space-y-1">
+    <span className="text-sm font-semibold text-[#444748]">{label}</span>
+    <select
+      className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] px-4 outline-none focus:border-black focus:ring-2 focus:ring-black/10"
+      onChange={(event) => onChange(event.target.value)}
+      required={required}
+      value={value}
+    >
+      {children}
+    </select>
+  </label>
+);
+
+const EmployeeProfileHeader = ({
+  branchName,
+  currentUserId,
+  employee,
+  onEdit,
+}: {
+  branchName?: string;
+  currentUserId?: string;
+  employee: Employee;
+  onEdit: () => void;
+}) => (
+  <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+    <div className="flex items-start gap-6">
+      <div className="relative">
+        {employee.avatar ? (
+          <img alt="" className="h-32 w-32 rounded-xl border border-[#e5e7eb] object-cover shadow-sm" src={employee.avatar} />
+        ) : (
+          <div className="flex h-32 w-32 items-center justify-center rounded-xl border border-[#e5e7eb] bg-[#f1edec] text-3xl font-black text-[#444748] shadow-sm">
+            {getInitials(employee.fullName)}
+          </div>
+        )}
+        <span className={employee.status === "active" ? "absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-white bg-[#10b981] shadow-sm" : "absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-white bg-[#c4c7c7] shadow-sm"} />
+      </div>
+      <div className="pt-2">
+        <h1 className="mb-1 text-4xl font-semibold tracking-tight text-black">{employee.fullName}</h1>
+        <div className="mb-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-[#444748]">
+          <span className="inline-flex items-center gap-1"><Badge className="h-4 w-4" />{toEmployeeRoleLabel(employee.role)}</span>
+          <span className="h-1 w-1 rounded-full bg-[#c4c7c7]" />
+          <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" />{branchName ?? "Chưa gán"}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusBadge status={toEmployeeStatusLabel(employee.status)} />
+          {employee.employeeCode ? <span className="text-xs text-[#444748]">ID: {employee.employeeCode}</span> : null}
+        </div>
+      </div>
+    </div>
+    <div className="flex gap-2">
+      <button className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#e5e7eb] px-4 text-sm font-semibold text-black hover:bg-[#f7f3f2]" onClick={onEdit} type="button"><Edit3 className="h-4 w-4" />Chỉnh sửa hồ sơ</button>
+      {employee.status === "active" && employee.id !== currentUserId ? (
+        <Link className="inline-flex h-10 items-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white hover:opacity-90" to={`/dashboard/employees/${employee.id}/deactivate`}><UserMinus className="h-4 w-4" />Ngừng kích hoạt</Link>
+      ) : null}
+    </div>
+  </div>
+);
+
+const EmployeeInfoPanel = ({ branchName, employee }: { branchName?: string; employee: Employee }) => (
+  <Panel title="Thông tin nhân viên" icon={<UserCheck />}>
+    <InfoRow label="Email Address" value={employee.email} />
+    <InfoRow label="Phone Number" value={employee.phone ?? "Not set"} />
+    <InfoRow label="Chi nhánh" value={branchName ?? "Chưa gán"} />
+    <InfoRow label="Loại nhân viên" value={employee.employeeType ? toEmployeeTypeLabel(employee.employeeType) : "Chưa thiết lập"} />
+    <InfoRow label="Join Date" value={formatDate(employee.joinDate)} />
+    <InfoRow label="Last Login" value={formatDate(employee.lastLoginAt)} />
+  </Panel>
+);
+
+const EmployeeEditModal = ({
+  branches,
+  employee,
+  onClose,
+  onSaved,
+}: {
+  branches: Branch[];
+  employee: Employee;
+  onClose: () => void;
+  onSaved: () => void;
+}) => {
+  const [fullName, setFullName] = useState(employee.fullName);
+  const [phone, setPhone] = useState(employee.phone ?? "");
+  const [role, setRole] = useState<EditableEmployeeRole>(employee.role === "manager" ? "manager" : "staff");
+  const [employeeType, setEmployeeType] = useState<EmployeeType>(employee.employeeType ?? "full_time");
+  const [branchId, setBranchId] = useState(employee.branchId ?? "");
+  const [employeeCode, setEmployeeCode] = useState(employee.employeeCode ?? "");
+  const [joinDate, setJoinDate] = useState(employee.joinDate ? employee.joinDate.slice(0, 10) : "");
+  const [error, setError] = useState("");
+  const updateMutation = useMutation({
+    mutationFn: () =>
+      employeeApi.update(employee.id, {
+        fullName,
+        role,
+        employeeType,
+        ...(phone ? { phone } : {}),
+        ...(branchId ? { branchId } : {}),
+        ...(employeeCode ? { employeeCode } : {}),
+        ...(joinDate ? { joinDate } : {}),
+      }),
+    onSuccess: onSaved,
+    onError: (err) => setError(getApiErrorMessage(err, "Unable to update employee.")),
+  });
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    updateMutation.mutate();
+  };
+
+  return (
+    <Modal title="Chỉnh sửa nhân viên" closeTo={`/dashboard/employees/${employee.id}`}>
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-4 p-6">
+          <InputField label="Full Name" onChange={setFullName} required value={fullName} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InputField label="Phone Number" onChange={setPhone} value={phone} />
+            <InputField label="Mã nhân viên" onChange={setEmployeeCode} value={employeeCode} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectControl label="Vai trò" onChange={(value) => setRole(value as EditableEmployeeRole)} value={role}>
+              <option value="staff">Nhân viên</option>
+              <option value="manager">Quản lý</option>
+            </SelectControl>
+            <SelectControl label="Loại nhân viên" onChange={(value) => setEmployeeType(value as EmployeeType)} value={employeeType}>
+              <option value="full_time">Full-time</option>
+              <option value="part_time">Part-time</option>
+            </SelectControl>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectControl label="Chi nhánh" onChange={setBranchId} required={role === "staff"} value={branchId}>
+              <option value="">{role === "staff" ? "Chọn chi nhánh" : "Chưa gán"}</option>
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>{branch.name}</option>
+              ))}
+            </SelectControl>
+            <InputField label="Join Date" onChange={setJoinDate} type="date" value={joinDate} />
+          </div>
+          {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
+        </div>
+        <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
+          <button className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" onClick={onClose} type="button">Cancel</button>
+          <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={updateMutation.isPending} type="submit">
+            {updateMutation.isPending ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+
+const toEmployeeRoleLabel = (role: EmployeeRole) => {
+  if (role === "owner") return "Owner";
+  if (role === "manager") return "Quản lý";
+  return "Nhân viên";
+};
+
+const toEmployeeStatusLabel = (status: EmployeeStatus) => (status === "active" ? "Đang hoạt động" : "Ngừng hoạt động");
+const toEmployeeTypeLabel = (type: EmployeeType) => (type === "full_time" ? "Full-time" : "Part-time");
+
+const formatDate = (value?: string) => {
+  if (!value) return "Not set";
+  return new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(value));
+};
 
 const SelectField = ({ label, options }: { label: string; options: string[] }) => (
   <label className="block space-y-1">
@@ -549,7 +1159,7 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => <div cla
 
 const RecentActivityPanel = () => (
   <section className="h-full rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-6">
-    <h3 className="mb-6 text-sm font-semibold text-black">Recent Activity</h3>
+    <h3 className="mb-6 text-sm font-semibold text-black">Hoạt động gần đây</h3>
     <div className="relative space-y-6 before:absolute before:bottom-2 before:left-[11px] before:top-2 before:w-[2px] before:bg-[#c4c7c7]">
       <ActivityNode icon={<UserCheck />} title="Clocked In" time="Today, 03:58 PM" detail="Verified via QR: DT-Main-01" active />
       <ActivityNode icon={<CalendarX />} title="Leave Request" time="Yesterday, 02:15 PM">
@@ -659,48 +1269,65 @@ const StatCard = ({ icon, label, meta, value }: { icon: ReactNode; label: string
   </div>
 );
 
-const BranchCard = ({ branch }: { branch: (typeof branches)[number] }) => (
+const BranchCard = ({
+  branch,
+  index,
+  isUpdating,
+  onToggleStatus,
+}: {
+  branch: Branch;
+  index: number;
+  isUpdating: boolean;
+  onToggleStatus: () => void;
+}) => (
   <article className="group overflow-hidden rounded-xl border border-[#e5e7eb] bg-white transition hover:border-black">
     <div className="relative h-32 overflow-hidden bg-[#f1edec]">
-      <img alt="" className="h-full w-full object-cover grayscale opacity-40 transition duration-700 group-hover:grayscale-0 group-hover:opacity-100" src={branch.image} />
-      {branch.tag ? (
+      <img alt="" className="h-full w-full object-cover grayscale opacity-40 transition duration-700 group-hover:grayscale-0 group-hover:opacity-100" src={branchPhotos[index % branchPhotos.length]} />
+      {branch.status === "disabled" ? (
         <span
-          className={
-            branch.tagTone === "error"
-              ? "absolute right-4 top-4 rounded bg-[#ef4444]/10 px-2 py-1 text-[10px] font-bold uppercase tracking-tight text-[#ef4444]"
-              : "absolute left-4 top-4 rounded bg-black px-2 py-1 text-[10px] font-bold uppercase tracking-tight text-white"
-          }
+          className="absolute right-4 top-4 rounded bg-[#ef4444]/10 px-2 py-1 text-[10px] font-bold uppercase tracking-tight text-[#ef4444]"
         >
-          {branch.tag}
+          Vô hiệu
         </span>
+      ) : branch.code ? (
+        <span className="absolute left-4 top-4 rounded bg-black px-2 py-1 text-[10px] font-bold uppercase tracking-tight text-white">{branch.code}</span>
       ) : null}
       <div className="absolute bottom-0 left-0 h-16 w-full bg-gradient-to-t from-white to-transparent" />
     </div>
     <div className="p-6 pt-0">
       <div className="mb-4 flex justify-between">
-        <div><h4 className="text-sm font-bold">{branch.name}</h4><p className="flex items-center gap-1 text-xs text-[#444748]"><MapPin className="h-3 w-3" />{branch.address}</p></div>
-        <MoreVertical className="h-5 w-5 text-[#444748]" />
+        <div><h4 className="text-sm font-bold">{branch.name}</h4><p className="flex items-center gap-1 text-xs text-[#444748]"><MapPin className="h-3 w-3" />{branch.address || "No address yet"}</p></div>
+        <button
+          className="rounded-lg p-1 text-[#444748] hover:bg-[#f1edec] disabled:opacity-50"
+          disabled={isUpdating}
+          onClick={onToggleStatus}
+          type="button"
+        >
+          <MoreVertical className="h-5 w-5" />
+        </button>
       </div>
       <div className="grid grid-cols-2 gap-4 border-y border-[#e5e7eb] py-4">
         <div>
-          <p className="mb-1 text-xs uppercase tracking-wider text-[#444748]">Manager</p>
+          <p className="mb-1 text-xs uppercase tracking-wider text-[#444748]">Phone</p>
           <div className="flex items-center gap-1">
-            <img alt="" className="h-6 w-6 rounded-full object-cover" src={branch.managerPhoto} />
-            <p className="text-xs font-semibold">{branch.manager}</p>
+            <p className="text-xs font-semibold">{branch.phone || "Not set"}</p>
           </div>
         </div>
         <div>
-          <p className="mb-1 text-xs uppercase tracking-wider text-[#444748]">Staff Count</p>
-          <p className={branch.tagTone === "error" ? "text-xs font-semibold text-[#ef4444]" : "text-xs font-semibold"}>{branch.staff} Employees</p>
+          <p className="mb-1 text-xs uppercase tracking-wider text-[#444748]">Chấm công QR</p>
+          <p className={branch.qrSettings?.enabled ? "text-xs font-semibold text-[#10b981]" : "text-xs font-semibold text-[#444748]"}>{branch.qrSettings?.enabled ? "Bật" : "Tắt"}</p>
         </div>
       </div>
       <div className="mt-6 flex items-center justify-between">
-        <div className="flex -space-x-2">
-          <img alt="" className="h-6 w-6 rounded-full border-2 border-white object-cover" src={employeePhotos[0]} />
-          {branch.name === "Main St. Downtown" ? <img alt="" className="h-6 w-6 rounded-full border-2 border-white object-cover" src={employeePhotos[1]} /> : null}
-          <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-[#ebe7e6] text-[8px] font-bold">+{branch.name === "Main St. Downtown" ? branch.staff - 3 : branch.staff - 1}</span>
-        </div>
-        <Link className="inline-flex items-center gap-1 text-sm font-semibold text-[#0058be] hover:underline" to="/dashboard/branches/settings">View Details <ChevronRight className="h-4 w-4" /></Link>
+        <button
+          className={branch.status === "active" ? "rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs font-bold text-[#ef4444] hover:bg-[#ef4444]/10" : "rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs font-bold text-[#10b981] hover:bg-[#10b981]/10"}
+          disabled={isUpdating}
+          onClick={onToggleStatus}
+          type="button"
+        >
+          {branch.status === "active" ? "Disable" : "Enable"}
+        </button>
+        <Link className="inline-flex items-center gap-1 text-sm font-semibold text-[#0058be] hover:underline" to={`/dashboard/branches/${branch.id}/settings`}>View Details <ChevronRight className="h-4 w-4" /></Link>
       </div>
     </div>
   </article>
@@ -714,4 +1341,156 @@ const SettingsSection = ({ children, icon, title, toggle }: { children: ReactNod
     </div>
     {children}
   </section>
+);
+
+const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
+  const queryClient = useQueryClient();
+  const branchQuery = useQuery({
+    queryKey: ["branch", branchId],
+    queryFn: () => branchApi.detail(branchId),
+  });
+  const branch = branchQuery.data;
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [timezone, setTimezone] = useState("");
+  const [openingTime, setOpeningTime] = useState("");
+  const [closingTime, setClosingTime] = useState("");
+  const [qrEnabled, setQrEnabled] = useState(true);
+  const [requireGps, setRequireGps] = useState(false);
+  const [refreshIntervalSeconds, setRefreshIntervalSeconds] = useState("60");
+  const [qrExpiresInSeconds, setQrExpiresInSeconds] = useState("120");
+  const [lateThresholdMinutes, setLateThresholdMinutes] = useState("15");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (!branch) return;
+    setName(branch.name);
+    setCode(branch.code ?? "");
+    setAddress(branch.address ?? "");
+    setPhone(branch.phone ?? "");
+    setTimezone(branch.settings?.timezone ?? "Asia/Ho_Chi_Minh");
+    setOpeningTime(branch.settings?.openingTime ?? "08:00");
+    setClosingTime(branch.settings?.closingTime ?? "18:00");
+    setQrEnabled(branch.qrSettings?.enabled ?? true);
+    setRequireGps(branch.qrSettings?.requireGps ?? false);
+    setRefreshIntervalSeconds(String(branch.qrSettings?.refreshIntervalSeconds ?? 60));
+    setQrExpiresInSeconds(String(branch.qrSettings?.qrExpiresInSeconds ?? 120));
+    setLateThresholdMinutes(String(branch.attendanceSettings?.lateThresholdMinutes ?? 15));
+  }, [branch]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const updatedBranch = await branchApi.update(branchId, {
+        name,
+        ...(code ? { code } : {}),
+        ...(address ? { address } : {}),
+        ...(phone ? { phone } : {}),
+      });
+      await branchApi.configureSettings(branchId, {
+        timezone,
+        openingTime,
+        closingTime,
+        requireCheckout: true,
+      });
+      await branchApi.configureQrSettings(branchId, {
+        enabled: qrEnabled,
+        requireGps,
+        refreshIntervalSeconds: Number(refreshIntervalSeconds),
+        qrExpiresInSeconds: Number(qrExpiresInSeconds),
+      });
+      await branchApi.configureLateThreshold(branchId, Number(lateThresholdMinutes));
+      return updatedBranch;
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["branch", branchId] }),
+        queryClient.invalidateQueries({ queryKey: ["branches"] }),
+      ]);
+      setSuccess("Đã lưu cài đặt chi nhánh.");
+    },
+    onError: (err) => setError(getApiErrorMessage(err, "Unable to save branch settings.")),
+  });
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+    saveMutation.mutate();
+  };
+
+  return (
+      <ShellTopBar breadcrumbs={["Cài đặt", "Cấu hình chi nhánh"]}>
+      <main className="min-h-screen bg-white p-6">
+        <div className="mx-auto max-w-3xl py-8">
+          <header className="mb-12">
+            <div className="mb-4">
+              <Link className="inline-flex items-center gap-2 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/branches">
+                <ArrowLeft className="h-4 w-4" />
+                Quay lại chi nhánh
+              </Link>
+            </div>
+            <h2 className="mb-2 text-4xl font-semibold tracking-tight text-black">Cấu hình chi nhánh</h2>
+            <p className="text-base text-[#444748]">Manage branch details, QR check-in preferences, and attendance policies.</p>
+          </header>
+          {branchQuery.isLoading ? (
+            <StatePanel title="Đang tải chi nhánh..." description="Đang lấy cấu hình chi nhánh." />
+          ) : branchQuery.isError ? (
+            <StatePanel title="Unable to load branch" description={getApiErrorMessage(branchQuery.error, "Please try again later.")} />
+          ) : (
+            <form className="space-y-8" onSubmit={handleSubmit}>
+              <SettingsSection icon={<Store />} title="Thông tin chi nhánh">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <InputField label="Tên chi nhánh" onChange={setName} required value={name} />
+                  <InputField label="Mã chi nhánh" onChange={setCode} value={code} />
+                  <InputField label="Phone" onChange={setPhone} value={phone} />
+                  <InputField label="Timezone" onChange={setTimezone} required value={timezone} />
+                  <div className="md:col-span-2"><InputField label="Physical Address" onChange={setAddress} value={address} /></div>
+                </div>
+              </SettingsSection>
+              <SettingsSection icon={<Badge />} title="Chấm công QR">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <ToggleField checked={qrEnabled} label="Bật chấm công QR" onChange={setQrEnabled} />
+                  <ToggleField checked={requireGps} label="Require GPS verification" onChange={setRequireGps} />
+                  <InputField label="QR Refresh Interval Seconds" onChange={setRefreshIntervalSeconds} required type="number" value={refreshIntervalSeconds} />
+                  <InputField label="QR Expiry Seconds" onChange={setQrExpiresInSeconds} required type="number" value={qrExpiresInSeconds} />
+                </div>
+              </SettingsSection>
+              <SettingsSection icon={<Clock3 />} title="Chính sách chấm công">
+                <div className="grid gap-6 md:grid-cols-3">
+                  <InputField label="Opening Time" onChange={setOpeningTime} required type="time" value={openingTime} />
+                  <InputField label="Closing Time" onChange={setClosingTime} required type="time" value={closingTime} />
+                  <InputField label="Late Grace Period" onChange={setLateThresholdMinutes} required type="number" value={lateThresholdMinutes} />
+                </div>
+              </SettingsSection>
+              {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
+              {success ? <p className="rounded-lg bg-[#10b981]/10 px-4 py-3 text-sm font-semibold text-[#047857]">{success}</p> : null}
+              <footer className="flex flex-col items-center justify-end gap-4 border-t border-[#e5e7eb] pt-8 sm:flex-row">
+                <Link className="w-full rounded-lg px-8 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-[#f1edec] sm:w-auto" to="/dashboard/branches">Cancel</Link>
+                <button className="w-full rounded-lg bg-black px-12 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 sm:w-auto" disabled={saveMutation.isPending} type="submit">
+                  {saveMutation.isPending ? "Saving..." : "Save Changes"}
+                </button>
+              </footer>
+            </form>
+          )}
+        </div>
+      </main>
+    </ShellTopBar>
+  );
+};
+
+const ToggleField = ({ checked, label, onChange }: { checked: boolean; label: string; onChange: (value: boolean) => void }) => (
+  <label className="flex items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
+    <span className="text-sm font-semibold text-[#444748]">{label}</span>
+    <input checked={checked} className="h-5 w-5 rounded border-[#e5e7eb] text-black focus:ring-black" onChange={(event) => onChange(event.target.checked)} type="checkbox" />
+  </label>
+);
+
+const StatePanel = ({ description, title }: { description: string; title: string }) => (
+  <div className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-10 text-center">
+    <p className="text-lg font-semibold text-black">{title}</p>
+    <p className="mt-2 text-sm text-[#444748]">{description}</p>
+  </div>
 );

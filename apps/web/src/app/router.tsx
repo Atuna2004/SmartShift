@@ -8,6 +8,7 @@ import {
   AdminSaasKpiPage,
   AdminSystemOverviewPage,
 } from "@/features/admin/pages/AdminPages";
+import { GuestOnlyRoute, ProtectedRoute } from "@/features/auth/routeGuards";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { RegisterPage } from "@/features/auth/pages/RegisterPage";
@@ -47,6 +48,7 @@ import {
   SubscriptionPage,
 } from "@/features/reportSubscription/pages/ReportSubscriptionPages";
 import {
+  DailySchedulePage,
   MonthlySchedulePage,
   SchedulePage,
   ShiftCreatePage,
@@ -93,11 +95,13 @@ export const router = createBrowserRouter([
       },
       {
         path: "/login",
-        element: <LoginPage />,
+        element: <GuestOnlyRoute />,
+        children: [{ index: true, element: <LoginPage /> }],
       },
       {
         path: "/register",
-        element: <RegisterPage />,
+        element: <GuestOnlyRoute />,
+        children: [{ index: true, element: <RegisterPage /> }],
       },
       {
         path: "/forgot-password",
@@ -109,87 +113,171 @@ export const router = createBrowserRouter([
       },
       {
         path: "/staff",
-        element: <StaffHomePage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffHomePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/schedule",
-        element: <StaffSchedulePage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffSchedulePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/shift-detail",
-        element: <StaffShiftDetailPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffShiftDetailPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/check-in",
-        element: <StaffQrCheckInPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffQrCheckInPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/attendance-history",
-        element: <StaffAttendanceHistoryPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffAttendanceHistoryPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/shift-swaps",
-        element: <StaffShiftSwapsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffShiftSwapsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/leave-requests",
-        element: <StaffLeaveRequestsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffLeaveRequestsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/notifications",
-        element: <StaffNotificationsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffNotificationsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/profile",
-        element: <StaffProfilePage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/staff/settings",
-        element: <StaffSettingsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffSettingsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin",
-        element: <AdminSystemOverviewPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminSystemOverviewPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/finance",
-        element: <AdminSaasKpiPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminSaasKpiPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/businesses",
-        element: <AdminBusinessListPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminBusinessListPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/businesses/:businessId",
-        element: <AdminBusinessDetailPage />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminBusinessDetailPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/users",
-        element: <AdminPlaceholderPage title="User Management" />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPlaceholderPage title="User Management" />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/subscriptions",
-        element: <AdminPlaceholderPage title="Subscription Management" />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPlaceholderPage title="Subscription Management" />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/payments",
-        element: <AdminPlaceholderPage title="Payment Operations" />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPlaceholderPage title="Payment Operations" />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/support",
-        element: <AdminPlaceholderPage title="Support Operations" />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPlaceholderPage title="Support Operations" />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/settings",
-        element: <AdminPlaceholderPage title="Admin Settings" />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPlaceholderPage title="Admin Settings" />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/admin/audit-logs",
-        element: <AdminPlaceholderPage title="Audit Logs" />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPlaceholderPage title="Audit Logs" />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/dashboard",
-        element: <DashboardLayout />,
+        element: (
+          <ProtectedRoute allowedRoles={["admin", "owner", "manager"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { index: true, element: <DashboardPage /> },
           {
@@ -211,6 +299,10 @@ export const router = createBrowserRouter([
           },
           {
             path: "branches/settings",
+            element: <BranchSettingsPage />,
+          },
+          {
+            path: "branches/:branchId/settings",
             element: <BranchSettingsPage />,
           },
           {
@@ -238,6 +330,10 @@ export const router = createBrowserRouter([
           {
             path: "schedule/monthly",
             element: <MonthlySchedulePage />,
+          },
+          {
+            path: "schedule/daily",
+            element: <DailySchedulePage />,
           },
           {
             path: "attendance",

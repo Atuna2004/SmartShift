@@ -7,6 +7,7 @@ import { LeaveRequestRoutes } from "../modules/leaveRequest/leave-request.route.
 import { NotificationRoutes } from "../modules/notification/notification.route.js";
 import { OrganizationRoutes } from "../modules/organization/organization.route.js";
 import { PaymentRoutes } from "../modules/payment/payment.route.js";
+import { ReportRoutes } from "../modules/report/report.route.js";
 import { ScheduleRoutes } from "../modules/schedule/schedule.route.js";
 import { ShiftRoutes } from "../modules/shift/shift.route.js";
 import { ShiftSwapRoutes } from "../modules/shiftSwap/shift-swap.route.js";
@@ -28,5 +29,6 @@ router.use("/shift-swaps", ShiftSwapRoutes);
 router.use("/notifications", NotificationRoutes);
 router.use("/subscriptions", SubscriptionRoutes);
 router.use("/payments", PaymentRoutes);
+router.use("/reports", ReportRoutes);
 
 export default router;

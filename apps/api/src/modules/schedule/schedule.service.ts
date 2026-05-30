@@ -38,6 +38,34 @@ const addDays = (date: Date, days: number) => {
   return next;
 };
 
+const assertNotPastWorkDate = (workDate: Date) => {
+  if (startOfDay(workDate) < startOfDay(new Date())) {
+    throw new AppError(400, "Assigned shift date cannot be in the past");
+  }
+};
+
+const timeToMinutes = (time: string) => {
+  const [hours = 0, minutes = 0] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+const getShiftInterval = (workDate: Date, startTime: string, endTime: string) => {
+  const dayStart = startOfDay(workDate).getTime();
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+  const endOffset = endMinutes <= startMinutes ? endMinutes + 24 * 60 : endMinutes;
+
+  return {
+    start: dayStart + startMinutes * 60 * 1000,
+    end: dayStart + endOffset * 60 * 1000,
+  };
+};
+
+const intervalsOverlap = (
+  first: { start: number; end: number },
+  second: { start: number; end: number }
+) => first.start < second.end && second.start < first.end;
+
 const ensureActor = async (actor: AuthTokenPayload) => {
   if (!actor.userId) {
     throw new AppError(401, "You are not authorized");
@@ -154,16 +182,18 @@ const getActiveShiftTemplate = async (
   return shiftTemplate;
 };
 
-const assertNoDuplicateAssignedShift = async (
+const assertNoOverlappingAssignedShift = async (
   employeeId: Types.ObjectId,
   workDate: Date,
+  shiftStartTime: string,
+  shiftEndTime: string,
   excludeAssignedShiftId?: Types.ObjectId
 ) => {
   const filter: Record<string, unknown> = {
     employeeId,
     workDate: {
-      $gte: startOfDay(workDate),
-      $lte: endOfDay(workDate),
+      $gte: startOfDay(addDays(workDate, -1)),
+      $lte: endOfDay(addDays(workDate, 1)),
     },
     deletedAt: { $exists: false },
     status: { $ne: "cancelled" },
@@ -173,10 +203,17 @@ const assertNoDuplicateAssignedShift = async (
     filter._id = { $ne: excludeAssignedShiftId };
   }
 
-  const existingSchedule = await ScheduleModel.findOne(filter);
+  const existingSchedules = await ScheduleModel.find(filter);
+  const proposedInterval = getShiftInterval(workDate, shiftStartTime, shiftEndTime);
+  const hasOverlap = existingSchedules.some((schedule) =>
+    intervalsOverlap(
+      proposedInterval,
+      getShiftInterval(schedule.workDate, schedule.shiftStartTime, schedule.shiftEndTime)
+    )
+  );
 
-  if (existingSchedule) {
-    throw new AppError(409, "Employee already has an assigned shift on this date");
+  if (hasOverlap) {
+    throw new AppError(409, "Employee already has an overlapping assigned shift");
   }
 };
 
@@ -195,10 +232,16 @@ const getAssignedShiftForActor = async (
   return assignedShift;
 };
 
-const toPublicAssignedShift = (assignedShift: ISchedule) => ({
+const toPublicAssignedShift = (
+  assignedShift: ISchedule,
+  branchesById?: Map<string, IBranch>
+) => ({
   id: getDocumentId(assignedShift).toString(),
   organizationId: assignedShift.organizationId.toString(),
   branchId: assignedShift.branchId.toString(),
+  ...(branchesById?.get(assignedShift.branchId.toString())?.name
+    ? { branchName: branchesById.get(assignedShift.branchId.toString())?.name }
+    : {}),
   employeeId: assignedShift.employeeId.toString(),
   shiftTemplateId: assignedShift.shiftTemplateId.toString(),
   workDate: assignedShift.workDate,
@@ -215,6 +258,17 @@ const toPublicAssignedShift = (assignedShift: ISchedule) => ({
     : {}),
 });
 
+const getBranchesById = async (branchIds: Array<string | Types.ObjectId | undefined>) => {
+  const ids = [...new Set(branchIds.filter(Boolean).map((id) => id?.toString() as string))];
+
+  if (ids.length === 0) {
+    return new Map<string, IBranch>();
+  }
+
+  const branches = await BranchModel.find({ _id: { $in: ids.map(asObjectId) } });
+  return new Map(branches.map((branch) => [getDocumentId(branch).toString(), branch]));
+};
+
 const createAssignedShift = async (
   actorPayload: AuthTokenPayload,
   payload: CreateAssignedShiftInput
@@ -226,8 +280,17 @@ const createAssignedShift = async (
   const employee = await assertEmployeeAssignable(actor, branch, payload.employeeId);
   const shiftTemplate = await getActiveShiftTemplate(branch, payload.shiftTemplateId);
   const workDate = startOfDay(payload.workDate);
+  const shiftStartTime = payload.shiftStartTime ?? shiftTemplate.startTime;
+  const shiftEndTime = payload.shiftEndTime ?? shiftTemplate.endTime;
 
-  await assertNoDuplicateAssignedShift(getDocumentId(employee), workDate);
+  assertNotPastWorkDate(workDate);
+
+  await assertNoOverlappingAssignedShift(
+    getDocumentId(employee),
+    workDate,
+    shiftStartTime,
+    shiftEndTime
+  );
 
   const assignedShift = await ScheduleModel.create({
     organizationId: branch.organizationId,
@@ -235,10 +298,10 @@ const createAssignedShift = async (
     employeeId: getDocumentId(employee),
     shiftTemplateId: getDocumentId(shiftTemplate),
     workDate,
-    shiftStartTime: payload.shiftStartTime ?? shiftTemplate.startTime,
-    shiftEndTime: payload.shiftEndTime ?? shiftTemplate.endTime,
+    shiftStartTime,
+    shiftEndTime,
     status: "scheduled",
-    published: payload.published ?? false,
+    published: true,
     assignedBy: getDocumentId(actor),
     ...(payload.note ? { note: payload.note } : {}),
   });
@@ -260,6 +323,8 @@ const updateAssignedShift = async (
   let employeeId = assignedShift.employeeId;
   let shiftTemplateId = assignedShift.shiftTemplateId;
   let workDate = startOfDay(assignedShift.workDate);
+  let shiftStartTime = assignedShift.shiftStartTime;
+  let shiftEndTime = assignedShift.shiftEndTime;
 
   if (payload.employeeId) {
     const employee = await assertEmployeeAssignable(actor, branch, payload.employeeId);
@@ -271,11 +336,11 @@ const updateAssignedShift = async (
     shiftTemplateId = getDocumentId(shiftTemplate);
 
     if (payload.shiftStartTime === undefined) {
-      assignedShift.shiftStartTime = shiftTemplate.startTime;
+      shiftStartTime = shiftTemplate.startTime;
     }
 
     if (payload.shiftEndTime === undefined) {
-      assignedShift.shiftEndTime = shiftTemplate.endTime;
+      shiftEndTime = shiftTemplate.endTime;
     }
   }
 
@@ -283,21 +348,28 @@ const updateAssignedShift = async (
     workDate = startOfDay(payload.workDate);
   }
 
-  await assertNoDuplicateAssignedShift(
+  assertNotPastWorkDate(workDate);
+
+  if (payload.shiftStartTime !== undefined) {
+    shiftStartTime = payload.shiftStartTime;
+  }
+  if (payload.shiftEndTime !== undefined) {
+    shiftEndTime = payload.shiftEndTime;
+  }
+
+  await assertNoOverlappingAssignedShift(
     employeeId,
     workDate,
+    shiftStartTime,
+    shiftEndTime,
     getDocumentId(assignedShift)
   );
 
   assignedShift.employeeId = employeeId;
   assignedShift.shiftTemplateId = shiftTemplateId;
   assignedShift.workDate = workDate;
-  if (payload.shiftStartTime !== undefined) {
-    assignedShift.shiftStartTime = payload.shiftStartTime;
-  }
-  if (payload.shiftEndTime !== undefined) {
-    assignedShift.shiftEndTime = payload.shiftEndTime;
-  }
+  assignedShift.shiftStartTime = shiftStartTime;
+  assignedShift.shiftEndTime = shiftEndTime;
   if (payload.status !== undefined) {
     assignedShift.status = payload.status as ScheduleStatus;
   }
@@ -373,10 +445,12 @@ const getWeeklySchedule = async (
     shiftStartTime: 1,
   });
 
+  const branchesById = await getBranchesById(schedules.map((schedule) => schedule.branchId));
+
   return {
     weekStart,
     weekEnd,
-    data: schedules.map(toPublicAssignedShift),
+    data: schedules.map((schedule) => toPublicAssignedShift(schedule, branchesById)),
   };
 };
 
@@ -407,10 +481,12 @@ const getMySchedule = async (
     shiftStartTime: 1,
   });
 
+  const branchesById = await getBranchesById(schedules.map((schedule) => schedule.branchId));
+
   return {
     from,
     to,
-    data: schedules.map(toPublicAssignedShift),
+    data: schedules.map((schedule) => toPublicAssignedShift(schedule, branchesById)),
   };
 };
 

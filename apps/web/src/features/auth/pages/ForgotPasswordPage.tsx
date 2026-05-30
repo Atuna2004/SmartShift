@@ -1,13 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { ArrowRight, CheckCircle2, LoaderCircle, LockKeyhole, Mail, RotateCcw } from "lucide-react";
+import { authApi } from "@/features/auth/auth.api";
 import { AuthShell } from "@/features/auth/components/AuthShell";
-import { api } from "@/services/api";
-
-type ForgotPasswordResponse = {
-  resetToken?: string;
-};
+import { getApiErrorMessage } from "@/shared/api";
 
 export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -22,18 +18,12 @@ export const ForgotPasswordPage = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await api.post<ForgotPasswordResponse>("/auth/forgot-password", {
-        email,
-      });
+      const result = await authApi.forgotPassword({ email });
 
       setResetToken(result?.resetToken ?? "");
       setIsSent(true);
     } catch (err) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        setError(err.response?.data?.message ?? "Unable to send reset instructions. Please try again.");
-      } else {
-        setError("Unable to send reset instructions. Please try again.");
-      }
+      setError(getApiErrorMessage(err, "Không thể gửi hướng dẫn đặt lại mật khẩu. Vui lòng thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -48,8 +38,8 @@ export const ForgotPasswordPage = () => {
           </div>
           {!isSent ? (
             <>
-              <h1 className="mb-2 text-4xl font-semibold tracking-tight">Forgot password?</h1>
-              <p className="text-base text-[#444748]">No worries, we&apos;ll send you reset instructions.</p>
+              <h1 className="mb-2 text-4xl font-semibold tracking-tight">Quên mật khẩu?</h1>
+              <p className="text-base text-[#444748]">Không sao, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.</p>
             </>
           ) : null}
         </div>
@@ -58,14 +48,14 @@ export const ForgotPasswordPage = () => {
           {!isSent ? (
             <form className="space-y-6" onSubmit={handleSubmit}>
               <label className="block space-y-1" htmlFor="email">
-                <span className="text-sm font-semibold">Email address</span>
+                <span className="text-sm font-semibold">Địa chỉ email</span>
                 <span className="relative block">
                   <input
                     autoFocus
                     className="h-12 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 pr-12 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black"
                     id="email"
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="name@company.com"
+                    placeholder="ten@congty.com"
                     required
                     type="email"
                     value={email}
@@ -80,7 +70,7 @@ export const ForgotPasswordPage = () => {
                 type="submit"
               >
                 {isSubmitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : null}
-                {isSubmitting ? "Sending..." : "Send reset link"}
+                {isSubmitting ? "Đang gửi..." : "Gửi liên kết đặt lại"}
                 {!isSubmitting ? <ArrowRight className="h-4 w-4" /> : null}
               </button>
             </form>
@@ -89,16 +79,16 @@ export const ForgotPasswordPage = () => {
               <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-[#10b981]/10 text-[#10b981]">
                 <CheckCircle2 className="h-10 w-10 fill-current" />
               </div>
-              <h2 className="mb-2 text-2xl font-semibold tracking-tight">Check your email</h2>
+              <h2 className="mb-2 text-2xl font-semibold tracking-tight">Kiểm tra email của bạn</h2>
               <p className="mb-6 text-base leading-7 text-[#444748]">
-                We&apos;ve sent a password reset link to your inbox. Please follow the instructions to reset your password.
+                Chúng tôi đã gửi liên kết đặt lại mật khẩu vào hộp thư của bạn. Vui lòng làm theo hướng dẫn để đặt lại mật khẩu.
               </p>
               {resetToken ? (
                 <Link
                   className="mb-6 flex h-12 w-full items-center justify-center rounded-lg bg-black text-sm font-semibold text-white"
                   to={`/reset-password?token=${resetToken}`}
                 >
-                  Open reset page
+                  Mở trang đặt lại
                 </Link>
               ) : null}
               <button
@@ -107,7 +97,7 @@ export const ForgotPasswordPage = () => {
                 type="button"
               >
                 <RotateCcw className="h-4 w-4" />
-                Click to retry
+                Bấm để thử lại
               </button>
             </div>
           )}

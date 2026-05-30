@@ -6,8 +6,17 @@ export type AuthUser = {
   fullName: string;
   email: string;
   role: "admin" | "owner" | "manager" | "staff";
+  employeeType?: string;
+  phone?: string;
+  avatar?: string;
+  employeeCode?: string;
+  joinDate?: string;
+  status?: "active" | "inactive" | "suspended";
+  isEmailVerified?: boolean;
+  lastLoginAt?: string;
   organizationId?: string;
   branchId?: string;
+  branchName?: string;
 };
 
 type AuthState = {
@@ -19,6 +28,8 @@ type AuthState = {
     refreshToken?: string;
     user: AuthUser;
   }) => void;
+  setUser: (user: AuthUser) => void;
+  setTokens: (payload: { accessToken: string; refreshToken?: string }) => void;
   clearAuth: () => void;
 };
 
@@ -33,6 +44,12 @@ export const useAuthStore = create<AuthState>()(
           accessToken,
           refreshToken: refreshToken ?? state.refreshToken,
           user,
+        })),
+      setUser: (user) => set({ user }),
+      setTokens: ({ accessToken, refreshToken }) =>
+        set((state) => ({
+          accessToken,
+          refreshToken: refreshToken ?? state.refreshToken,
         })),
       clearAuth: () =>
         set({

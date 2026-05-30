@@ -91,10 +91,25 @@ const disableShiftTemplate = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const enableShiftTemplate = catchAsync(async (req: Request, res: Response) => {
+  const result = await ShiftService.enableShiftTemplate(
+    getAuthUser(req),
+    getShiftTemplateIdParam(req)
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Shift template enabled successfully",
+    data: result,
+  });
+});
+
 export const ShiftController = {
   createShiftTemplate,
   getShiftTemplateList,
   getShiftTemplateById,
   updateShiftTemplate,
   disableShiftTemplate,
+  enableShiftTemplate,
 };

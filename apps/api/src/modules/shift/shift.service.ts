@@ -81,7 +81,7 @@ const getShiftTemplateForActor = async (
 ) => {
   const shiftTemplate = await ShiftTemplateModel.findById(shiftTemplateId);
 
-  if (!shiftTemplate || shiftTemplate.deletedAt) {
+  if (!shiftTemplate) {
     throw new AppError(404, "Shift template not found");
   }
 
@@ -166,9 +166,7 @@ const getShiftTemplateList = async (
   const page = query.page;
   const limit = query.limit;
   const skip = (page - 1) * limit;
-  const filter: Record<string, unknown> = {
-    deletedAt: { $exists: false },
-  };
+  const filter: Record<string, unknown> = {};
 
   if (query.branchId) {
     const branch = await getBranchForActor(actor, query.branchId);
@@ -265,7 +263,22 @@ const disableShiftTemplate = async (
   const shiftTemplate = await getShiftTemplateForActor(actor, shiftTemplateId);
 
   shiftTemplate.status = "disabled";
-  shiftTemplate.deletedAt = new Date();
+  shiftTemplate.set("deletedAt", undefined);
+  shiftTemplate.updatedBy = getDocumentId(actor);
+  await shiftTemplate.save();
+
+  return toPublicShiftTemplate(shiftTemplate);
+};
+
+const enableShiftTemplate = async (
+  actorPayload: AuthTokenPayload,
+  shiftTemplateId: string
+) => {
+  const actor = await ensureActor(actorPayload);
+  const shiftTemplate = await getShiftTemplateForActor(actor, shiftTemplateId);
+
+  shiftTemplate.status = "active";
+  shiftTemplate.set("deletedAt", undefined);
   shiftTemplate.updatedBy = getDocumentId(actor);
   await shiftTemplate.save();
 
@@ -278,4 +291,5 @@ export const ShiftService = {
   getShiftTemplateById,
   updateShiftTemplate,
   disableShiftTemplate,
+  enableShiftTemplate,
 };

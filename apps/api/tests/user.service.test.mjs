@@ -342,17 +342,38 @@ test("Remove Manager From Branch: owner can remove assigned manager", async () =
   assert.equal(branch.managerId, undefined);
 });
 
-test("Staff cannot use employee admin service", async () => {
+test("View Employee List: staff can list active staff in own branch for shift swaps", async () => {
   const staff = createUserDoc({ _id: staffId, role: "staff", branchId });
+  let capturedFilter;
 
   stubFindByIdQueue(staff);
+  stub(UserModel, "find", (filter) => {
+    capturedFilter = filter;
+    return {
+      sort() {
+        return this;
+      },
+      skip() {
+        return this;
+      },
+      async limit() {
+        return [staff];
+      },
+    };
+  });
+  stub(UserModel, "countDocuments", async () => 1);
 
-  await assert.rejects(
-    () =>
-      UserService.getEmployeeList(actorPayload(staff), {
-        page: 1,
-        limit: 20,
-      }),
-    { statusCode: 403 }
-  );
+  const result = await UserService.getEmployeeList(actorPayload(staff), {
+    page: 1,
+    limit: 20,
+    role: "staff",
+    status: "active",
+    branchId: branchId.toString(),
+  });
+
+  assert.equal(result.meta.total, 1);
+  assert.equal(result.data[0].id, staffId.toString());
+  assert.equal(capturedFilter.role, "staff");
+  assert.equal(capturedFilter.status, "active");
+  assert.equal(capturedFilter.branchId.toString(), branchId.toString());
 });

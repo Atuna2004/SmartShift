@@ -166,7 +166,7 @@ test("Create Assigned Shift: manager can assign staff using template times", asy
   stub(UserModel, "findById", async () => findByIdQueue.shift() ?? null);
   stub(BranchModel, "findById", async () => branch);
   stub(ShiftTemplateModel, "findById", async () => shiftTemplate);
-  stub(ScheduleModel, "findOne", async () => null);
+  stub(ScheduleModel, "find", async () => []);
   stub(ScheduleModel, "create", async (payload) => {
     createdPayload = payload;
     return createAssignedShiftDoc({ _id: assignedShiftId, ...payload });
@@ -184,6 +184,74 @@ test("Create Assigned Shift: manager can assign staff using template times", asy
   assert.equal(result.shiftEndTime, "17:00");
   assert.equal(createdPayload.workDate.getHours(), 0);
   assert.equal(createdPayload.assignedBy.toString(), managerId.toString());
+});
+
+test("Create Assigned Shift: allows same employee on non-overlapping day and overnight shifts", async () => {
+  const manager = createUserDoc({ _id: managerId, role: "manager", branchId });
+  const staff = createUserDoc({ _id: staffId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const nightTemplate = createShiftTemplateDoc({
+    name: "Night",
+    startTime: "20:00",
+    endTime: "04:00",
+  });
+  const existingMorningShift = createAssignedShiftDoc({
+    workDate: new Date("2026-05-25T00:00:00.000Z"),
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+  const findByIdQueue = [manager, staff];
+
+  stub(UserModel, "findById", async () => findByIdQueue.shift() ?? null);
+  stub(BranchModel, "findById", async () => branch);
+  stub(ShiftTemplateModel, "findById", async () => nightTemplate);
+  stub(ScheduleModel, "find", async () => [existingMorningShift]);
+  stub(ScheduleModel, "create", async (payload) =>
+    createAssignedShiftDoc({ _id: assignedShiftId, ...payload })
+  );
+
+  const result = await ScheduleService.createAssignedShift(actorPayload(manager), {
+    branchId: branchId.toString(),
+    employeeId: staffId.toString(),
+    shiftTemplateId: shiftTemplateId.toString(),
+    workDate: new Date("2026-05-25T00:00:00.000Z"),
+  });
+
+  assert.equal(result.shiftStartTime, "20:00");
+  assert.equal(result.shiftEndTime, "04:00");
+});
+
+test("Create Assigned Shift: rejects overlapping overnight shift into next day", async () => {
+  const manager = createUserDoc({ _id: managerId, role: "manager", branchId });
+  const staff = createUserDoc({ _id: staffId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const earlyTemplate = createShiftTemplateDoc({
+    name: "Early",
+    startTime: "03:00",
+    endTime: "06:00",
+  });
+  const existingNightShift = createAssignedShiftDoc({
+    workDate: new Date("2026-05-25T00:00:00.000Z"),
+    shiftStartTime: "20:00",
+    shiftEndTime: "04:00",
+  });
+  const findByIdQueue = [manager, staff];
+
+  stub(UserModel, "findById", async () => findByIdQueue.shift() ?? null);
+  stub(BranchModel, "findById", async () => branch);
+  stub(ShiftTemplateModel, "findById", async () => earlyTemplate);
+  stub(ScheduleModel, "find", async () => [existingNightShift]);
+
+  await assert.rejects(
+    () =>
+      ScheduleService.createAssignedShift(actorPayload(manager), {
+        branchId: branchId.toString(),
+        employeeId: staffId.toString(),
+        shiftTemplateId: shiftTemplateId.toString(),
+        workDate: new Date("2026-05-26T00:00:00.000Z"),
+      }),
+    { statusCode: 409 }
+  );
 });
 
 test("View My Schedule: filters by authenticated user and date range", async () => {

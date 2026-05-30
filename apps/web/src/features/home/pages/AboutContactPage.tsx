@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { Mail, MapPin, Rocket, TimerOff } from "lucide-react";
 import { MarketingShell } from "@/features/home/components/MarketingShell";
 
@@ -28,9 +28,9 @@ export const AboutContactPage = () => (
     <main className="pt-32">
       <section className="mx-auto mb-20 grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-12">
         <div>
-          <h1 className="text-5xl font-black leading-tight tracking-tight text-black">Our Mission to Empower Small Businesses</h1>
+          <h1 className="text-5xl font-black leading-tight tracking-tight text-black">Sứ mệnh của chúng tôi là trao quyền cho doanh nghiệp nhỏ</h1>
           <p className="mt-6 max-w-xl text-lg leading-8 text-[#444748]">
-            Local shops, services, and small enterprises deserve the same high-caliber technology as global giants.
+            Các cửa hàng địa phương, doanh nghiệp dịch vụ và doanh nghiệp nhỏ xứng đáng được tiếp cận công nghệ chất lượng cao như các tập đoàn lớn.
           </p>
         </div>
         <img alt="" className="aspect-[4/3] rounded-xl border border-[#e5e7eb] object-cover shadow-xl grayscale-[20%]" src={images.storefront} />
@@ -39,31 +39,31 @@ export const AboutContactPage = () => (
       <section className="border-y border-[#e5e7eb] bg-[#f7f3f2] px-6 py-20 lg:px-12">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-4xl font-black tracking-tight">Why we built SmartShift</h2>
-            <p className="mt-4 text-[#444748]">The tools of the past are holding back the growth of the future.</p>
+            <h2 className="text-4xl font-black tracking-tight">Vì sao chúng tôi xây dựng SmartShift</h2>
+            <p className="mt-4 text-[#444748]">Những công cụ cũ đang cản trở sự tăng trưởng của tương lai.</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             <div className="rounded-xl border border-[#e5e7eb] bg-white p-8 shadow-sm md:col-span-2">
               <TimerOff className="mb-4 h-8 w-8" />
-              <h3 className="text-2xl font-black tracking-tight">Escaping the Manual Trap</h3>
+              <h3 className="text-2xl font-black tracking-tight">Thoát khỏi vòng lặp thủ công</h3>
               <p className="mt-3 leading-8 text-[#444748]">
-                Spreadsheets and paper ledgers are invisible walls. SmartShift helps owners reclaim time from admin work.
+                Bảng tính và sổ giấy là những bức tường vô hình. SmartShift giúp chủ doanh nghiệp lấy lại thời gian từ công việc hành chính.
               </p>
             </div>
             <div className="flex flex-col justify-center rounded-xl bg-black p-8 text-white">
               <h4 className="text-4xl font-black">4.2x</h4>
-              <p className="mt-2 text-white/70">Average efficiency increase for partners moving away from manual tools.</p>
+              <p className="mt-2 text-white/70">Mức tăng hiệu suất trung bình của đối tác khi rời bỏ công cụ thủ công.</p>
             </div>
             <div className="rounded-xl border border-[#e5e7eb] bg-white p-8 shadow-sm">
               <Rocket className="mb-4 h-8 w-8" />
-              <h3 className="text-sm font-black uppercase tracking-widest">Growth Focus</h3>
-              <p className="mt-3 text-[#444748]">Scale without administrative friction.</p>
+              <h3 className="text-sm font-black uppercase tracking-widest">Tập trung tăng trưởng</h3>
+              <p className="mt-3 text-[#444748]">Mở rộng mà không bị cản bởi thủ tục hành chính.</p>
             </div>
             <div className="flex items-center gap-8 rounded-xl border border-[#e5e7eb] bg-white p-8 shadow-sm md:col-span-2">
               <img alt="" className="hidden h-32 w-32 rounded-xl object-cover grayscale lg:block" src={images.laptop} />
               <div>
-                <h3 className="text-2xl font-black tracking-tight">Intelligent Automation</h3>
-                <p className="mt-2 text-[#444748]">From smart scheduling to automated reporting, manual entry becomes precision logic.</p>
+                <h3 className="text-2xl font-black tracking-tight">Tự động hóa thông minh</h3>
+                <p className="mt-2 text-[#444748]">Từ lập lịch thông minh đến báo cáo tự động, nhập liệu thủ công được thay bằng logic chính xác.</p>
               </div>
             </div>
           </div>
@@ -72,8 +72,8 @@ export const AboutContactPage = () => (
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-12">
         <div className="mb-12 text-center">
-          <h2 className="text-4xl font-black tracking-tight">The Team Behind the Shift</h2>
-          <p className="mx-auto mt-4 max-w-xl text-[#444748]">Designers, engineers, and former business operators dedicated to your success.</p>
+          <h2 className="text-4xl font-black tracking-tight">Đội ngũ đứng sau SmartShift</h2>
+          <p className="mx-auto mt-4 max-w-xl text-[#444748]">Các nhà thiết kế, kỹ sư và cựu nhà vận hành doanh nghiệp tận tâm vì thành công của bạn.</p>
         </div>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {team.map(([name, role], index) => (
@@ -89,22 +89,22 @@ export const AboutContactPage = () => (
       <section className="border-t border-[#e5e7eb] bg-white px-6 py-20 lg:px-12">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
           <div>
-            <h2 className="text-4xl font-black tracking-tight">Let's talk about your business.</h2>
-            <p className="mt-4 text-lg leading-8 text-[#444748]">Questions about our mission? Need help getting started? We're here to help you scale.</p>
+            <h2 className="text-4xl font-black tracking-tight">Hãy trao đổi về doanh nghiệp của bạn.</h2>
+            <p className="mt-4 text-lg leading-8 text-[#444748]">Có câu hỏi về sứ mệnh của chúng tôi? Cần hỗ trợ để bắt đầu? Chúng tôi luôn sẵn sàng giúp bạn mở rộng.</p>
             <div className="mt-8 space-y-4">
               <ContactLine icon={<Mail className="h-5 w-5" />} text="hello@smartshift.io" />
-              <ContactLine icon={<MapPin className="h-5 w-5" />} text="Ho Chi Minh City, Vietnam" />
+              <ContactLine icon={<MapPin className="h-5 w-5" />} text="TP. Hồ Chí Minh, Việt Nam" />
             </div>
           </div>
           <form className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-8">
-            <Field label="Name" placeholder="Your Name" />
+            <Field label="Tên" placeholder="Your Tên" />
             <Field label="Email" placeholder="email@example.com" type="email" />
             <label className="mb-6 block">
-              <span className="mb-1 block text-sm font-semibold">Message</span>
-              <textarea className="min-h-32 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 outline-none focus:border-black focus:ring-2 focus:ring-black" placeholder="How can we help?" />
+              <span className="mb-1 block text-sm font-semibold">Tin nhắn</span>
+              <textarea className="min-h-32 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 outline-none focus:border-black focus:ring-2 focus:ring-black" placeholder="Chúng tôi có thể hỗ trợ gì cho bạn?" />
             </label>
             <button className="h-12 w-full rounded-lg bg-black text-sm font-semibold text-white" type="button">
-              Send Message
+              Send Tin nhắn
             </button>
           </form>
         </div>
@@ -126,3 +126,5 @@ const ContactLine = ({ icon, text }: { icon: ReactNode; text: string }) => (
     {text}
   </div>
 );
+
+

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import {
   ArrowRight,
@@ -27,10 +27,10 @@ const images = {
 };
 
 const navLinks = [
-  { label: "Product", href: "/" },
-  { label: "Features", href: "/features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Resources", href: "/about-contact" },
+  { label: "Sản phẩm", href: "/" },
+  { label: "Tính năng", href: "/features" },
+  { label: "Bảng giá", href: "/pricing" },
+  { label: "Tài nguyên", href: "/about-contact" },
 ];
 
 export const HomePage = () => {
@@ -50,10 +50,10 @@ export const HomePage = () => {
           </nav>
           <div className="flex items-center gap-4">
             <Link className="hidden text-sm font-semibold text-[#444748] transition hover:text-black sm:inline" to="/login">
-              Log In
+              Đăng nhập
             </Link>
             <Link className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white transition hover:opacity-85" to="/register">
-              Get Started
+              Bắt đầu ngay
             </Link>
           </div>
         </div>
@@ -64,19 +64,19 @@ export const HomePage = () => {
           <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div>
               <h1 className="max-w-xl text-5xl font-black leading-[1.04] tracking-tight text-black md:text-6xl">
-                Stop managing shifts with paper and Zalo
+                Ngừng quản lý ca làm bằng giấy và Zalo
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-8 text-[#444748]">
-                The smartest way for cafes and restaurants to schedule staff, track attendance, and automate payroll in one single workspace.
+                Cách thông minh nhất để quán cà phê và nhà hàng xếp lịch nhân sự, theo dõi chấm công và tự động hóa lương trong một không gian làm việc duy nhất.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link className="inline-flex h-14 items-center justify-center gap-2 rounded-lg bg-black px-8 text-base font-semibold text-white transition hover:opacity-90" to="/register">
-                  Start Free Trial
+                  Dùng thử miễn phí
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <a className="inline-flex h-14 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-[#fdf8f8] px-8 text-base font-semibold text-black transition hover:bg-[#f1edec]" href="#features">
                   <CirclePlay className="h-5 w-5" />
-                  Watch Demo
+                  Xem demo
                 </a>
               </div>
               <div className="mt-8 flex items-center gap-4">
@@ -86,7 +86,7 @@ export const HomePage = () => {
                     500+
                   </div>
                 </div>
-                <p className="text-xs text-[#444748]">Trusted by local service businesses</p>
+                <p className="text-xs text-[#444748]">Được các doanh nghiệp dịch vụ địa phương tin dùng</p>
               </div>
             </div>
 
@@ -104,25 +104,25 @@ export const HomePage = () => {
         <section className="bg-[#f7f3f2] px-6 py-16 lg:px-12 lg:py-20">
           <div className="mx-auto max-w-7xl">
             <div className="mb-12 text-center">
-              <span className="text-sm font-semibold uppercase tracking-widest text-[#0058be]">The Old Way</span>
-              <h2 className="mt-2 text-4xl font-black tracking-tight">Messy workflows kill margins</h2>
+              <span className="text-sm font-semibold uppercase tracking-widest text-[#0058be]">Cách làm cũ</span>
+              <h2 className="mt-2 text-4xl font-black tracking-tight">Quy trình rối rắm làm giảm lợi nhuận</h2>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
-              <ProblemCard icon={<Table2 />} title="Chaotic Excel Sheets">
-                Version control nightmares and broken formulas leading to payroll errors.
+              <ProblemCard icon={<Table2 />} title="Bảng Excel lộn xộn">
+                Lỗi phiên bản và công thức hỏng khiến tính lương sai lệch.
               </ProblemCard>
-              <ProblemCard icon={<MessageSquare />} title="Zalo Group Fatigue">
-                Important shift swaps buried under hundreds of unrelated messages.
+              <ProblemCard icon={<MessageSquare />} title="Ngập tin nhắn Zalo">
+                Các ca đổi quan trọng bị chôn giữa hàng trăm tin nhắn không liên quan.
               </ProblemCard>
               <div className="rounded-xl bg-black p-8 text-white md:col-span-3 md:flex md:items-center md:justify-between md:gap-8">
                 <div className="max-w-lg">
-                  <h3 className="text-4xl font-black tracking-tight">Vs. The SmartShift Advantage</h3>
+                  <h3 className="text-4xl font-black tracking-tight">So với lợi thế của SmartShift</h3>
                   <p className="mt-4 text-lg leading-8 text-white/75">
-                    One source of truth for every branch, every manager, and every staff member.
+                    Một nguồn dữ liệu duy nhất cho mọi chi nhánh, mọi quản lý và mọi nhân viên.
                   </p>
                 </div>
                 <div className="mt-8 grid gap-4 sm:grid-cols-2 md:mt-0">
-                  {["100% Accurate", "Zero Paper", "Real-time Sync", "Staff Happy"].map((item) => (
+                  {["Chính xác 100%", "Không giấy tờ", "Đồng bộ thời gian thực", "Nhân viên hài lòng"].map((item) => (
                     <div className="flex items-center gap-2 text-sm font-semibold" key={item}>
                       <CheckCircle2 className="h-5 w-5 text-[#10b981]" />
                       {item}
@@ -136,18 +136,18 @@ export const HomePage = () => {
 
         <section className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-24" id="features">
           <div className="mb-12 max-w-2xl">
-            <span className="text-sm font-semibold uppercase tracking-widest text-[#0058be]">Features</span>
-            <h2 className="mt-2 text-4xl font-black tracking-tight">Built for the velocity of service work</h2>
+            <span className="text-sm font-semibold uppercase tracking-widest text-[#0058be]">Tính năng</span>
+            <h2 className="mt-2 text-4xl font-black tracking-tight">Được xây cho nhịp độ của công việc dịch vụ</h2>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            <FeatureCard image={images.schedule} title="Visual Scheduling">
-              Drag and drop shifts in seconds. View coverage gaps and labor costs before publishing.
+            <FeatureCard image={images.schedule} title="Lập lịch trực quan">
+              Kéo thả ca làm trong vài giây. Xem khoảng trống ca và chi phí lao động trước khi xuất bản.
             </FeatureCard>
-            <FeatureCard image={images.qr} title="QR Check-in">
-              Eliminate buddy punching with secure QR check-ins from staff devices.
+            <FeatureCard image={images.qr} title="Chấm công QR">
+              Loại bỏ việc chấm công hộ bằng mã QR an toàn từ thiết bị của nhân viên.
             </FeatureCard>
-            <FeatureCard image={images.swaps} title="Self-Service Swaps">
-              Staff can request swaps with manager approval without messy coordination.
+            <FeatureCard image={images.swaps} title="Tự đổi ca">
+              Nhân viên có thể gửi yêu cầu đổi ca và chờ quản lý duyệt mà không cần điều phối rối rắm.
             </FeatureCard>
           </div>
         </section>
@@ -161,40 +161,40 @@ export const HomePage = () => {
                 ))}
               </div>
               <blockquote className="text-4xl font-black italic leading-tight tracking-tight">
-                "SmartShift saved us 15 hours a week in manager administration."
+                "SmartShift giúp chúng tôi tiết kiệm 15 giờ mỗi tuần cho công việc quản lý."
               </blockquote>
               <div className="mt-8 flex items-center gap-4">
                 <img alt="" className="h-12 w-12 rounded-full object-cover" src={images.portrait} />
                 <div>
                   <p className="text-sm font-semibold text-black">Le Minh Anh</p>
-                  <p className="text-xs text-[#444748]">Owner, The Roastery Saigon</p>
+                  <p className="text-xs text-[#444748]">Chủ quán, The Roastery Saigon</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Metric value="4.9/5" label="App Store Rating" />
-              <Metric value="3000+" label="Active Staff" />
-              <Metric value="30%" label="Reduction in Labor Costs" wide />
+              <Metric value="4.9/5" label="Đánh giá ứng dụng" />
+              <Metric value="3000+" label="Nhân viên đang hoạt động" />
+              <Metric value="30%" label="Giảm chi phí nhân công" wide />
             </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-6xl px-6 py-16 lg:px-12 lg:py-24" id="pricing">
           <div className="mb-12 text-center">
-            <h2 className="text-4xl font-black tracking-tight">Simple, transparent pricing</h2>
+            <h2 className="text-4xl font-black tracking-tight">Bảng giá đơn giản, minh bạch</h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-[#444748]">
-              Scale your service business with tools designed for precision. No hidden fees.
+              Phát triển doanh nghiệp dịch vụ của bạn với bộ công cụ được thiết kế cho độ chính xác. Không phí ẩn.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            <PlanCard name="Basic Plan" price="$49" cta="Choose Basic" features={["Up to 10 staff members", "Real-time QR Code Clock-in", "Email support"]} />
+            <PlanCard name="Gói cơ bản" price="$49" cta="Chọn gói cơ bản" features={["Tối đa 10 nhân viên", "Chấm công QR thời gian thực", "Hỗ trợ qua email"]} />
             <PlanCard
               dark
               badge="Most Popular"
-              name="Organization Plan"
+              name="Gói tổ chức"
               price="$129"
-              cta="Contact Sales"
-              features={["Unlimited staff and users", "Auto-scheduling AI", "Multi-branch support", "Dedicated success manager"]}
+              cta="Liên hệ kinh doanh"
+              features={["Không giới hạn nhân viên và người dùng", "AI tự động lập lịch", "Hỗ trợ đa chi nhánh", "Quản lý thành công riêng"]}
             />
           </div>
         </section>
@@ -202,9 +202,9 @@ export const HomePage = () => {
         <section className="bg-white px-6 py-16 lg:px-12 lg:py-24" id="contact">
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
             <div>
-              <h2 className="text-4xl font-black tracking-tight">Let's talk about your business.</h2>
+              <h2 className="text-4xl font-black tracking-tight">Hãy trao đổi về doanh nghiệp của bạn.</h2>
               <p className="mt-4 max-w-xl text-lg leading-8 text-[#444748]">
-                Questions about SmartShift? Need help getting started? Our team can help you map the right setup.
+                Có câu hỏi về SmartShift? Cần hỗ trợ bắt đầu? Đội ngũ của chúng tôi sẽ giúp bạn thiết lập phù hợp.
               </p>
               <div className="mt-8 space-y-4">
                 <div className="flex items-center gap-3 font-semibold">
@@ -218,14 +218,14 @@ export const HomePage = () => {
               </div>
             </div>
             <form className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-8">
-              <ContactField label="Name" placeholder="Your name" />
+              <ContactField label="Tên" placeholder="Tên của bạn" />
               <ContactField label="Email" placeholder="email@example.com" type="email" />
               <label className="mb-6 block">
-                <span className="mb-1 block text-sm font-semibold">Message</span>
-                <textarea className="min-h-32 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 outline-none focus:border-black focus:ring-2 focus:ring-black" placeholder="How can we help?" />
+                <span className="mb-1 block text-sm font-semibold">Tin nhắn</span>
+                <textarea className="min-h-32 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 outline-none focus:border-black focus:ring-2 focus:ring-black" placeholder="Chúng tôi có thể hỗ trợ gì cho bạn?" />
               </label>
               <button className="h-12 w-full rounded-lg bg-black text-sm font-semibold text-white transition hover:opacity-90" type="button">
-                Send Message
+                Send Tin nhắn
               </button>
             </form>
           </div>
@@ -233,16 +233,16 @@ export const HomePage = () => {
 
         <section className="px-6 py-16 lg:px-12">
           <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-black p-8 text-center text-white md:p-16">
-            <h2 className="mx-auto max-w-3xl text-4xl font-black tracking-tight">Ready to simplify your branch management?</h2>
+            <h2 className="mx-auto max-w-3xl text-4xl font-black tracking-tight">Sẵn sàng đơn giản hóa việc quản lý chi nhánh?</h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-white/70">
-              Join hundreds of businesses scaling faster with better staff operations.
+              Tham gia cùng hàng trăm doanh nghiệp đang tăng trưởng nhanh hơn nhờ vận hành nhân sự tốt hơn.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <Link className="rounded-lg bg-white px-8 py-4 text-sm font-semibold text-black transition hover:bg-[#f1edec]" to="/register">
-                Get Started
+                Bắt đầu ngay
               </Link>
               <a className="rounded-lg border border-white/20 px-8 py-4 text-sm font-semibold text-white transition hover:bg-white/10" href="#contact">
-                Contact Sales
+                Liên hệ kinh doanh
               </a>
             </div>
           </div>
@@ -253,15 +253,15 @@ export const HomePage = () => {
         <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 md:grid-cols-4 lg:px-12">
           <div>
             <div className="mb-4 text-2xl font-black">SmartShift</div>
-            <p className="max-w-xs text-[#ddd9d8]">Building tools for the future of service industry operations.</p>
+            <p className="max-w-xs text-[#ddd9d8]">Xây dựng công cụ cho tương lai của vận hành ngành dịch vụ.</p>
           </div>
-          <FooterColumn title="Product" items={["Features", "Pricing", "Enterprise"]} />
-          <FooterColumn title="Company" items={["About", "Careers", "Contact"]} />
-          <FooterColumn title="Legal" items={["Privacy Policy", "Terms of Service", "Security"]} />
+          <FooterColumn title="Sản phẩm" items={["Tính năng", "Bảng giá", "Doanh nghiệp"]} />
+          <FooterColumn title="Công ty" items={["Giới thiệu", "Tuyển dụng", "Liên hệ"]} />
+          <FooterColumn title="Pháp lý" items={["Chính sách quyền riêng tư", "Điều khoản dịch vụ", "Bảo mật"]} />
         </div>
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-white/10 px-6 py-6 text-xs text-[#ddd9d8] md:flex-row lg:px-12">
-          <span>© 2024 SmartShift. All rights reserved.</span>
-          <span>Precision scheduling for modern service teams.</span>
+          <span>Â© 2024 SmartShift. All rights reserved.</span>
+          <span>Lập lịch chính xác cho đội ngũ dịch vụ hiện đại.</span>
         </div>
       </footer>
     </div>
@@ -351,3 +351,5 @@ const FooterColumn = ({ items, title }: { items: string[]; title: string }) => (
     </ul>
   </div>
 );
+
+

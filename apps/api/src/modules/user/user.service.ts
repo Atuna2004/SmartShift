@@ -15,7 +15,7 @@ import type {
 
 const asObjectId = (value: string) => new Types.ObjectId(value);
 
-const ensureActor = async (actor: AuthTokenPayload) => {
+const ensureActor = async (actor: AuthTokenPayload, options?: { allowStaff?: boolean }) => {
   if (!actor.userId) {
     throw new AppError(401, "You are not authorized");
   }
@@ -30,7 +30,7 @@ const ensureActor = async (actor: AuthTokenPayload) => {
     throw new AppError(403, "User account is inactive");
   }
 
-  if (user.role === "staff") {
+  if (user.role === "staff" && !options?.allowStaff) {
     throw new AppError(403, "Staff cannot manage employees");
   }
 
@@ -226,7 +226,7 @@ const getEmployeeById = async (actorPayload: AuthTokenPayload, employeeId: strin
 };
 
 const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeListQuery) => {
-  const actor = await ensureActor(actorPayload);
+  const actor = await ensureActor(actorPayload, { allowStaff: true });
   const page = query.page;
   const limit = query.limit;
   const skip = (page - 1) * limit;
@@ -240,7 +240,7 @@ const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeLi
     Object.assign(filter, getOwnerScopeFilter(actor));
   } else {
     if (!actor.branchId) {
-      throw new AppError(403, "Manager is not assigned to a branch");
+      throw new AppError(403, `${actor.role === "staff" ? "Staff" : "Manager"} is not assigned to a branch`);
     }
 
     filter.role = "staff";
@@ -248,8 +248,8 @@ const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeLi
   }
 
   if (query.role) {
-    if (actor.role === "manager" && query.role !== "staff") {
-      throw new AppError(403, "Managers can only list staff");
+    if ((actor.role === "manager" || actor.role === "staff") && query.role !== "staff") {
+      throw new AppError(403, `${actor.role === "staff" ? "Staff" : "Managers"} can only list staff`);
     }
 
     filter.role = query.role;
@@ -260,8 +260,8 @@ const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeLi
   }
 
   if (query.branchId) {
-    if (actor.role === "manager" && query.branchId !== actor.branchId?.toString()) {
-      throw new AppError(403, "Managers can only list their branch");
+    if ((actor.role === "manager" || actor.role === "staff") && query.branchId !== actor.branchId?.toString()) {
+      throw new AppError(403, `${actor.role === "staff" ? "Staff" : "Managers"} can only list their branch`);
     }
 
     if (actor.role === "owner") {

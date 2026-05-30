@@ -1,21 +1,17 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
-import axios from "axios";
 import { AlertCircle, LoaderCircle } from "lucide-react";
 import { AuthShell } from "@/features/auth/components/AuthShell";
-import { api } from "@/services/api";
-import { useAuthStore, type AuthUser } from "@/store";
-
-type LoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-  user: AuthUser;
-};
+import { authApi } from "@/features/auth/auth.api";
+import { getApiErrorMessage } from "@/shared/api";
+import { useAuthStore } from "@/store";
 
 const googleIcon =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDj6LOZrrBFXTVjwuVZTi4A0g3X4aBPW8bkCoiKKmSCCUaq3WhrgDKPebnBxv34_TDv935wOaIbNLs0Fl5A5tSeXvDGcVr8TtDCjikVRDsQVkGlhZlEezpUKUTbrL_fLpfXC8YB9pGO1MGjzJEwrhGdM9_0Bv5k3mcg3BcNp6EY8yMWhEFi0eb5TMaLJUyPK9avd5VQApc8_dwiEt4HkkwI79lSJ-FqeiJJOHduUzkbHsa7fQhLPe5JxY9V2qbgGr8w8BjWeEl2qnRY";
 
 export const LoginPage = () => {
+  const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,19 +24,17 @@ export const LoginPage = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await api.post<LoginResponse>("/auth/login", {
+      const result = await authApi.login({
         email,
         password,
       });
 
       setAuth(result);
-      window.location.assign("/dashboard");
+      navigate(result.user.role === "admin" ? "/admin" : result.user.role === "staff" ? "/staff" : "/dashboard", {
+        replace: true,
+      });
     } catch (err) {
-      if (axios.isAxiosError<{ message?: string }>(err)) {
-        setError(err.response?.data?.message ?? "Invalid email or password. Please try again.");
-      } else {
-        setError("Invalid email or password. Please try again.");
-      }
+      setError(getApiErrorMessage(err, "Email hoặc mật khẩu không đúng. Vui lòng thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -55,8 +49,8 @@ export const LoginPage = () => {
               SmartShift
             </Link>
           </div>
-          <h1 className="mb-2 text-4xl font-semibold leading-tight tracking-tight text-[#1c1b1b]">Welcome back</h1>
-          <p className="text-base leading-6 text-[#444748]">Please enter your details to sign in.</p>
+          <h1 className="mb-2 text-4xl font-semibold leading-tight tracking-tight text-[#1c1b1b]">Chào mừng trở lại</h1>
+          <p className="text-base leading-6 text-[#444748]">Vui lòng nhập thông tin để đăng nhập.</p>
         </div>
 
         {error ? (
@@ -68,7 +62,7 @@ export const LoginPage = () => {
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <label className="block space-y-1" htmlFor="email">
-            <span className="text-sm font-semibold text-[#1c1b1b]">Email address</span>
+            <span className="text-sm font-semibold text-[#1c1b1b]">Địa chỉ email</span>
             <input
               autoFocus
               className="h-12 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black"
@@ -83,9 +77,9 @@ export const LoginPage = () => {
 
           <label className="block space-y-1" htmlFor="password">
             <span className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-[#1c1b1b]">Password</span>
+              <span className="text-sm font-semibold text-[#1c1b1b]">Mật khẩu</span>
               <Link className="text-sm font-semibold text-[#0058be] hover:underline" to="/forgot-password">
-                Forgot password?
+                Quên mật khẩu?
               </Link>
             </span>
             <input
@@ -101,7 +95,7 @@ export const LoginPage = () => {
 
           <label className="flex items-center gap-2 text-base text-[#444748]" htmlFor="remember">
             <input className="h-5 w-5 rounded border-[#e5e7eb] text-black focus:ring-black" id="remember" type="checkbox" />
-            Remember for 30 days
+            Ghi nhớ trong 30 ngày
           </label>
 
           <div className="space-y-4 pt-4">
@@ -113,10 +107,10 @@ export const LoginPage = () => {
               {isSubmitting ? (
                 <>
                   <LoaderCircle className="h-5 w-5 animate-spin" />
-                  Signing in...
+                  Đang đăng nhập...
                 </>
               ) : (
-                "Sign in"
+                "Đăng nhập"
               )}
             </button>
             <button
@@ -124,15 +118,15 @@ export const LoginPage = () => {
               type="button"
             >
               <img alt="Google" className="h-5 w-5" src={googleIcon} />
-              Sign in with Google
+              Đăng nhập bằng Google
             </button>
           </div>
         </form>
 
         <p className="mt-12 text-center text-base text-[#444748]">
-          Don&apos;t have an account?{" "}
+          Bạn chưa có tài khoản?{" "}
           <Link className="font-semibold text-black hover:underline" to="/register">
-            Create an account
+            Tạo tài khoản
           </Link>
         </p>
       </div>

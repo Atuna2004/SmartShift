@@ -13,11 +13,16 @@ import {
 
 const router = Router();
 
+router.get(
+  "/",
+  auth("admin", "owner", "manager", "staff"),
+  validateRequest(employeeListSchema),
+  UserController.getEmployeeList
+);
+
 router.use(auth("admin", "owner", "manager"));
 
 router.post("/", validateRequest(createEmployeeSchema), UserController.createEmployee);
-
-router.get("/", validateRequest(employeeListSchema), UserController.getEmployeeList);
 
 router.get(
   "/:userId",

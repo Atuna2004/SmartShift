@@ -25,6 +25,13 @@ const stub = (target, key, value) => {
   target[key] = value;
 };
 
+const futureWorkDate = (daysFromToday = 7) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
 afterEach(() => {
   while (originals.length) {
     const [target, key, value] = originals.pop();
@@ -66,7 +73,7 @@ const createScheduleDoc = (overrides = {}) => ({
   branchId,
   employeeId: overrides.employeeId ?? fromEmployeeId,
   shiftTemplateId,
-  workDate: new Date("2026-05-25T00:00:00.000Z"),
+  workDate: futureWorkDate(),
   shiftStartTime: "08:00",
   shiftEndTime: "17:00",
   status: overrides.status ?? "scheduled",
@@ -103,7 +110,12 @@ test("Create Shift Swap: staff creates request for own shift", async () => {
   const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
   const branch = createBranchDoc();
   const fromSchedule = createScheduleDoc({ _id: fromScheduleId, employeeId: fromEmployeeId });
-  const toSchedule = createScheduleDoc({ _id: toScheduleId, employeeId: toEmployeeId });
+  const toSchedule = createScheduleDoc({
+    _id: toScheduleId,
+    employeeId: toEmployeeId,
+    shiftStartTime: "18:00",
+    shiftEndTime: "22:00",
+  });
   let createdPayload;
 
   stub(UserModel, "findById", async (id) => {
@@ -115,6 +127,7 @@ test("Create Shift Swap: staff creates request for own shift", async () => {
     id.toString() === fromScheduleId.toString() ? fromSchedule : toSchedule
   );
   stub(BranchModel, "findById", async () => branch);
+  stub(ScheduleModel, "find", async () => []);
   stub(ShiftSwapRequestModel, "findOne", async () => null);
   stub(ShiftSwapRequestModel, "create", async (payload) => {
     createdPayload = payload;
@@ -133,12 +146,218 @@ test("Create Shift Swap: staff creates request for own shift", async () => {
   assert.equal(createdPayload.organizationId.toString(), organizationId.toString());
 });
 
+test("Create Shift Swap: rejects immediately when cover would overlap receiver shift", async () => {
+  const requester = createUserDoc({ _id: fromEmployeeId, role: "staff", branchId });
+  const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const fromSchedule = createScheduleDoc({
+    _id: fromScheduleId,
+    employeeId: fromEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+  const receiverExistingSchedule = createScheduleDoc({
+    _id: toScheduleId,
+    employeeId: toEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "10:00",
+    shiftEndTime: "18:00",
+  });
+
+  stub(UserModel, "findById", async (id) => {
+    if (id.toString() === requester._id.toString()) return requester;
+    if (id.toString() === receiver._id.toString()) return receiver;
+    return null;
+  });
+  stub(ScheduleModel, "findById", async () => fromSchedule);
+  stub(BranchModel, "findById", async () => branch);
+  stub(ScheduleModel, "find", async () => [receiverExistingSchedule]);
+
+  await assert.rejects(
+    () =>
+      ShiftSwapService.createShiftSwap(actorPayload(requester), {
+        toEmployeeId: toEmployeeId.toString(),
+        fromScheduleId: fromScheduleId.toString(),
+        reason: "Need cover",
+      }),
+    { statusCode: 409 }
+  );
+});
+
+test("Create Shift Swap: rejects source shift that already started", async () => {
+  const requester = createUserDoc({ _id: fromEmployeeId, role: "staff", branchId });
+  const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  yesterday.setHours(0, 0, 0, 0);
+  const fromSchedule = createScheduleDoc({
+    _id: fromScheduleId,
+    employeeId: fromEmployeeId,
+    workDate: yesterday,
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+
+  stub(UserModel, "findById", async (id) => {
+    if (id.toString() === requester._id.toString()) return requester;
+    if (id.toString() === receiver._id.toString()) return receiver;
+    return null;
+  });
+  stub(ScheduleModel, "findById", async () => fromSchedule);
+  stub(BranchModel, "findById", async () => branch);
+
+  await assert.rejects(
+    () =>
+      ShiftSwapService.createShiftSwap(actorPayload(requester), {
+        toEmployeeId: toEmployeeId.toString(),
+        fromScheduleId: fromScheduleId.toString(),
+        reason: "Need cover",
+      }),
+    { statusCode: 400 }
+  );
+});
+
+test("Create Shift Swap: allows non-overlapping day shift and overnight target shift", async () => {
+  const requester = createUserDoc({ _id: fromEmployeeId, role: "staff", branchId });
+  const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const fromSchedule = createScheduleDoc({
+    _id: fromScheduleId,
+    employeeId: fromEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+  const toSchedule = createScheduleDoc({
+    _id: toScheduleId,
+    employeeId: toEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "20:00",
+    shiftEndTime: "04:00",
+  });
+
+  stub(UserModel, "findById", async (id) => {
+    if (id.toString() === requester._id.toString()) return requester;
+    if (id.toString() === receiver._id.toString()) return receiver;
+    return null;
+  });
+  stub(ScheduleModel, "findById", async (id) =>
+    id.toString() === fromScheduleId.toString() ? fromSchedule : toSchedule
+  );
+  stub(BranchModel, "findById", async () => branch);
+  stub(ScheduleModel, "find", async () => []);
+  stub(ShiftSwapRequestModel, "findOne", async () => null);
+  stub(ShiftSwapRequestModel, "create", async (payload) => createShiftSwapDoc({ _id: shiftSwapId, ...payload }));
+
+  const result = await ShiftSwapService.createShiftSwap(actorPayload(requester), {
+    toEmployeeId: toEmployeeId.toString(),
+    fromScheduleId: fromScheduleId.toString(),
+    toScheduleId: toScheduleId.toString(),
+    reason: "Swap shifts",
+  });
+
+  assert.equal(result.finalStatus, "pending_receiver");
+  assert.equal(result.toScheduleId, toScheduleId.toString());
+});
+
+test("Create Shift Swap: rejects target shift that overlaps source shift", async () => {
+  const requester = createUserDoc({ _id: fromEmployeeId, role: "staff", branchId });
+  const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const fromSchedule = createScheduleDoc({
+    _id: fromScheduleId,
+    employeeId: fromEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+  const toSchedule = createScheduleDoc({
+    _id: toScheduleId,
+    employeeId: toEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+
+  stub(UserModel, "findById", async (id) => {
+    if (id.toString() === requester._id.toString()) return requester;
+    if (id.toString() === receiver._id.toString()) return receiver;
+    return null;
+  });
+  stub(ScheduleModel, "findById", async (id) =>
+    id.toString() === fromScheduleId.toString() ? fromSchedule : toSchedule
+  );
+  stub(BranchModel, "findById", async () => branch);
+
+  await assert.rejects(
+    () =>
+      ShiftSwapService.createShiftSwap(actorPayload(requester), {
+        toEmployeeId: toEmployeeId.toString(),
+        fromScheduleId: fromScheduleId.toString(),
+        toScheduleId: toScheduleId.toString(),
+        reason: "Swap shifts",
+      }),
+    { statusCode: 409 }
+  );
+});
+
+test("Create Shift Swap: allows day shift swapped with next-day overnight shift", async () => {
+  const requester = createUserDoc({ _id: fromEmployeeId, role: "staff", branchId });
+  const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const fromSchedule = createScheduleDoc({
+    _id: fromScheduleId,
+    employeeId: fromEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "16:00",
+  });
+  const toSchedule = createScheduleDoc({
+    _id: toScheduleId,
+    employeeId: toEmployeeId,
+    workDate: futureWorkDate(8),
+    shiftStartTime: "20:00",
+    shiftEndTime: "04:00",
+  });
+
+  stub(UserModel, "findById", async (id) => {
+    if (id.toString() === requester._id.toString()) return requester;
+    if (id.toString() === receiver._id.toString()) return receiver;
+    return null;
+  });
+  stub(ScheduleModel, "findById", async (id) =>
+    id.toString() === fromScheduleId.toString() ? fromSchedule : toSchedule
+  );
+  stub(BranchModel, "findById", async () => branch);
+  stub(ScheduleModel, "find", async (filter) => {
+    if (filter.employeeId?.toString() === requester._id.toString()) {
+      return [fromSchedule];
+    }
+
+    return [toSchedule];
+  });
+  stub(ShiftSwapRequestModel, "findOne", async () => null);
+  stub(ShiftSwapRequestModel, "create", async (payload) => createShiftSwapDoc({ _id: shiftSwapId, ...payload }));
+
+  const result = await ShiftSwapService.createShiftSwap(actorPayload(requester), {
+    toEmployeeId: toEmployeeId.toString(),
+    fromScheduleId: fromScheduleId.toString(),
+    toScheduleId: toScheduleId.toString(),
+    reason: "Swap shifts",
+  });
+
+  assert.equal(result.finalStatus, "pending_receiver");
+  assert.equal(result.toScheduleId, toScheduleId.toString());
+});
+
 test("Accept Shift Swap: receiver moves request to manager review", async () => {
   const receiver = createUserDoc({ _id: toEmployeeId, role: "staff", branchId });
   const shiftSwap = createShiftSwapDoc();
 
   stub(UserModel, "findById", async () => receiver);
   stub(ShiftSwapRequestModel, "findById", async () => shiftSwap);
+  stub(ScheduleModel, "find", async () => []);
 
   const result = await ShiftSwapService.acceptShiftSwap(
     actorPayload(receiver),
@@ -167,6 +386,7 @@ test("Approve Shift Swap: manager swaps schedule employees", async () => {
   stub(ScheduleModel, "findById", async (id) =>
     id.toString() === fromScheduleId.toString() ? fromSchedule : toSchedule
   );
+  stub(ScheduleModel, "find", async () => []);
 
   const result = await ShiftSwapService.approveShiftSwap(
     actorPayload(manager),
@@ -181,12 +401,56 @@ test("Approve Shift Swap: manager swaps schedule employees", async () => {
   assert.equal(toSchedule.status, "swapped");
 });
 
+test("Approve Shift Swap: rejects cover request when receiver already has overlapping shift", async () => {
+  const manager = createUserDoc({ _id: managerId, role: "manager", branchId });
+  const branch = createBranchDoc();
+  const shiftSwap = createShiftSwapDoc({
+    receiverStatus: "accepted",
+    finalStatus: "pending_manager",
+    toScheduleId: null,
+  });
+  const fromSchedule = createScheduleDoc({
+    _id: fromScheduleId,
+    employeeId: fromEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "12:00",
+  });
+  const receiverExistingSchedule = createScheduleDoc({
+    _id: toScheduleId,
+    employeeId: toEmployeeId,
+    workDate: futureWorkDate(),
+    shiftStartTime: "08:00",
+    shiftEndTime: "12:00",
+  });
+
+  stub(UserModel, "findById", async () => manager);
+  stub(ShiftSwapRequestModel, "findById", async () => shiftSwap);
+  stub(BranchModel, "findById", async () => branch);
+  stub(ScheduleModel, "findById", async () => fromSchedule);
+  stub(ScheduleModel, "find", async () => [receiverExistingSchedule]);
+
+  await assert.rejects(
+    () =>
+      ShiftSwapService.approveShiftSwap(
+        actorPayload(manager),
+        shiftSwapId.toString(),
+        { note: "Approved" }
+      ),
+    { statusCode: 409 }
+  );
+
+  assert.equal(fromSchedule.employeeId.toString(), fromEmployeeId.toString());
+  assert.equal(fromSchedule.saved, undefined);
+});
+
 test("Cancel Shift Swap: requester can cancel pending request", async () => {
   const requester = createUserDoc({ _id: fromEmployeeId, role: "staff", branchId });
   const shiftSwap = createShiftSwapDoc();
 
   stub(UserModel, "findById", async () => requester);
   stub(ShiftSwapRequestModel, "findById", async () => shiftSwap);
+  stub(ScheduleModel, "find", async () => []);
 
   const result = await ShiftSwapService.cancelShiftSwap(
     actorPayload(requester),
@@ -195,4 +459,59 @@ test("Cancel Shift Swap: requester can cancel pending request", async () => {
 
   assert.equal(result.finalStatus, "cancelled");
   assert.equal(shiftSwap.saved, true);
+});
+
+test("Cancel Shift Swap: manager cannot cancel requester workflow", async () => {
+  const manager = createUserDoc({ _id: managerId, role: "manager", branchId });
+  const branch = createBranchDoc();
+  const shiftSwap = createShiftSwapDoc();
+
+  stub(UserModel, "findById", async () => manager);
+  stub(ShiftSwapRequestModel, "findById", async () => shiftSwap);
+  stub(BranchModel, "findById", async () => branch);
+
+  await assert.rejects(
+    () => ShiftSwapService.cancelShiftSwap(actorPayload(manager), shiftSwapId.toString()),
+    { statusCode: 403 }
+  );
+});
+
+test("View Shift Swap List: manager cannot view receiver-pending requests", async () => {
+  const manager = createUserDoc({ _id: managerId, role: "manager", branchId });
+  let capturedFilter;
+
+  stub(UserModel, "findById", async () => manager);
+  stub(ShiftSwapRequestModel, "find", (filter) => {
+    capturedFilter = filter;
+    return {
+      sort() {
+        return this;
+      },
+      skip() {
+        return this;
+      },
+      async limit() {
+        return [];
+      },
+    };
+  });
+  stub(ShiftSwapRequestModel, "countDocuments", async () => 0);
+
+  await ShiftSwapService.getShiftSwapList(actorPayload(manager), {
+    page: 1,
+    limit: 20,
+  });
+
+  assert.equal(capturedFilter.branchId.toString(), branchId.toString());
+  assert.deepEqual(capturedFilter.finalStatus, { $ne: "pending_receiver" });
+
+  await assert.rejects(
+    () =>
+      ShiftSwapService.getShiftSwapList(actorPayload(manager), {
+        page: 1,
+        limit: 20,
+        finalStatus: "pending_receiver",
+      }),
+    { statusCode: 403 }
+  );
 });

@@ -1,4 +1,4 @@
-import { CheckCircle2 } from "lucide-react";
+﻿import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { MarketingShell } from "@/features/home/components/MarketingShell";
 
@@ -18,64 +18,64 @@ export const FeaturesPage = () => (
     <main className="pt-32">
       <header className="mx-auto mb-16 max-w-7xl px-6 lg:px-12">
         <h1 className="max-w-4xl text-5xl font-black leading-tight tracking-tight text-black md:text-6xl">
-          Engineered for Efficiency
+          Thiết kế cho hiệu quả vận hành
         </h1>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-[#444748]">
-          Discover the suite of tools designed to streamline operations, empower your team, and scale your business.
+          Khám phá bộ công cụ được thiết kế để tinh gọn vận hành, trao quyền cho đội ngũ và mở rộng doanh nghiệp của bạn.
         </p>
       </header>
 
       <FeatureSection
         image={featureImages.scheduling}
-        kicker="01 - OPTIMIZATION"
-        title="Smart Scheduling"
-        points={["Auto-fill open shifts based on staff availability", "Conflict detection for overtime and time-off", "One-click publishing to all employee devices"]}
+        kicker="01 - TỐI ƯU"
+        title="Lập lịch thông minh"
+        points={["Tự động lấp ca trống theo lịch rảnh của nhân viên", "Phát hiện xung đột về tăng ca và nghỉ phép", "Xuất bản chỉ với một lần bấm đến mọi thiết bị nhân viên"]}
       >
-        Eliminate conflicts and understaffing with an AI-driven scheduling engine that suggests optimal rotations automatically.
+        Loại bỏ xung đột và thiếu người với công cụ lập lịch chạy bằng AI, tự đề xuất phương án ca tối ưu.
       </FeatureSection>
 
       <FeatureSection
         flip
         image={featureImages.qr}
-        kicker="02 - PRECISION"
-        title="QR Attendance"
-        points={["Geofenced clock-ins for verified location tracking", "Instant notifications for late arrivals", "Seamless integration with payroll systems"]}
+        kicker="02 - CHÍNH XÁC"
+        title="Chấm công QR"
+        points={["Chấm công theo vị trí để xác minh địa điểm", "Thông báo tức thì khi đến trễ", "Tích hợp mượt mà với hệ thống tính lương"]}
       >
-        Modernize clock-in without expensive hardware. Staff scan secure QR codes from their own devices.
+        Hiện đại hóa chấm công mà không cần phần cứng đắt tiền. Nhân viên quét mã QR an toàn ngay trên thiết bị của họ.
       </FeatureSection>
 
       <FeatureSection
         image={featureImages.team}
-        kicker="03 - COLLABORATION"
-        title="Team Hub"
-        points={["Direct and group messaging for shift coordination", "Bulletin boards for company-wide announcements", "Document sharing for training and SOPs"]}
+        kicker="03 - CỘNG TÁC"
+        title="Trung tâm đội ngũ"
+        points={["Nhắn tin cá nhân và nhóm để điều phối ca làm", "Bảng tin cho thông báo toàn công ty", "Chia sẻ tài liệu đào tạo và SOP"]}
       >
-        Stop managing through scattered text threads and keep shift-related discussions inside the schedule context.
+        Ngừng quản lý qua các cuộc trò chuyện rải rác và giữ thảo luận về ca làm ngay trong ngữ cảnh lịch.
       </FeatureSection>
 
       <section className="bg-[#101010] px-6 py-20 text-white lg:px-12">
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
           <div>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black">04 - SCALE</span>
-            <h2 className="mt-4 text-4xl font-black tracking-tight">Multi-Branch Control</h2>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black">04 - MỞ RỘNG</span>
+            <h2 className="mt-4 text-4xl font-black tracking-tight">Quản lý đa chi nhánh</h2>
             <p className="mt-4 text-base leading-8 text-white/70">
-              Oversee your enterprise from a bird's-eye view. Manage locations, compare performance, and standardize operations.
+              Theo dõi doanh nghiệp từ góc nhìn tổng quan. Quản lý địa điểm, so sánh hiệu suất và chuẩn hóa vận hành.
             </p>
-            <FeatureList dark items={["Switch between location views instantly", "Aggregated labor cost reporting across all sites", "Centralized permissions and regional manager roles"]} />
+            <FeatureList dark items={["Chuyển giữa các góc nhìn chi nhánh tức thì", "Báo cáo chi phí nhân công tổng hợp trên mọi cơ sở", "Phân quyền tập trung và vai trò quản lý vùng"]} />
           </div>
           <img alt="" className="aspect-video rounded-xl border border-white/20 object-cover" src={featureImages.branch} />
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 text-center lg:px-12">
-        <h2 className="text-4xl font-black tracking-tight">Ready to optimize your workforce?</h2>
-        <p className="mx-auto mt-4 max-w-xl text-[#444748]">Join businesses saving hours every week on administrative tasks.</p>
+        <h2 className="text-4xl font-black tracking-tight">Sẵn sàng tối ưu lực lượng nhân sự?</h2>
+        <p className="mx-auto mt-4 max-w-xl text-[#444748]">Gia nhập những doanh nghiệp đang tiết kiệm hàng giờ mỗi tuần cho việc hành chính.</p>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
           <Link className="rounded-lg bg-black px-8 py-4 text-sm font-semibold text-white" to="/register">
-            Start Your Free Trial
+            Bắt đầu dùng thử miễn phí
           </Link>
           <Link className="rounded-lg border border-[#e5e7eb] px-8 py-4 text-sm font-semibold text-black" to="/about-contact">
-            Book a Demo
+            Đặt lịch demo
           </Link>
         </div>
       </section>
@@ -123,3 +123,4 @@ const FeatureList = ({ dark = false, items }: { dark?: boolean; items: string[] 
     ))}
   </ul>
 );
+

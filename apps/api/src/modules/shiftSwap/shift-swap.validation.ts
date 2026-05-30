@@ -11,6 +11,8 @@ const finalStatusSchema = z.enum([
   "rejected",
   "cancelled",
 ]);
+const receiverStatusSchema = z.enum(["pending", "accepted", "rejected"]);
+const managerStatusSchema = z.enum(["pending", "approved", "rejected"]);
 
 export const createShiftSwapSchema = z.object({
   body: z.object({
@@ -57,7 +59,18 @@ export const shiftSwapListSchema = z.object({
   query: z.object({
     branchId: objectIdSchema.optional(),
     employeeId: objectIdSchema.optional(),
+    fromEmployeeId: objectIdSchema.optional(),
+    toEmployeeId: objectIdSchema.optional(),
+    fromScheduleId: objectIdSchema.optional(),
+    toScheduleId: objectIdSchema.optional(),
+    managerId: objectIdSchema.optional(),
     finalStatus: finalStatusSchema.optional(),
+    receiverStatus: receiverStatusSchema.optional(),
+    managerStatus: managerStatusSchema.optional(),
+    createdFrom: z.coerce.date().optional(),
+    createdTo: z.coerce.date().optional(),
+    respondedFrom: z.coerce.date().optional(),
+    respondedTo: z.coerce.date().optional(),
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(20),
   }),

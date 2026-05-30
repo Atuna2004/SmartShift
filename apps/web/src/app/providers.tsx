@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
+import { AuthBootstrap } from "@/features/auth/AuthBootstrap";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,5 +13,9 @@ const queryClient = new QueryClient({
 });
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthBootstrap>{children}</AuthBootstrap>
+    </QueryClientProvider>
+  );
 };
