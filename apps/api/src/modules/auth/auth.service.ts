@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Types } from "mongoose";
 import { AppError } from "../../common/errors/AppError.js";
 import { comparePassword, hashPassword } from "../../common/utils/hash.js";
 import {
@@ -6,6 +7,8 @@ import {
   createToken,
   verifyRefreshToken,
 } from "../../common/utils/jwt.js";
+import { BranchModel } from "../branch/branch.model.js";
+import { OrganizationModel } from "../organization/organization.model.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import type {
@@ -14,11 +17,13 @@ import type {
   LoginInput,
   RefreshTokenInput,
   RegisterOwnerInput,
+  RegisterAdminInput,
   ResetPasswordInput,
   UpdateProfileInput,
 } from "./auth.validation.js";
 
-const toPublicUser = (user: IUser) => {
+const toPublicUser = async (user: IUser) => {
+  const branch = user.branchId ? await BranchModel.findById(user.branchId) : null;
   const publicUser = {
     id: user._id.toString(),
     fullName: user.fullName,
@@ -36,6 +41,7 @@ const toPublicUser = (user: IUser) => {
     ...(user.phone ? { phone: user.phone } : {}),
     ...(user.avatar ? { avatar: user.avatar } : {}),
     ...(user.branchId ? { branchId: user.branchId.toString() } : {}),
+    ...(branch ? { branchName: branch.name } : {}),
     ...(user.organizationId
       ? { organizationId: user.organizationId.toString() }
       : {}),
@@ -93,11 +99,113 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
 
   const user = await UserModel.create(userPayload);
 
+  try {
+    const userId = user._id as Types.ObjectId;
+
+    if (payload.organization) {
+      const organizationPayload: Record<string, unknown> = {
+        name: payload.organization.name,
+        ownerId: userId,
+        createdBy: userId,
+        status: "active",
+      };
+
+      if (payload.organization.businessType) {
+        organizationPayload.businessType = payload.organization.businessType;
+      }
+
+      if (payload.organization.phone) {
+        organizationPayload.phone = payload.organization.phone;
+      }
+
+      if (payload.organization.email) {
+        organizationPayload.email = payload.organization.email;
+      }
+
+      if (payload.organization.address) {
+        organizationPayload.address = payload.organization.address;
+      }
+
+      if (payload.subscription) {
+        organizationPayload.subscription = payload.subscription;
+      }
+
+      const organization = await OrganizationModel.create(organizationPayload);
+
+      const organizationId = organization._id as Types.ObjectId;
+
+      user.organizationId = organizationId;
+
+      if (payload.branch) {
+        const branchPayload: Record<string, unknown> = {
+          organizationId,
+          name: payload.branch.name,
+          ownerId: userId,
+          createdBy: userId,
+          status: "active",
+        };
+
+        if (payload.branch.address) {
+          branchPayload.address = payload.branch.address;
+        }
+
+        if (payload.branch.phone) {
+          branchPayload.phone = payload.branch.phone;
+        }
+
+        const branch = await BranchModel.create(branchPayload);
+
+        user.branchId = branch._id as Types.ObjectId;
+      }
+
+      await user.save();
+    }
+  } catch (error) {
+    await Promise.allSettled([
+      BranchModel.deleteMany({ ownerId: user._id }),
+      OrganizationModel.deleteMany({ ownerId: user._id }),
+      UserModel.findByIdAndDelete(user._id),
+    ]);
+
+    throw error;
+  }
+
   const tokens = await buildTokenPair(user);
 
   return {
     ...tokens,
-    user: toPublicUser(user),
+    user: await toPublicUser(user),
+  };
+};
+
+const registerAdmin = async (payload: RegisterAdminInput) => {
+  const setupSecret = process.env.ADMIN_SETUP_SECRET;
+
+  if (!setupSecret || payload.setupSecret !== setupSecret) {
+    throw new AppError(403, "Invalid admin setup secret");
+  }
+
+  const existingUser = await UserModel.findOne({ email: payload.email });
+
+  if (existingUser) {
+    throw new AppError(409, "Email already exists");
+  }
+
+  const hashedPassword = await hashPassword(payload.password);
+  const user = await UserModel.create({
+    fullName: payload.fullName,
+    email: payload.email,
+    password: hashedPassword,
+    role: "admin" as const,
+    status: "active" as const,
+    ...(payload.phone ? { phone: payload.phone } : {}),
+  });
+
+  const tokens = await buildTokenPair(user);
+
+  return {
+    ...tokens,
+    user: await toPublicUser(user),
   };
 };
 
@@ -126,7 +234,7 @@ const login = async (payload: LoginInput) => {
 
   return {
     ...tokens,
-    user: toPublicUser(user),
+    user: await toPublicUser(user),
   };
 };
 
@@ -263,7 +371,7 @@ const getMe = async (userId: string) => {
     throw new AppError(403, "User account is inactive");
   }
 
-  return toPublicUser(user);
+  return await toPublicUser(user);
 };
 
 const viewProfile = async (userId: string) => {
@@ -298,10 +406,11 @@ const updateProfile = async (
 
   await user.save();
 
-  return toPublicUser(user);
+  return await toPublicUser(user);
 };
 
 export const AuthService = {
+  registerAdmin,
   registerOwner,
   login,
   logout,

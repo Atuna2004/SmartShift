@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shift Details - Workforce</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#f4f0ef",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "canvas": "#ffffff",
+                        "tertiary": "#000000",
+                        "surface-container": "#f1edec",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1c1b1b",
+                        "tertiary-container": "#1d1b1a",
+                        "surface": "#fdf8f8",
+                        "surface-bright": "#fdf8f8",
+                        "surface-tint": "#5f5e5e",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ef4444",
+                        "on-secondary-container": "#fefcff",
+                        "on-error-container": "#93000a",
+                        "background": "#fdf8f8",
+                        "primary": "#000000",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-primary-container": "#858383",
+                        "inverse-primary": "#c8c6c5",
+                        "secondary": "#0058be",
+                        "primary-container": "#1c1b1b",
+                        "on-surface-variant": "#444748",
+                        "on-secondary-fixed": "#001a42",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#313030",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-container-low": "#f7f3f2",
+                        "tertiary-fixed-dim": "#cac6c3",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-error": "#ffffff",
+                        "on-surface": "#1c1b1b",
+                        "surface-dim": "#ddd9d8",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#474646",
+                        "tertiary-fixed": "#e6e1df",
+                        "surface-container-high": "#ebe7e6",
+                        "outline-variant": "#c4c7c7",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-fixed": "#e5e2e1",
+                        "surface-card": "#f5f5f5",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "secondary-container": "#2170e4",
+                        "hairline": "#e5e7eb",
+                        "outline": "#747878",
+                        "on-tertiary-container": "#868381",
+                        "surface-dark": "#101010",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e5e2e1",
+                        "success": "#10b981"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "2xl": "48px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "display-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-surface border-b border-hairline">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-high rounded-full transition-opacity duration-150 active:opacity-80">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm font-black text-primary">Shift Detail</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-high rounded-full transition-opacity duration-150 active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-high rounded-full transition-opacity duration-150 active:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant">share</span>
+</button>
+</div>
+</header>
+<main class="pt-20 px-4 max-w-2xl mx-auto space-y-6">
+<!-- Shift Overview Header Card -->
+<section class="bg-surface-card rounded-xl p-6 space-y-4">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary text-on-primary font-label-md text-label-md">Upcoming</span>
+<h2 class="font-display-md text-display-md tracking-tight pt-2">Morning Floor Shift</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">South Wing Level 2</p>
+</div>
+<div class="text-right">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Duration</p>
+<p class="font-headline-sm text-headline-sm text-primary">8.5 hrs</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-4">
+<div class="p-4 bg-canvas rounded-lg border border-hairline flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">login</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant">Start Time</p>
+<p class="font-label-md text-label-md">08:00 AM</p>
+</div>
+</div>
+<div class="p-4 bg-canvas rounded-lg border border-hairline flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">logout</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant">End Time</p>
+<p class="font-label-md text-label-md">04:30 PM</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Location Section -->
+<section class="space-y-3">
+<h3 class="font-label-md text-label-md text-on-surface-variant px-1 uppercase tracking-widest">Location</h3>
+<div class="relative w-full h-48 rounded-xl overflow-hidden group cursor-pointer border border-hairline">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A professional satellite view of a modern urban commercial building complex with clean, architectural lines. The map style is minimalist and high-contrast, featuring deep blacks for roads and bright white for building structures, matching a premium SaaS aesthetic. Subtle glowing markers indicate a specific workplace entrance. The lighting is simulated daylight, crisp and clear." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOVUiwTfYFoyqCZlYxvuXY7YfoKwTYm7wJ5t6kakqgSlWDrp8cIsZ17VMj_MRSua6H5rubz4_gm21JQWLIvWH7anXVX-YquoLsHAu23rgPCS1KdedWGRFj26NP_23dF5QtD2zhpgiC-Grd3OMZE5cp_I1OJNAbZ2NrIHMljUh-smCqoQDgWjCr3umWJspDrfAxUVP8SCEUXV_iTBH08j7r1gwQavFdQez_O4wGwB-lCc2ADCewxvpC_oMEGkWF3-4WI115AIKSwC84"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 left-4 text-white">
+<p class="font-label-md text-label-md font-bold">Main Headquarters</p>
+<p class="font-caption text-caption opacity-80">1221 Innovation Way, Tech District</p>
+</div>
+<div class="absolute top-4 right-4">
+<div class="bg-white/90 backdrop-blur text-primary px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sm">directions</span>
+                        Get Directions
+                    </div>
+</div>
+</div>
+</section>
+<!-- Colleagues Section -->
+<section class="space-y-3">
+<div class="flex justify-between items-center px-1">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Team on Shift</h3>
+<span class="font-label-md text-label-md text-secondary">3 Active</span>
+</div>
+<div class="flex flex-col bg-surface border border-hairline rounded-xl overflow-hidden">
+<div class="flex items-center gap-4 p-4 border-b border-hairline hover:bg-surface-container-low transition-colors">
+<img class="w-12 h-12 rounded-full object-cover grayscale hover:grayscale-0 transition-all" data-alt="A professional headshot of a diverse male team member with a warm, confident expression. He is wearing a minimalist dark polo shirt against a clean, neutral grey background. The lighting is soft and studio-quality, emphasizing clarity and professionalism. The aesthetic is modern corporate, matching a high-end workforce management application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEOcgkfpQC9mJM4_Rx8mV5Lq7MoNAqprDN4TX6eTkWI5DgHakPWKZqVhNuoM14RwPk1m7hXHL3vXHeSE6PwWCydSOkh_a16wx3yeorLpwXHP9Ocvhh3LtNzI8NTx6SB2uZVROjfVDm7-fXudwMZ-JwfXX3lKzyt-PW9baILRLiqHFwqGSTrZx2qONKDGEG2Qu88EWZI-h1IdzmDlckS4FzLi5-T5ymDWR_LVeKJUaT8wHuo8AprXfyXyN9hSD_j40dxLBGuT3kTg93"/>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">Marcus Thorne</p>
+<p class="font-caption text-caption text-on-surface-variant">Shift Lead</p>
+</div>
+<button class="w-10 h-10 rounded-full border border-hairline flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant">chat_bubble</span>
+</button>
+</div>
+<div class="flex items-center gap-4 p-4 border-b border-hairline hover:bg-surface-container-low transition-colors">
+<img class="w-12 h-12 rounded-full object-cover grayscale hover:grayscale-0 transition-all" data-alt="A high-quality profile portrait of a professional female employee with a friendly, intelligent gaze. She is dressed in a clean, professional white blouse. The background is a soft, out-of-focus modern office space with high-key lighting. The image maintains a stark, professional color palette of whites and blacks to align with a minimalist SaaS brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKOoNM17PvhJ3eTH7js8TVCsQrgV06W740l6scNalMFNxYuLvA-tE-eIOR95arVal9robL5VKYXoMc2I48LCAfpHuqWkQwS2VzOjFNwYbwoz-4vNMg2vOTwOy0QdMD1jxdZWGQKtPMnP68tv25yX2h3ibGUL3fkW-4Es_oPgJtfoVUnb4KIGwNYuC3_868Ss26of3eFehyWbqLdLSCPV95MvJDFwaVAVPVoMDvt1nTvktH3rmRHidkkkZhXW5Fz3lhfcAYeW9Piq25"/>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">Elena Rodriguez</p>
+<p class="font-caption text-caption text-on-surface-variant">Floor Associate</p>
+</div>
+<button class="w-10 h-10 rounded-full border border-hairline flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant">chat_bubble</span>
+</button>
+</div>
+<div class="flex items-center gap-4 p-4 hover:bg-surface-container-low transition-colors">
+<img class="w-12 h-12 rounded-full object-cover grayscale hover:grayscale-0 transition-all" data-alt="A focused studio portrait of a professional male colleague with a calm and capable demeanor. He is wearing a simple black t-shirt, standing against a bright, minimalist white background. The lighting is crisp and modern, creating a clear, high-contrast look suitable for a high-utility professional tool. The visual style is rooted in clarity and efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqJRDUgumkr06ETRL4fzY4HhEkhQg0rPPGhg_ZAFQFKxxWKg7wnTywwqn9BD76tIxSx9rEIz_Z5bc0uzS_25Gggrwv0_j6nz-DuyE-J4uXGRY6jZbyl6TT0aSFmv0rbi_O7dTcveoqmYtAvD6wxQ8Ln9JsaqSZYtTbpdIuA6rSTdJJ3364YMoIMh7H3RsfXCFkjIc6r6Ex9kzQ4Qi2sEDpcNL-30mS9xPOTueqv48XMz0WaNTlkxZ8pSdZihkhIVvDuVpRnXl4Juqr"/>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">Julian Chen</p>
+<p class="font-caption text-caption text-on-surface-variant">Floor Associate</p>
+</div>
+<button class="w-10 h-10 rounded-full border border-hairline flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant">chat_bubble</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Shift Notes -->
+<section class="space-y-3">
+<h3 class="font-label-md text-label-md text-on-surface-variant px-1 uppercase tracking-widest">Shift Notes</h3>
+<div class="bg-surface-card border border-hairline p-5 rounded-xl space-y-3">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-md">assignment_turned_in</span>
+<p class="font-label-md text-label-md">Key Deliverables</p>
+</div>
+<ul class="space-y-2 list-none font-body-md text-body-md text-on-surface-variant">
+<li class="flex items-start gap-3">
+<div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0"></div>
+                        Complete inventory restock for the South Wing prior to the lunch rush.
+                    </li>
+<li class="flex items-start gap-3">
+<div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0"></div>
+                        Conduct safety walk-through with Marcus at 10:30 AM.
+                    </li>
+<li class="flex items-start gap-3">
+<div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0"></div>
+                        Special attention to high-traffic areas during the afternoon transition.
+                    </li>
+</ul>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar (Fixed) -->
+<div class="fixed bottom-0 left-0 w-full z-40 p-4 bg-white/80 backdrop-blur-md border-t border-hairline">
+<div class="max-w-2xl mx-auto flex gap-4">
+<button class="flex-1 h-12 bg-primary text-on-primary rounded-lg font-button text-button active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">swap_horiz</span>
+                Shift Swap Request
+            </button>
+<button class="w-12 h-12 border border-hairline bg-surface rounded-lg flex items-center justify-center text-primary active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Hidden Interaction Handlers -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.addEventListener('touchstart', () => btn.classList.add('opacity-70'));
+                btn.addEventListener('touchend', () => btn.classList.remove('opacity-70'));
+            });
+        });
+    </script>
+</body></html>

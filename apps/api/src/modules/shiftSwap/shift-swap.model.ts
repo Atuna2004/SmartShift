@@ -31,6 +31,8 @@ export interface IShiftSwapRequest extends Document {
   finalStatus: ShiftSwapFinalStatus;
 
   note?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const shiftSwapRequestSchema = new Schema<IShiftSwapRequest>(

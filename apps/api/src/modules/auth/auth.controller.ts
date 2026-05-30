@@ -14,6 +14,17 @@ const registerOwner = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const registerAdmin = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.registerAdmin(req.body);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Admin registered successfully",
+    data: result,
+  });
+});
+
 const login = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.login(req.body);
 
@@ -144,6 +155,7 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const AuthController = {
+  registerAdmin,
   registerOwner,
   login,
   logout,

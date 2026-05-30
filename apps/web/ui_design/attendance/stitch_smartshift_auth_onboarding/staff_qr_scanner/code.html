@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Staff QR Scanner | SmartShift</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#f1edec",
+                    "on-primary-fixed": "#1c1b1b",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#484645",
+                    "background": "#fdf8f8",
+                    "tertiary-container": "#1d1b1a",
+                    "on-tertiary-container": "#868381",
+                    "on-primary-fixed-variant": "#474646",
+                    "tertiary": "#000000",
+                    "success": "#10b981",
+                    "primary-fixed": "#e5e2e1",
+                    "on-primary-container": "#858383",
+                    "on-secondary-fixed": "#001a42",
+                    "surface-variant": "#e5e2e1",
+                    "primary-container": "#1c1b1b",
+                    "on-secondary-fixed-variant": "#004395",
+                    "outline-variant": "#c4c7c7",
+                    "on-secondary-container": "#fefcff",
+                    "hairline": "#e5e7eb",
+                    "outline": "#747878",
+                    "secondary-fixed": "#d8e2ff",
+                    "surface": "#fdf8f8",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-surface-variant": "#444748",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f7f3f2",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#1d1b1a",
+                    "surface-container-high": "#ebe7e6",
+                    "surface-dim": "#ddd9d8",
+                    "error": "#ef4444",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#c8c6c5",
+                    "on-background": "#1c1b1b",
+                    "inverse-surface": "#313030",
+                    "surface-container-highest": "#e5e2e1",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "surface-tint": "#5f5e5e",
+                    "on-secondary": "#ffffff",
+                    "surface-card": "#f5f5f5",
+                    "secondary": "#0058be",
+                    "surface-dark": "#101010",
+                    "canvas": "#ffffff",
+                    "primary": "#000000",
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#fdf8f8",
+                    "tertiary-fixed": "#e6e1df",
+                    "on-surface": "#1c1b1b",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#2170e4",
+                    "inverse-on-surface": "#f4f0ef",
+                    "tertiary-fixed-dim": "#cac6c3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "lg": "24px",
+                    "base": "4px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "3xl": "64px",
+                    "2xl": "48px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "display-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "caption": ["Inter"],
+                    "button": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                    "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                    "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scan-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            clip-path: polygon(
+                0% 0%, 0% 100%, 
+                calc(50% - 130px) 100%, 
+                calc(50% - 130px) calc(50% - 130px), 
+                calc(50% + 130px) calc(50% - 130px), 
+                calc(50% + 130px) calc(50% + 130px), 
+                calc(50% - 130px) calc(50% + 130px), 
+                calc(50% - 130px) 100%, 
+                100% 100%, 100% 0%
+            );
+        }
+        .scan-line {
+            height: 2px;
+            background: #ffffff;
+            box-shadow: 0 0 15px #ffffff;
+            animation: scan 2.5s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0%, 100% { top: calc(50% - 130px); opacity: 0; }
+            50% { top: calc(50% + 130px); opacity: 1; }
+        }
+        .corner-border {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffffff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface font-body-md overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation Bar (Mobile focused variant of Shared TopNavBar) -->
+<!-- Applying style_shell_layout, style_bg_color, style_separation_logic from JSON -->
+<header class="bg-canvas dark:bg-surface-dark border-b border-hairline dark:border-outline-variant flex justify-between items-center w-full px-lg h-16 fixed top-0 z-50">
+<div class="flex items-center gap-sm">
+<button class="p-xs hover:bg-surface-container-low transition-colors rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-display-md text-headline-sm font-bold text-primary dark:text-on-primary-fixed">SmartShift</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="help">help</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional headshot of a smiling branch manager in a modern office environment. The lighting is bright and clean, reflecting a high-end corporate SaaS aesthetic. The image features soft shadows and a neutral background, maintaining a minimalist and reliable brand feel consistent with a professional workforce management platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUKqmReEbaPgfwT4WC0PNnS75hAEGe2yOOx8GxMqvcMHBImcJ-1GsXWBKSD39PE7Fi3_4bpNprDKBdKP5Nq5WrhsnBIgDqdoXHgrgHbQH1ks_ms9Lx7yo3xRLPMzaFoqMcLjxPK4x0PdqmtBmLtcGGJ1qxBoM4NALLr8mNl5PjC3XP23-amKFEvYJepNrwlrhtJHL8rF-avXdIQ6Bd7vRAMQmb3V6TsHMex890poaQQUtLhjp_VDCNHcafCNnf7zOtSXeV2GuVozk_"/>
+</div>
+</div>
+</header>
+<!-- Scanning Status Bar -->
+<div class="mt-16 bg-primary dark:bg-primary-container px-lg py-sm flex items-center justify-center gap-sm z-40 relative">
+<span class="material-symbols-outlined text-on-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<p class="font-label-md text-on-primary uppercase tracking-wider">Scanning for Branch: <span class="font-black">Downtown Hub</span></p>
+</div>
+<!-- Viewfinder Section -->
+<main class="relative flex-grow flex items-center justify-center bg-black overflow-hidden">
+<!-- Simulated Camera View -->
+<div class="absolute inset-0">
+<img alt="Retail background" class="w-full h-full object-cover opacity-80" data-alt="A blurred, wide-angle view of a modern high-end retail interior or corporate lounge, seen through a camera lens. The setting is bright with minimalist furniture and professional lighting. The color palette is dominated by neutral whites, soft grays, and deep black accents, creating a professional and clean atmosphere suitable for a high-utility workforce tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpgMCNcYk-4MO3bE2bOB6Wp8DtsVhZXLpCcfTKe8l11k4N3DizQWZ_IIvluZDpTFKEvX00zpjXoA1kp3PI2ogWAR2xrrx64yxA8Az5lvcOAFGEMSMtJFlTgo5WzJqhDf1dtJR224EwNIkbUV5JJ4GWjYjDMaA-uz0hbGvaqHevk8SY8RNCA7-MR64LcIb1s2hgGdQ8RcxRTJTA3EN5dZN50mnXJfmqQFn38pCseH5iAdgkR1sgVL6cZoQbiQ7hdHTLvxft9sQmPI3t"/>
+</div>
+<!-- Mask/Overlay -->
+<div class="absolute inset-0 scan-overlay z-10"></div>
+<!-- Scanner Box UI -->
+<div class="relative w-[260px] h-[260px] z-20">
+<!-- Scan Animation Line -->
+<div class="scan-line absolute left-0 w-full"></div>
+<!-- Corner Brackets -->
+<div class="corner-border top-0 left-0 border-r-0 border-b-0"></div>
+<div class="corner-border top-0 right-0 border-l-0 border-b-0"></div>
+<div class="corner-border bottom-0 left-0 border-r-0 border-t-0"></div>
+<div class="corner-border bottom-0 right-0 border-l-0 border-t-0"></div>
+<!-- Target Center Hint -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+</div>
+</div>
+<!-- Instructional Toast -->
+<div class="absolute bottom-32 left-1/2 -translate-x-1/2 z-30 w-[80%] text-center">
+<div class="bg-black/40 backdrop-blur-md px-md py-sm rounded-xl border border-white/20">
+<p class="text-white font-label-md">Align QR code within the frame to clock in</p>
+</div>
+</div>
+</main>
+<!-- Bottom Action Controls -->
+<footer class="bg-canvas dark:bg-surface-dark px-lg pt-lg pb-xl z-40">
+<div class="max-w-md mx-auto space-y-md">
+<div class="flex items-center justify-center gap-xl">
+<!-- Flash Toggle -->
+<button class="group flex flex-col items-center gap-xs" id="flash-toggle">
+<div class="w-14 h-14 rounded-full border border-hairline flex items-center justify-center group-active:scale-90 transition-transform hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-primary" id="flash-icon">flashlight_on</span>
+</div>
+<span class="font-label-md text-on-surface-variant">Flash</span>
+</button>
+<!-- Enter Manually -->
+<button class="group flex flex-col items-center gap-xs">
+<div class="w-14 h-14 rounded-full border border-hairline flex items-center justify-center group-active:scale-90 transition-transform hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-primary">keyboard</span>
+</div>
+<span class="font-label-md text-on-surface-variant">Type Code</span>
+</button>
+<!-- View Recent -->
+<button class="group flex flex-col items-center gap-xs">
+<div class="w-14 h-14 rounded-full border border-hairline flex items-center justify-center group-active:scale-90 transition-transform hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-primary">history</span>
+</div>
+<span class="font-label-md text-on-surface-variant">History</span>
+</button>
+</div>
+<button class="w-full bg-primary text-on-primary py-md rounded-lg font-button flex items-center justify-center gap-sm active:scale-[0.98] transition-all">
+<span>Enter Code Manually</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</footer>
+<!-- Micro-interactions Script -->
+<script>
+        const flashBtn = document.getElementById('flash-toggle');
+        const flashIcon = document.getElementById('flash-icon');
+        let flashOn = false;
+
+        flashBtn.addEventListener('click', () => {
+            flashOn = !flashOn;
+            flashIcon.textContent = flashOn ? 'flashlight_off' : 'flashlight_on';
+            flashIcon.classList.toggle('text-secondary', flashOn);
+            flashBtn.querySelector('div').classList.toggle('bg-secondary-fixed', flashOn);
+            flashBtn.querySelector('div').classList.toggle('border-secondary', flashOn);
+        });
+
+        // Haptic-like feedback on scanner lock (visual only)
+        document.querySelector('.scan-overlay').addEventListener('click', () => {
+            const corners = document.querySelectorAll('.corner-border');
+            corners.forEach(c => {
+                c.style.borderColor = '#10b981';
+                c.style.transform = 'scale(1.1)';
+            });
+            setTimeout(() => {
+                corners.forEach(c => {
+                    c.style.borderColor = '#ffffff';
+                    c.style.transform = 'scale(1)';
+                });
+            }, 300);
+        });
+    </script>
+</body></html>

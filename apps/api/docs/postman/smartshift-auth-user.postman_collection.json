@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "7fdc71bb-4f3d-4c87-8d86-02ab2f14c001",
     "name": "SmartShift Core API",
-    "description": "Postman collection for SmartShift core APIs including notifications. Run Auth first; notification list/read endpoints use the authenticated user.",
+    "description": "Postman collection for SmartShift core APIs including organizations, notifications, subscriptions, and payments. Run Auth first for owner-scoped APIs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -29,6 +29,18 @@
           "}",
           "if (!pm.collectionVariables.get('newPassword')) {",
           "  pm.collectionVariables.set('newPassword', 'Password456!');",
+          "}",
+          "if (!pm.collectionVariables.get('subscriptionPlanCode')) {",
+          "  pm.collectionVariables.set('subscriptionPlanCode', `basic-${Date.now()}`);",
+          "}",
+          "if (!pm.collectionVariables.get('organizationSlug')) {",
+          "  pm.collectionVariables.set('organizationSlug', `postman-org-${Date.now()}`);",
+          "}",
+          "if (!pm.collectionVariables.get('adminEmail')) {",
+          "  pm.collectionVariables.set('adminEmail', `admin.${Date.now()}@smartshift.test`);",
+          "}",
+          "if (!pm.collectionVariables.get('adminPassword')) {",
+          "  pm.collectionVariables.set('adminPassword', 'Password123!');",
           "}"
         ]
       }
@@ -38,6 +50,55 @@
     {
       "name": "Auth",
       "item": [
+        {
+          "name": "Register Admin",
+          "description": "Creates a SmartShift platform admin. Requires ADMIN_SETUP_SECRET on the API server and {{adminSetupSecret}} in Postman.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 or email already exists/invalid secret', function () {",
+                  "  pm.expect([201, 403, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', json.data.refreshToken);",
+                  "  pm.collectionVariables.set('adminId', json.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"SmartShift Admin\",\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"phone\": \"0900000098\",\n  \"setupSecret\": \"{{adminSetupSecret}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register-admin"
+              ]
+            }
+          }
+        },
         {
           "name": "Register Owner",
           "event": [
@@ -2395,6 +2456,918 @@
       ]
     },
     {
+      "name": "Organizations",
+      "description": "Owner organization management APIs for profile, settings, basic subscription info, and internal enable/disable.",
+      "item": [
+        {
+          "name": "Create Organization",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 or slug exists', function () { pm.expect([201, 409]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('organizationId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Organization\",\n  \"slug\": \"{{organizationSlug}}\",\n  \"businessType\": \"cafe\",\n  \"phone\": \"0900000010\",\n  \"email\": \"billing@smartshift.test\",\n  \"address\": \"Ho Chi Minh City\",\n  \"logo\": \"https://example.com/logo.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/organizations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View My Organization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/organizations/me?organizationId={{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations",
+                "me?organizationId={{organizationId}}"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Organization Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Organization Updated\",\n  \"businessType\": \"restaurant\",\n  \"phone\": \"0900000099\",\n  \"email\": \"billing-updated@smartshift.test\",\n  \"address\": \"Updated address\",\n  \"logo\": \"https://example.com/logo-updated.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/organizations/me/profile?organizationId={{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations",
+                "me",
+                "profile?organizationId={{organizationId}}"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Configure Organization Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timezone\": \"Asia/Ho_Chi_Minh\",\n  \"defaultLateThresholdMinutes\": 15,\n  \"defaultQrExpiresInSeconds\": 60,\n  \"defaultRequireGps\": true,\n  \"defaultAllowEarlyCheckInMinutes\": 10,\n  \"defaultAllowLateCheckOutMinutes\": 15\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/organizations/me/settings?organizationId={{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations",
+                "me",
+                "settings?organizationId={{organizationId}}"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Configure Organization Subscription Info",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"basic\",\n  \"status\": \"active\",\n  \"startedAt\": \"2026-05-01T00:00:00.000Z\",\n  \"expiredAt\": \"2026-06-01T00:00:00.000Z\",\n  \"maxBranches\": 2,\n  \"maxEmployees\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/organizations/me/subscription?organizationId={{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations",
+                "me",
+                "subscription?organizationId={{organizationId}}"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disable Organization",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/organizations/{{organizationId}}/disable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations",
+                "{{organizationId}}",
+                "disable"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enable Organization",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/organizations/{{organizationId}}/enable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations",
+                "{{organizationId}}",
+                "enable"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "description": "Subscription plan and organization subscription APIs. Create an organization and plan first, then subscribe the organization to that plan.",
+      "item": [
+        {
+          "name": "Create Organization For Subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 or conflict/validation', function () { pm.expect([201, 400, 409]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('organizationId', json.data.id || json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Subscription Org\",\n  \"email\": \"billing@smartshift.test\",\n  \"phone\": \"0900000010\",\n  \"address\": \"Ho Chi Minh City\",\n  \"slug\": \"{{organizationSlug}}\",\n  \"businessType\": \"cafe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/organizations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 or code exists', function () { pm.expect([201, 409]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('subscriptionPlanId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Basic Plan\",\n  \"code\": \"{{subscriptionPlanCode}}\",\n  \"description\": \"Plan created from Postman collection\",\n  \"priceMonthly\": 199000,\n  \"currency\": \"VND\",\n  \"limits\": {\n    \"maxBranches\": 2,\n    \"maxEmployees\": 30,\n    \"maxManagers\": 3,\n    \"maxShiftTemplates\": 10,\n    \"maxAssignedShiftsPerMonth\": 500\n  },\n  \"features\": {\n    \"qrCheckIn\": true,\n    \"gpsValidation\": true,\n    \"attendanceReports\": true,\n    \"shiftSwap\": true,\n    \"payroll\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "plans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Subscription Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/plans?page=1&limit=20&status=active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "plans?page=1&limit=20&status=active"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription Plan Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/plans/{{subscriptionPlanId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "plans",
+                "{{subscriptionPlanId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Subscription Plan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated from Postman collection\",\n  \"priceMonthly\": 249000,\n  \"limits\": {\n    \"maxBranches\": 3,\n    \"maxEmployees\": 40,\n    \"maxManagers\": 5,\n    \"maxShiftTemplates\": 15,\n    \"maxAssignedShiftsPerMonth\": 800\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/plans/{{subscriptionPlanId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "plans",
+                "{{subscriptionPlanId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subscribe Organization To Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 when organization and plan exist', function () { pm.expect([201, 400, 403, 404]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('subscriptionId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{subscriptionPlanId}}\",\n  \"autoRenew\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/organizations/{{organizationId}}/subscribe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "organizations",
+                "{{organizationId}}",
+                "subscribe"
+              ]
+            }
+          }
+        },
+        {
+          "name": "View Current Subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/current?organizationId={{organizationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "current?organizationId={{organizationId}}"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Subscription Limits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/limits?organizationId={{organizationId}}&feature=payroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "limits?organizationId={{organizationId}}&feature=payroll"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                },
+                {
+                  "key": "feature",
+                  "value": "payroll"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Subscription Plan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"planId\": \"{{subscriptionPlanId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/current/change-plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "current",
+                "change-plan"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Renew Subscription",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"months\": 1,\n  \"autoRenew\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/current/renew",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "current",
+                "renew"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/current/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "current",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disable Subscription Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/plans/{{subscriptionPlanId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "plans",
+                "{{subscriptionPlanId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "Payment APIs for subscription checkout, PayOS webhook, manual payment confirmation, and payroll payment calculation/creation. PayOS payment link requires PAYOS_* env vars on the API server.",
+      "item": [
+        {
+          "name": "Create Subscription Payment - PayOS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 when PayOS env is configured', function () { pm.expect([201, 400, 403, 404, 500, 502]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('subscriptionId', json.data.subscriptionId);",
+                  "  pm.collectionVariables.set('paymentId', json.data.payment.id);",
+                  "  pm.collectionVariables.set('payosCheckoutUrl', json.data.payment.checkoutUrl || '');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"planId\": \"{{subscriptionPlanId}}\",\n  \"months\": 1,\n  \"paymentMethod\": \"payos\",\n  \"note\": \"Subscription checkout through PayOS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "subscriptions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription Payment - Manual Bank Transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 when organization and plan exist', function () { pm.expect([201, 400, 403, 404]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('subscriptionId', json.data.subscriptionId);",
+                  "  pm.collectionVariables.set('paymentId', json.data.payment.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"planId\": \"{{subscriptionPlanId}}\",\n  \"months\": 1,\n  \"paymentMethod\": \"bank_transfer\",\n  \"note\": \"Manual subscription payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "subscriptions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Payment Paid Manually",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionCode\": \"MANUAL-{{paymentId}}\",\n  \"note\": \"Owner confirmed payment manually\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}/mark-paid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "{{paymentId}}",
+                "mark-paid"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments?organizationId={{organizationId}}&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments?organizationId={{organizationId}}&page=1&limit=20"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "{{organizationId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "{{paymentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Calculate Payroll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"from\": \"{{payrollFrom}}\",\n  \"to\": \"{{payrollTo}}\",\n  \"hourlyRate\": 50000,\n  \"overtimeMultiplier\": 1.5,\n  \"deductionRatePerMinute\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/payroll/calculate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "payroll",
+                "calculate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Payroll Payment - Bank Transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201 when employee and attendance data exist', function () { pm.expect([201, 400, 403, 404]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('payrollPaymentId', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"from\": \"{{payrollFrom}}\",\n  \"to\": \"{{payrollTo}}\",\n  \"hourlyRate\": 50000,\n  \"overtimeMultiplier\": 1.5,\n  \"deductionRatePerMinute\": 0,\n  \"paymentMethod\": \"bank_transfer\",\n  \"note\": \"Monthly payroll payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/payroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "payroll"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Payroll Payment - PayOS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"{{organizationId}}\",\n  \"employeeId\": \"{{employeeId}}\",\n  \"from\": \"{{payrollFrom}}\",\n  \"to\": \"{{payrollTo}}\",\n  \"hourlyRate\": 50000,\n  \"overtimeMultiplier\": 1.5,\n  \"deductionRatePerMinute\": 0,\n  \"paymentMethod\": \"payos\",\n  \"note\": \"Payroll payment through PayOS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/payroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "payroll"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Payroll Payment Paid",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionCode\": \"PAYROLL-MANUAL-001\",\n  \"note\": \"Payroll transfer completed\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{payrollPaymentId}}/mark-paid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "{{payrollPaymentId}}",
+                "mark-paid"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Payment",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "{{paymentId}}",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Refund Payment",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}/refund",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "{{paymentId}}",
+                "refund"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PayOS Webhook Sample",
+          "description": "Sample shape only. The signature must be generated with PAYOS_CHECKSUM_KEY over data fields for the API to accept it.",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": {\n    \"code\": \"00\",\n    \"orderCode\": 123456789,\n    \"reference\": \"PAYOS_REFERENCE\"\n  },\n  \"signature\": \"replace-with-valid-payos-signature\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/payos/webhook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "payos",
+                "webhook"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Validation Samples",
       "item": [
         {
@@ -2892,6 +3865,76 @@
     },
     {
       "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "organizationId",
+      "value": "665000000000000000000010",
+      "type": "string"
+    },
+    {
+      "key": "subscriptionPlanId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subscriptionPlanCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subscriptionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payrollPaymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payosCheckoutUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payrollFrom",
+      "value": "2026-05-01T00:00:00.000Z",
+      "type": "string"
+    },
+    {
+      "key": "payrollTo",
+      "value": "2026-05-31T23:59:59.999Z",
+      "type": "string"
+    },
+    {
+      "key": "organizationSlug",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Password123!",
+      "type": "string"
+    },
+    {
+      "key": "adminSetupSecret",
       "value": "",
       "type": "string"
     }

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift - Shift Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "inverse-primary": "#c8c6c5",
+                    "canvas": "#ffffff",
+                    "tertiary-fixed-dim": "#cac6c3",
+                    "surface-tint": "#5f5e5e",
+                    "on-primary-fixed-variant": "#474646",
+                    "inverse-on-surface": "#f4f0ef",
+                    "on-tertiary-fixed-variant": "#484645",
+                    "surface-container-highest": "#e5e2e1",
+                    "secondary-fixed": "#d8e2ff",
+                    "surface-bright": "#fdf8f8",
+                    "on-secondary-container": "#fefcff",
+                    "secondary-container": "#2170e4",
+                    "primary-container": "#1c1b1b",
+                    "on-secondary": "#ffffff",
+                    "primary": "#000000",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "tertiary-fixed": "#e6e1df",
+                    "error": "#ef4444",
+                    "tertiary": "#000000",
+                    "surface-variant": "#e5e2e1",
+                    "surface-container-high": "#ebe7e6",
+                    "on-error": "#ffffff",
+                    "surface-container": "#f1edec",
+                    "surface-card": "#f5f5f5",
+                    "on-primary-fixed": "#1c1b1b",
+                    "secondary": "#0058be",
+                    "on-secondary-fixed": "#001a42",
+                    "surface-dark": "#101010",
+                    "success": "#10b981",
+                    "background": "#fdf8f8",
+                    "on-primary": "#ffffff",
+                    "hairline": "#e5e7eb",
+                    "on-tertiary-container": "#868381",
+                    "on-surface": "#1c1b1b",
+                    "on-tertiary-fixed": "#1d1b1a",
+                    "on-background": "#1c1b1b",
+                    "surface": "#fdf8f8",
+                    "surface-container-low": "#f7f3f2",
+                    "on-primary-container": "#858383",
+                    "tertiary-container": "#1d1b1a",
+                    "surface-dim": "#ddd9d8",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#e5e2e1",
+                    "on-surface-variant": "#444748",
+                    "outline-variant": "#c4c7c7",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#004395",
+                    "inverse-surface": "#313030",
+                    "outline": "#747878"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "sm": "8px",
+                    "lg": "24px",
+                    "xl": "32px",
+                    "3xl": "64px",
+                    "2xl": "48px",
+                    "md": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "display-md": ["Inter"],
+                    "caption": ["Inter"],
+                    "label-md": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "button": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .glass-blur { backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface font-body-md overflow-hidden">
+<!-- Background Schedule Board (Blurred for context) -->
+<div class="fixed inset-0 flex flex-col blur-md select-none pointer-events-none opacity-50">
+<!-- Top Nav (Blurred) -->
+<header class="fixed top-0 right-0 left-64 h-16 border-b border-hairline flex items-center px-lg justify-between bg-canvas/80">
+<div class="flex items-center gap-md">
+<span class="font-headline-sm text-headline-sm text-primary">Schedules</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-surface-container"></div>
+</div>
+</header>
+<!-- Sidebar (Blurred) -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-hairline bg-canvas p-md flex flex-col">
+<div class="text-headline-sm font-headline-sm font-black text-primary mb-xl">SmartShift</div>
+<div class="space-y-sm">
+<div class="flex items-center gap-md px-md py-sm bg-surface-container-high rounded-lg"><span class="material-symbols-outlined">dashboard</span> Dashboard</div>
+<div class="flex items-center gap-md px-md py-sm"><span class="material-symbols-outlined">calendar_month</span> Schedules</div>
+</div>
+</aside>
+<!-- Main Content Grid (Blurred) -->
+<main class="ml-64 mt-16 p-lg grid grid-cols-7 gap-base h-full">
+<template x-for="i in 35">
+<div class="bg-surface-container-low border border-hairline rounded-lg p-sm min-h-[120px]"></div>
+</template>
+</main>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-primary/20 glass-blur p-md overflow-y-auto">
+<!-- Modal Container -->
+<div class="bg-surface-container-lowest w-full max-w-[640px] rounded-xl shadow-2xl overflow-hidden border border-hairline animate-in fade-in zoom-in duration-300">
+<!-- Modal Header -->
+<div class="px-lg py-md flex items-center justify-between border-b border-hairline bg-surface-bright">
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-primary">Add New Shift</h2>
+<p class="font-caption text-caption text-on-surface-variant">Monday, Oct 23 • Downtown Branch</p>
+</div>
+<button class="p-sm hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Form Body -->
+<div class="p-lg space-y-lg">
+<!-- Conflict Detection Warning (Visible state) -->
+<div class="bg-error-container/40 border border-error/20 rounded-lg p-md flex items-start gap-md animate-pulse">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div class="space-y-xs">
+<p class="font-label-md text-label-md text-on-error-container">Scheduling Conflict Detected</p>
+<p class="font-caption text-caption text-on-error-container/80">Employee "Jordan Smith" is already scheduled for a Morning Shift (8:00 AM - 12:00 PM) at this location.</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-lg">
+<!-- Template Selection -->
+<div class="col-span-2 md:col-span-1 flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface">Shift Template</label>
+<div class="relative group">
+<select class="w-full bg-white border border-hairline rounded-lg px-md py-sm appearance-none focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all">
+<option>Standard Opening (8:00 AM - 4:00 PM)</option>
+<option>Mid-Day Support (11:00 AM - 7:00 PM)</option>
+<option>Closing Shift (4:00 PM - 12:00 AM)</option>
+<option value="custom">Custom Shift...</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Employee Selection -->
+<div class="col-span-2 md:col-span-1 flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface">Assign Employee</label>
+<div class="flex items-center gap-md bg-white border border-hairline rounded-lg px-md py-sm hover:border-outline-variant transition-colors cursor-pointer">
+<img alt="Jordan Smith" class="w-6 h-6 rounded-full object-cover grayscale" data-alt="A professional studio portrait of a male employee with a warm, friendly expression, set against a clean and minimalist light grey background to match a high-end corporate SaaS aesthetic. The lighting is soft and directional, emphasizing professional reliability and personability while maintaining a stark, modern color palette of blacks and whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSHnrgZ1p23Lj_apFW04zBKsvOvuhPVf9ZHQ5ePImif6YHJVSpTG3Acn9NBO4oSh_ppC0gDod8LErYqIbToYYHRucr9eIAelAnTwBvZ6VAXRZ1l_CXO789ciEC-771GFH9cY5XKDLtTo7BOrWwx6yRNEJkY8cqiVKUlMa2iREgsTEd5opJl8PCNxfjd6HenzQLXxs-qEJ0j8bAN2cFYeIbkQQBL-aS3DWpeu0VaLhZWr8Ohm7Axt0Z0QqH5DcbruWCpJ6aOLAHzjDm"/>
+<span class="flex-grow font-body-md text-body-md text-primary">Jordan Smith</span>
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</div>
+</div>
+<!-- Time Selection -->
+<div class="col-span-2 grid grid-cols-2 gap-md p-md bg-surface-card rounded-lg border border-hairline">
+<div class="flex flex-col gap-xs">
+<label class="font-caption text-caption text-on-surface-variant">Start Time</label>
+<input class="bg-transparent border-none p-0 text-headline-sm font-headline-sm focus:ring-0" type="time" value="08:00"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-caption text-caption text-on-surface-variant">End Time</label>
+<input class="bg-transparent border-none p-0 text-headline-sm font-headline-sm focus:ring-0" type="time" value="16:00"/>
+</div>
+</div>
+<!-- Additional Options -->
+<div class="col-span-2 space-y-md">
+<div class="flex items-center gap-md">
+<input class="w-5 h-5 rounded border-hairline text-primary focus:ring-primary" id="unpaid_break" type="checkbox"/>
+<label class="font-body-md text-body-md text-on-surface" for="unpaid_break">Include 30-minute unpaid break</label>
+</div>
+</div>
+<!-- Notes -->
+<div class="col-span-2 flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface">Shift Notes (Optional)</label>
+<textarea class="w-full min-h-[100px] bg-white border border-hairline rounded-lg px-md py-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all resize-none" placeholder="Specific tasks, coverage requirements, or reminders..."></textarea>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-lg py-md border-t border-hairline flex items-center justify-between bg-surface-bright">
+<button class="px-lg py-sm font-button text-button text-on-surface-variant hover:text-primary transition-colors">
+                    Delete Draft
+                </button>
+<div class="flex items-center gap-md">
+<button class="px-lg py-sm font-button text-button border border-hairline rounded-lg hover:bg-surface-container-low transition-colors">
+                        Cancel
+                    </button>
+<button class="px-xl py-sm font-button text-button bg-primary text-on-primary rounded-lg hover:bg-primary/90 active:scale-95 transition-all">
+                        Publish Shift
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+        // Simple logic to simulate interaction
+        const select = document.querySelector('select');
+        const conflictDiv = document.querySelector('.bg-error-container\\/40');
+        
+        select.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                // Potential UI state change for custom shifts
+                console.log('Custom shift selected');
+            }
+            
+            // Toggle conflict warning based on a "random" condition for demo
+            if (Math.random() > 0.5) {
+                conflictDiv.classList.remove('hidden');
+                conflictDiv.classList.add('flex');
+            } else {
+                conflictDiv.classList.remove('flex');
+                conflictDiv.classList.add('hidden');
+            }
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                console.log('Closing modal...');
+            }
+        });
+    </script>
+</body></html>

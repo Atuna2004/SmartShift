@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift | Modern Staff Scheduling &amp; Attendance</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter & Cal Sans substitute (Inter Tight with weight 900 for that Cal Sans look) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary-container": "#1d1b1a",
+                "primary-container": "#1c1b1b",
+                "surface-container-high": "#ebe7e6",
+                "surface": "#fdf8f8",
+                "on-tertiary-fixed-variant": "#484645",
+                "error": "#ef4444",
+                "primary": "#000000",
+                "on-primary-fixed": "#1c1b1b",
+                "inverse-surface": "#313030",
+                "surface-dark": "#101010",
+                "on-tertiary-fixed": "#1d1b1a",
+                "surface-dim": "#ddd9d8",
+                "tertiary": "#000000",
+                "background": "#fdf8f8",
+                "on-surface-variant": "#444748",
+                "surface-bright": "#fdf8f8",
+                "on-tertiary": "#ffffff",
+                "canvas": "#ffffff",
+                "on-primary-fixed-variant": "#474646",
+                "tertiary-fixed-dim": "#cac6c3",
+                "on-secondary-fixed-variant": "#004395",
+                "surface-container-highest": "#e5e2e1",
+                "inverse-on-surface": "#f4f0ef",
+                "outline-variant": "#c4c7c7",
+                "inverse-primary": "#c8c6c5",
+                "surface-tint": "#5f5e5e",
+                "secondary-fixed-dim": "#adc6ff",
+                "surface-container-low": "#f7f3f2",
+                "surface-variant": "#e5e2e1",
+                "on-secondary-fixed": "#001a42",
+                "primary-fixed": "#e5e2e1",
+                "tertiary-fixed": "#e6e1df",
+                "outline": "#747878",
+                "surface-container": "#f1edec",
+                "secondary-fixed": "#d8e2ff",
+                "on-secondary-container": "#fefcff",
+                "on-error-container": "#93000a",
+                "secondary-container": "#2170e4",
+                "on-secondary": "#ffffff",
+                "on-error": "#ffffff",
+                "on-background": "#1c1b1b",
+                "on-primary-container": "#858383",
+                "surface-card": "#f5f5f5",
+                "primary-fixed-dim": "#c8c6c5",
+                "error-container": "#ffdad6",
+                "hairline": "#e5e7eb",
+                "on-surface": "#1c1b1b",
+                "surface-container-lowest": "#ffffff",
+                "secondary": "#0058be",
+                "success": "#10b981",
+                "on-primary": "#ffffff",
+                "on-tertiary-container": "#868381"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "xs": "4px",
+                "3xl": "64px",
+                "sm": "8px",
+                "md": "16px",
+                "xl": "32px",
+                "lg": "24px",
+                "2xl": "48px",
+                "base": "4px"
+            },
+            "fontFamily": {
+                "button": ["Inter", "sans-serif"],
+                "body-lg": ["Inter", "sans-serif"],
+                "caption": ["Inter", "sans-serif"],
+                "body-md": ["Inter", "sans-serif"],
+                "label-md": ["Inter", "sans-serif"],
+                "headline-sm": ["Inter", "sans-serif"],
+                "display-lg": ["Inter", "sans-serif"],
+                "display-md": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "display-lg": ["56px", {"lineHeight": "1.05", "letterSpacing": "-0.05em", "fontWeight": "900"}],
+                "display-md": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "900"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+body {
+    font-family: "Inter", sans-serif
+    }
+.font-black {
+    font-weight: 900
+    }
+.noise-bg {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuANzPGnx0YrE6xU5-xoySOIdXCfJ2XHhnW6UznVqVzLu50Q6smJas7akaKCjD18jCxLM9iQ6W8BVyLWEV86dOTVp_Y_8CTD7tGVC7tEGMlLGOFvoaWd7pdCyA4VHVz48maPDZFRG48o98CXfPJGS7YdDzHYlqyg7vnfX17X8XyCRFVZCL3kgpBv9UUYPSBU2R7aZxyg40VbkJRjn5BOPB2ilkupRAX6R3pmFHsfPCMapqWo1VIjhWnrUBx9VmlTjDL0rSa82cLAywy2);
+    background-repeat: repeat
+    }</style>
+</head>
+<body class="bg-canvas text-on-surface selection:bg-primary selection:text-white">
+<!-- TopNavBar -->
+<header class="bg-surface/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-hairline">
+<div class="flex justify-between items-center h-16 px-6 lg:px-12 max-w-7xl mx-auto">
+<div class="text-headline-sm font-headline-sm font-black text-primary">SmartShift</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-button text-button" href="#">Product</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-button text-button" href="#">Features</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-button text-button" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-button text-button" href="#">Resources</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="font-button text-button text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 transition-transform">Log In</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-lg font-button text-button hover:opacity-80 transition-opacity active:scale-95 transition-transform">Get Started</button>
+</div>
+</div>
+</header>
+<main class="pt-16">
+<!-- Hero Section -->
+<section class="relative overflow-hidden pt-2xl pb-3xl px-6 lg:px-12">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-xl items-center">
+<div class="z-10">
+<h1 class="font-display-lg text-display-lg mb-md max-w-xl">
+                        Stop managing shifts with paper and Zalo
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-xl max-w-lg">
+                        The smartest way for cafes and restaurants to schedule staff, track attendance, and automate payroll in one single workspace.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-md">
+<button class="bg-primary text-on-primary px-8 py-4 rounded-lg font-button text-button text-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                            Start Free Trial
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<button class="border border-hairline bg-surface px-8 py-4 rounded-lg font-button text-button text-lg flex items-center justify-center gap-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">play_circle</span>
+                            Watch Demo
+                        </button>
+</div>
+<div class="mt-xl flex items-center gap-4">
+<div class="flex -space-x-2">
+<img class="w-10 h-10 rounded-full border-2 border-canvas" data-alt="A portrait of a smiling young barista in a professional cafe setting, captured with warm, natural sunlight that enhances the high-contrast light mode aesthetic. The background features clean white tiles and minimalist decor, emphasizing a modern SaaS atmosphere with high-end, crisp visual clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6RBa3ewDnrJlCfyI-WNYZNjuC9N88bFuPK1AuBKDz-JRW9DGtQCOFvQJn1v6ro0LwNYv334hqEqR9bgfnfS8mabDZDpEz0g7fIt_WGW6wI1PEsLNz4tnGVnVbWpBVB3bSPWrwh-eFFFWCtihdBcSihkGvCw7r00dDZHJI1FleDRdWpGlP_DhLqT219s-s0_QJ8x5QLE1BveEKDeKwfZT7R86Y0UPNsKRxvKD0S52igF6ZC-ceJ1U9R9MjoNdjZExMIiRLGq3rF-lJ"/>
+<img class="w-10 h-10 rounded-full border-2 border-canvas" data-alt="A profile photograph of a diverse restaurant manager in a minimalist office environment. The lighting is bright and airy, utilizing soft shadows and sharp focus to highlight professionalism and modern efficiency. The overall color scheme is neutral with stark black and white tones, reflecting the brand's sophisticated and reliable identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGvyCOd_73FcmbZ5VZK_rW3ugvUzW3tCQ-pjLCWyvGmWyz8NwtCxbhJCEFbZO3JyFYGuJHmY3fIbjU527eW43AYxhFaCZF1eVu0EH6o5bTtlMo-l9e-buKkh8X_AhBvwGY-IJFMoXP1tlOjW5ZHZPySe3mNUiNrh3QOwZ5twul6B9gsS6fkKYaJWo30g4Dwg4N_7EUrYSyeLo0cFzdzuYvvr3Gxr-TZA97_2jkh7g-NC-RzdQeTj-TV29u_QWEh1wsoz_w3fXyZJTH"/>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Trusted by 500+ local businesses</p>
+</div>
+</div>
+<div class="relative lg:h-[600px] flex items-center justify-center">
+<!-- Desktop Screen Representation -->
+<div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden shadow-2xl border border-hairline bg-white transform lg:translate-x-12 translate-y-4">
+<img alt="Main Dashboard Interface" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1BZRBGMHlTROb5Mkh1qHA6Dzfla5D0vw2HbbvXDyQ6qzp6QBLtQI6CPJwS2_7Nxz-O-ZGOa4Otphn0aFuybjddGmdmPhv-NdtVhRAjSw1-LTguvaePMDq0ESGzpTwknkpQ1vBIZdrd4Af3AAfZN5FQBJkSxb9WfFITtttFUnp8JOH71nlEEydmB4KrbtaqXPF-Jd-M9n42FiVcdu4V1Wa2gQG4_UqiC1M_gMSVALWY6NRnWhwRsh5CclcwV9e3zg-qHL_L2RAqM2x"/>
+</div>
+<!-- Mobile Screen Overlap -->
+<div class="absolute -bottom-8 -left-4 lg:left-0 w-48 h-[400px] rounded-[2rem] border-[6px] border-primary-container bg-black shadow-2xl overflow-hidden hidden sm:block">
+<img alt="Mobile App View" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUr63gZIY6cvPMFR1QtHrI55VHbvwrOqbfN1MMMd4tBFNLC5KSnoNj55m7cD2jcOjIDN-90i5HoOP3tka9tVCiGOmjf2D30Hb9IWdniV--EtIDkBnLKJ3Pv2oAEfeJg-TSQ3fMqMtaWOrYN8DrwbpII-ynBFHG6nDDPwpkRsAfxEu7UHJ6fysLRe4TpV3iEpv56iyywLNH3kITn-1ouK_clRjrdNkhLbD1MmpFeyqdqDYHLDqBzzbjO6sEmNSGTExB8f0VED_Ng4Lk"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Problem Section (Asymmetric Bento) -->
+<section class="py-3xl bg-surface-container-low px-6 lg:px-12">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-2xl">
+<span class="text-secondary font-label-md text-label-md uppercase tracking-widest">The Old Way</span>
+<h2 class="font-display-md text-display-md mt-sm">Messy workflows kill margins</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<!-- Messy Excel -->
+<div class="bg-white p-xl rounded-xl border border-hairline relative overflow-hidden h-64 flex flex-col justify-end">
+<div class="absolute top-4 right-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'wght' 200;">table_chart</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-xs text-error">Chaotic Excel Sheets</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Version control nightmares and broken formulas leading to payroll errors.</p>
+</div>
+<!-- Zalo Noise -->
+<div class="bg-white p-xl rounded-xl border border-hairline relative overflow-hidden h-64 flex flex-col justify-end">
+<div class="absolute top-4 right-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'wght' 200;">chat</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-xs text-error">Zalo Group Fatigue</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Important shift swaps buried under hundreds of unrelated messages.</p>
+</div>
+<!-- The VS Card -->
+<div class="md:col-span-3 bg-primary text-on-primary p-xl rounded-xl flex flex-col md:flex-row items-center justify-between gap-xl">
+<div class="max-w-md">
+<h3 class="font-display-md text-display-md mb-md">Vs. The SmartShift Advantage</h3>
+<p class="font-body-lg text-body-lg opacity-80">Centralize your operations. One source of truth for every branch, every manager, and every staff member.</p>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success">check_circle</span>
+<span class="font-label-md text-label-md">100% Accurate</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success">check_circle</span>
+<span class="font-label-md text-label-md">Zero Paper</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success">check_circle</span>
+<span class="font-label-md text-label-md">Real-time Sync</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success">check_circle</span>
+<span class="font-label-md text-label-md">Staff Happy</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Solution Section -->
+<section class="py-3xl px-6 lg:px-12 max-w-7xl mx-auto">
+<div class="mb-2xl flex flex-col md:flex-row items-end justify-between gap-md">
+<div class="max-w-2xl">
+<span class="text-secondary font-label-md text-label-md uppercase tracking-widest">Features</span>
+<h2 class="font-display-md text-display-md mt-sm">Built for the velocity of service work</h2>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+<!-- Card 1 -->
+<div class="group">
+<div class="bg-surface-card rounded-xl aspect-square mb-lg overflow-hidden border border-hairline group-hover:border-primary transition-colors">
+<img alt="Scheduling Interface" class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPsVxmGI7zexFPKrbMaDGcIaa8XIEedCWRJMkjBcY1xomEHhQGojIPJfm7xb6VwXibCAZkkhFD6GMxNEYMK5wa6VAipr6bVJUl4hmzjOtrz6uzOKU3t5_NZjDSe9fw4C1Qk6MJ8nfjW0h8wN_zcpIG9Dv7X2HBel2-vzRkTaloUQRnjrwf3sHHLpwl-8JnMuTXUeM4ziaEwfjk1Gyyw3CkeSexDKivcI9eQ3se3G_0ZMvg4WVjgDjVVemKLTFz62B87CsvJ7f6ginH"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-sm">Visual Scheduling</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Drag and drop shifts in seconds. View coverage gaps and labor costs in real-time before you publish.</p>
+</div>
+<!-- Card 2 -->
+<div class="group">
+<div class="bg-surface-card rounded-xl aspect-square mb-lg overflow-hidden border border-hairline group-hover:border-primary transition-colors">
+<img alt="QR Attendance" class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU21yuzoLnuhCXM4rYnjUPS_veEPbt-fvhR3WN8mzeBuvhMt0wOC3dZCS2iH8Mq4guqSDrnjuBn9r4t2-9Xb1-yZ3dQfJOniZ69WAZOxhDP_OAQQVwY3OiB5e_IIQEhdfsyjTXWXEMoES6_cMTbANmiT_10O8t2503o9BKKqP_6KYp9FfjrQGYy9inijd5TnOCgtVriFihGCp17r79PAg6yCPEzgW4C20zFKgmS6nMuyqVFXP_8TeFV627DvDJ-qqSzFvC_qBhCpgj"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-sm">QR Check-in</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Eliminate buddy punching. Staff scan a secure, rotating QR code to clock in from their own devices.</p>
+</div>
+<!-- Card 3 -->
+<div class="group">
+<div class="bg-surface-card rounded-xl aspect-square mb-lg overflow-hidden border border-hairline group-hover:border-primary transition-colors">
+<img alt="Shift Swaps" class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQN41RXjOCHvtFt0Do65QfmwkzhC-gTvlEAoCIEXSjPJ8feH2YrAJUOLeZTJMob7kTM54I--VGbXZI7w9cdGIJ83U7p-T2rYpVJ8GJxJybAA5ofHX5h1fzvgQdBxzeAUxsjhLyHZ1DphfD-tn7x-B26imSI21AmD9tDd9Z6dhK6rpanZVudB3zMAJprr2KI4PP5yoYwC5oqHS42qZdXkBudyLg6WfVDwogO4Gcre0NYuT8pr_ez1ey3a1zuq03fhm-PquSU-i8WHnc"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-sm">Self-Service Swaps</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Empower staff to swap shifts with manager approval. No more middle-man coordination for simple changes.</p>
+</div>
+</div>
+</section>
+<!-- Testimonials -->
+<section class="py-3xl bg-surface px-6 lg:px-12 border-y border-hairline overflow-hidden">
+<div class="max-w-7xl mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-3xl items-center">
+<div>
+<div class="flex items-center gap-1 text-primary mb-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<blockquote class="font-display-md text-display-md italic mb-xl">
+                            "SmartShift saved us 15 hours a week in manager administration. My baristas love the clarity of knowing exactly when they work."
+                        </blockquote>
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full" data-alt="A candid, high-quality photograph of a female cafe owner standing confidently behind a sleek, minimalist wooden counter. The lighting is bright and modern, echoing the light-mode UI style with crisp blacks and vibrant energy. Her expression is approachable and professional, set against a backdrop of organized coffee equipment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBapCQUT_MaJtdRrLH-47hHdgcYr52WgNWmY1chLzGXs7_yLOtTnTmE7IBMGaFhDREhliycY--PpgzkejpGze2pqc90LAvqXfv494A1DctlAH9DLdKEB-CUwTi1MtmBUWENmP3hdLSZwDTNWn0WVfvwqNfgwbYcCA_tlvZuMfVQwBdCXBJ1OQKGwUrpTnxUWzDXbQejXARXVFg9dHFanvpjzVwUkgoXkp8NseC2FWAVPuOijMjko9Sv2-vYgp1rjRtfMUPpqHGqGGWU"/>
+<div>
+<p class="font-label-md text-label-md text-primary">Le Minh Anh</p>
+<p class="font-caption text-caption text-on-surface-variant">Owner, The Roastery Saigon</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="p-lg bg-white rounded-xl border border-hairline shadow-sm">
+<p class="font-headline-sm text-headline-sm text-primary mb-xs">4.9/5</p>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-widest">App Store Rating</p>
+</div>
+<div class="p-lg bg-white rounded-xl border border-hairline shadow-sm">
+<p class="font-headline-sm text-headline-sm text-primary mb-xs">3000+</p>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-widest">Active Staff</p>
+</div>
+<div class="p-lg bg-white rounded-xl border border-hairline shadow-sm col-span-2">
+<p class="font-headline-sm text-headline-sm text-primary mb-xs">30%</p>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-widest">Reduction in Labor Costs</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Banner -->
+<section class="py-3xl px-6 lg:px-12">
+<div class="max-w-7xl mx-auto bg-primary text-on-primary rounded-[2rem] p-xl md:p-3xl text-center relative overflow-hidden">
+<div class="absolute inset-0 noise-bg opacity-10 pointer-events-none"></div>
+<div class="relative z-10">
+<h2 class="font-display-md text-display-md mb-md">Ready to simplify your branch management?</h2>
+<p class="font-body-lg text-body-lg opacity-80 mb-xl max-w-2xl mx-auto">Join the hundreds of businesses scaling faster with better staff operations.</p>
+<div class="flex flex-col sm:flex-row gap-md justify-center items-center">
+<button class="bg-white text-primary px-xl py-4 rounded-lg font-button text-button text-lg hover:bg-surface-container transition-colors w-full sm:w-auto">
+                            Get Started
+                        </button>
+<button class="text-white border border-white/20 px-xl py-4 rounded-lg font-button text-button text-lg hover:bg-white/10 transition-colors w-full sm:w-auto">
+                            Contact Sales
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-dark text-surface">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-lg py-xl px-6 lg:px-12 max-w-7xl mx-auto font-body-md text-body-md">
+<div>
+<div class="text-headline-sm font-headline-sm font-black text-surface mb-md">SmartShift</div>
+<p class="text-surface-dim max-w-xs">Building tools for the future of service industry operations.</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-surface mb-md">Product</p>
+<ul class="space-y-sm">
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Features</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Integrations</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Enterprise</a></li>
+</ul>
+</div>
+<div>
+<p class="font-label-md text-label-md text-surface mb-md">Company</p>
+<ul class="space-y-sm">
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">About</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Careers</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<p class="font-label-md text-label-md text-surface mb-md">Legal</p>
+<ul class="space-y-sm">
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Terms of Service</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors" href="#">Cookie Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-white/10 py-md px-6 lg:px-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+<p class="text-surface-dim text-caption font-caption">© 2024 SmartShift. All rights reserved.</p>
+<div class="flex gap-md">
+<a class="text-surface-dim hover:text-surface transition-colors" href="#">
+<span class="material-symbols-outlined">public</span>
+</a>
+<a class="text-surface-dim hover:text-surface transition-colors" href="#">
+<span class="material-symbols-outlined">alternate_email</span>
+</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                button.style.transform = 'scale(0.98)';
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Simple reveal on scroll
+        const revealElements = document.querySelectorAll('.group, .bg-white');
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0');
+                    entry.target.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        revealElements.forEach(el => {
+            el.classList.add('opacity-0');
+            el.style.transform = 'translateY(20px)';
+            observer.observe(el);
+        });
+    </script>
+</body></html>

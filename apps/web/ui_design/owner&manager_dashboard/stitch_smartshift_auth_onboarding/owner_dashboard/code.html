@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift Owner Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#c8c6c5",
+                    "surface-variant": "#e5e2e1",
+                    "secondary": "#0058be",
+                    "on-primary-container": "#858383",
+                    "background": "#fdf8f8",
+                    "surface-container-low": "#f7f3f2",
+                    "primary": "#000000",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#000000",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#ebe7e6",
+                    "on-surface-variant": "#444748",
+                    "on-tertiary-container": "#868381",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#5f5e5e",
+                    "primary-container": "#1c1b1b",
+                    "on-surface": "#1c1b1b",
+                    "inverse-primary": "#c8c6c5",
+                    "primary-fixed": "#e5e2e1",
+                    "tertiary-fixed-dim": "#cac6c3",
+                    "on-primary-fixed-variant": "#474646",
+                    "surface-card": "#f5f5f5",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-tertiary-fixed": "#1d1b1a",
+                    "surface-bright": "#fdf8f8",
+                    "on-error": "#ffffff",
+                    "canvas": "#ffffff",
+                    "error": "#ef4444",
+                    "on-background": "#1c1b1b",
+                    "on-secondary-container": "#fefcff",
+                    "inverse-on-surface": "#f4f0ef",
+                    "surface-container": "#f1edec",
+                    "on-secondary-fixed": "#001a42",
+                    "tertiary-fixed": "#e6e1df",
+                    "surface-dark": "#101010",
+                    "tertiary-container": "#1d1b1a",
+                    "surface-dim": "#ddd9d8",
+                    "surface-container-highest": "#e5e2e1",
+                    "success": "#10b981",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#004395",
+                    "hairline": "#e5e7eb",
+                    "error-container": "#ffdad6",
+                    "outline": "#747878",
+                    "on-primary-fixed": "#1c1b1b",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#313030",
+                    "on-tertiary-fixed-variant": "#484645",
+                    "outline-variant": "#c4c7c7",
+                    "secondary-container": "#2170e4",
+                    "surface": "#fdf8f8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "2xl": "48px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "3xl": "64px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "button": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "display-md": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "caption": ["Inter"]
+            },
+            "fontSize": {
+                    "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                    "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-md px-sm border-r border-hairline bg-canvas w-64 z-50">
+<div class="flex items-center gap-sm px-md mb-xl">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[20px]">layers</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-black text-primary leading-none">SmartShift</h1>
+<p class="font-caption text-caption text-on-surface-variant">Enterprise Admin</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto hide-scrollbar">
+<!-- Active Tab: Dashboard -->
+<a class="flex items-center gap-md px-md py-sm bg-surface-container text-primary font-bold rounded-lg transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-label-md text-label-md">Employees</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="store">store</span>
+<span class="font-label-md text-label-md">Branches</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="font-label-md text-label-md">Shift Templates</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-md text-label-md">Schedules</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="clock_loader_60">clock_loader_60</span>
+<span class="font-label-md text-label-md">Attendance</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="font-label-md text-label-md">QR Check-in</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="swap_horiz">swap_horiz</span>
+<span class="font-label-md text-label-md">Shift Swap</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="event_busy">event_busy</span>
+<span class="font-label-md text-label-md">Leave Requests</span>
+</a>
+<div class="pt-4 mt-4 border-t border-hairline">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-md text-label-md">Reports</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-md text-label-md">Subscription</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all scale-[0.98] active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+</nav>
+<div class="mt-auto px-md py-sm flex items-center gap-sm bg-surface-card rounded-lg border border-hairline">
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-hairline" data-alt="A professional studio portrait of a corporate executive in a crisp white shirt, photographed against a clean, neutral background with soft high-key lighting. The style is modern, minimalist, and high-quality, reflecting a professional SaaS platform identity with sharp focus and natural skin tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFwmmGw3vYArfu6-Hu_cx_KriVQ5wAhwScidL_3DYmKGNJTxjq_H3Yf9LvqhHggnKqDIJRzfgybeLeLSPX0ocpwDYEtMuKBQXW8TCmhtXz5Oiauez52EEgJiVSrBp6BaW5b3QE2sa2UGTKwlKOvRm6vagp1gKoJFy3-3Iq3Noj6vlnKB3ilGXakr39w-t3UqEXfpGRJBxHMp-2oNqsQT5ccyBD2Bj60LxuyGl_dwbof5ED49gci8mmNpRpaVlkcr0KhclpWYRHeZre"/>
+<div class="flex-1 min-w-0">
+<p class="font-label-md text-label-md text-primary truncate">Alex Sterling</p>
+<p class="font-caption text-caption text-on-surface-variant truncate">Owner</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-lg h-16 bg-canvas border-b border-hairline">
+<div class="flex items-center gap-xl flex-1">
+<div class="flex items-center gap-sm bg-surface-card px-md py-2 rounded-lg border border-hairline cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<span class="font-body-md text-body-md font-bold text-primary">Downtown Branch</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="expand_more">expand_more</span>
+</div>
+<div class="max-w-md w-full relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-card border-hairline rounded-lg pl-10 pr-4 py-2 font-body-md text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Search employees, shifts, or reports..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-card transition-all active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<button class="bg-primary text-on-primary font-button text-button px-md py-2 rounded-lg transition-all hover:opacity-90 active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                    Create Shift
+                </button>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="p-lg max-w-[1400px] mx-auto space-y-lg">
+<section>
+<h2 class="font-display-md text-display-md font-bold text-primary mb-md tracking-tight">Overview</h2>
+<!-- KPI Grid: 4 Columns -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+<div class="bg-surface-card p-md rounded-xl border border-hairline hover:border-primary transition-all group">
+<div class="flex justify-between items-start mb-sm">
+<span class="material-symbols-outlined p-2 bg-canvas rounded-lg text-primary" data-icon="groups">groups</span>
+<span class="text-success font-label-md text-label-md flex items-center gap-1">+4% <span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span></span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Total Employees</p>
+<h3 class="font-headline-sm text-headline-sm font-black mt-xs">156</h3>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline hover:border-primary transition-all group">
+<div class="flex justify-between items-start mb-sm">
+<span class="material-symbols-outlined p-2 bg-canvas rounded-lg text-primary" data-icon="check_circle">check_circle</span>
+<span class="text-success font-label-md text-label-md flex items-center gap-1">98% <span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span></span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Attendance Rate</p>
+<h3 class="font-headline-sm text-headline-sm font-black mt-xs">96.2%</h3>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline hover:border-primary transition-all group">
+<div class="flex justify-between items-start mb-sm">
+<span class="material-symbols-outlined p-2 bg-canvas rounded-lg text-primary" data-icon="store">store</span>
+<span class="text-on-surface-variant font-label-md text-label-md">Stable</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Active Branches</p>
+<h3 class="font-headline-sm text-headline-sm font-black mt-xs">12</h3>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline hover:border-primary transition-all group">
+<div class="flex justify-between items-start mb-sm">
+<span class="material-symbols-outlined p-2 bg-canvas rounded-lg text-primary" data-icon="payments">payments</span>
+<span class="text-error font-label-md text-label-md flex items-center gap-1">-2.1% <span class="material-symbols-outlined text-[14px]" data-icon="trending_down">trending_down</span></span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Monthly Cost</p>
+<h3 class="font-headline-sm text-headline-sm font-black mt-xs">$42,850</h3>
+</div>
+</div>
+</section>
+<!-- Main Layout: 2 Columns -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Left: Branch Performance & Detailed Table (2/3 width) -->
+<div class="lg:col-span-2 space-y-lg">
+<div class="bg-canvas border border-hairline rounded-xl overflow-hidden">
+<div class="p-md flex justify-between items-center border-b border-hairline">
+<h3 class="font-headline-sm text-headline-sm font-bold">Branch Performance</h3>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container rounded-lg font-label-md text-label-md">Weekly</button>
+<button class="px-3 py-1 font-label-md text-label-md text-on-surface-variant">Monthly</button>
+</div>
+</div>
+<div class="p-lg">
+<!-- Visual placeholder for a sophisticated chart -->
+<div class="h-64 w-full bg-surface-card rounded-lg relative flex items-end justify-between px-md pb-4 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent"></div>
+<div class="w-12 bg-primary rounded-t-sm h-[60%] transition-all hover:opacity-80"></div>
+<div class="w-12 bg-primary-container rounded-t-sm h-[45%] transition-all hover:opacity-80"></div>
+<div class="w-12 bg-primary rounded-t-sm h-[85%] transition-all hover:opacity-80"></div>
+<div class="w-12 bg-primary-container rounded-t-sm h-[30%] transition-all hover:opacity-80"></div>
+<div class="w-12 bg-primary rounded-t-sm h-[70%] transition-all hover:opacity-80"></div>
+<div class="w-12 bg-primary-container rounded-t-sm h-[55%] transition-all hover:opacity-80"></div>
+<div class="w-12 bg-primary rounded-t-sm h-[95%] transition-all hover:opacity-80"></div>
+</div>
+</div>
+<table class="w-full text-left">
+<thead class="bg-surface-card border-y border-hairline font-label-md text-label-md text-on-surface-variant">
+<tr>
+<th class="px-lg py-sm font-semibold">Branch Name</th>
+<th class="px-lg py-sm font-semibold">Efficiency</th>
+<th class="px-lg py-sm font-semibold">Coverage</th>
+<th class="px-lg py-sm font-semibold">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-hairline">
+<tr class="hover:bg-surface-card transition-colors">
+<td class="px-lg py-md font-body-md font-bold">Downtown HQ</td>
+<td class="px-lg py-md font-body-md">94%</td>
+<td class="px-lg py-md font-body-md">100%</td>
+<td class="px-lg py-md">
+<span class="bg-success/10 text-success text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Optimal</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-card transition-colors">
+<td class="px-lg py-md font-body-md font-bold">Westside Retail</td>
+<td class="px-lg py-md font-body-md">88%</td>
+<td class="px-lg py-md font-body-md">92%</td>
+<td class="px-lg py-md">
+<span class="bg-success/10 text-success text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Optimal</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-card transition-colors">
+<td class="px-lg py-md font-body-md font-bold">North Logistics</td>
+<td class="px-lg py-md font-body-md">76%</td>
+<td class="px-lg py-md font-body-md">84%</td>
+<td class="px-lg py-md">
+<span class="bg-secondary/10 text-secondary text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Review</span>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-md text-center">
+<button class="font-button text-button text-on-surface-variant hover:text-primary transition-colors">View All Branches →</button>
+</div>
+</div>
+</div>
+<!-- Right: Subscription & Activity (1/3 width) -->
+<div class="space-y-lg">
+<!-- Subscription Card -->
+<div class="bg-primary text-on-primary p-lg rounded-xl shadow-lg relative overflow-hidden group">
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+<h3 class="font-headline-sm text-headline-sm font-black mb-sm">Premium Enterprise</h3>
+<p class="font-body-md text-body-md text-on-primary-container mb-xl">Your plan supports up to 500 employees and unlimited branches.</p>
+<div class="space-y-md mb-xl">
+<div class="flex justify-between font-label-md text-label-md">
+<span class="text-on-primary-container">Next Renewal</span>
+<span>Oct 12, 2024</span>
+</div>
+<div class="w-full bg-white/20 h-1 rounded-full overflow-hidden">
+<div class="bg-white h-full w-[75%]"></div>
+</div>
+</div>
+<button class="w-full bg-white text-primary font-button text-button py-3 rounded-lg hover:bg-surface-variant transition-all active:scale-95">
+                            Manage Subscription
+                        </button>
+</div>
+<!-- Recent Activity Feed -->
+<div class="bg-canvas border border-hairline rounded-xl p-md">
+<h3 class="font-headline-sm text-headline-sm font-bold mb-md">Recent Activity</h3>
+<div class="space-y-md">
+<div class="flex gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-card flex items-center justify-center shrink-0 border border-hairline">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="person_add">person_add</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">New Employee Hired</p>
+<p class="font-caption text-caption text-on-surface-variant">Jordan Smith joined Downtown Branch.</p>
+<p class="font-caption text-[10px] text-on-surface-variant/60 mt-1 uppercase">2 hours ago</p>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-card flex items-center justify-center shrink-0 border border-hairline">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="swap_horiz">swap_horiz</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">Shift Swap Approved</p>
+<p class="font-caption text-caption text-on-surface-variant">Maria V. swapped with Leon K.</p>
+<p class="font-caption text-[10px] text-on-surface-variant/60 mt-1 uppercase">5 hours ago</p>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-card flex items-center justify-center shrink-0 border border-hairline">
+<span class="material-symbols-outlined text-error text-[20px]" data-icon="warning">warning</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary">Late Attendance</p>
+<p class="font-caption text-caption text-on-surface-variant">4 employees clocked in late at Westside.</p>
+<p class="font-caption text-[10px] text-on-surface-variant/60 mt-1 uppercase">Yesterday</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-md py-2 font-button text-button border border-hairline rounded-lg text-on-surface-variant hover:bg-surface-card transition-colors">
+                            View All Activity
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button: Contextually placed for Owner -->
+<button class="fixed right-lg bottom-lg w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-[32px]" data-icon="bolt">bolt</span>
+</button>
+<script>
+        // Simple micro-interaction for KPI cards
+        document.querySelectorAll('.bg-surface-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Initialize any tooltips or dynamic elements if necessary
+        console.log("SmartShift Dashboard Initialized");
+    </script>
+</body></html>

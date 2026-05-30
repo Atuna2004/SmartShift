@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift | Shift Swap Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdf8f8;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#0058be",
+                      "canvas": "#ffffff",
+                      "primary": "#000000",
+                      "on-primary-fixed": "#1c1b1b",
+                      "tertiary-container": "#1d1b1a",
+                      "surface-dark": "#101010",
+                      "surface-dim": "#ddd9d8",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#c8c6c5",
+                      "on-background": "#1c1b1b",
+                      "success": "#10b981",
+                      "on-secondary-container": "#fefcff",
+                      "hairline": "#e5e7eb",
+                      "inverse-on-surface": "#f4f0ef",
+                      "primary-container": "#1c1b1b",
+                      "surface": "#fdf8f8",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "error": "#ef4444",
+                      "on-primary-container": "#858383",
+                      "surface-bright": "#fdf8f8",
+                      "surface-container-high": "#ebe7e6",
+                      "inverse-primary": "#c8c6c5",
+                      "surface-container": "#f1edec",
+                      "error-container": "#ffdad6",
+                      "tertiary-fixed": "#e6e1df",
+                      "secondary-fixed": "#d8e2ff",
+                      "secondary-container": "#2170e4",
+                      "on-primary-fixed-variant": "#474646",
+                      "surface-container-low": "#f7f3f2",
+                      "outline": "#747878",
+                      "on-tertiary-fixed-variant": "#484645",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-container": "#868381",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#e5e2e1",
+                      "on-surface-variant": "#444748",
+                      "surface-tint": "#5f5e5e",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed": "#1d1b1a",
+                      "inverse-surface": "#313030",
+                      "surface-card": "#f5f5f5",
+                      "outline-variant": "#c4c7c7",
+                      "on-secondary-fixed-variant": "#004395",
+                      "on-primary": "#ffffff",
+                      "background": "#fdf8f8",
+                      "surface-variant": "#e5e2e1",
+                      "on-surface": "#1c1b1b",
+                      "tertiary": "#000000",
+                      "surface-container-highest": "#e5e2e1",
+                      "on-secondary-fixed": "#001a42",
+                      "tertiary-fixed-dim": "#cac6c3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "md": "16px",
+                      "lg": "24px",
+                      "2xl": "48px",
+                      "sm": "8px",
+                      "3xl": "64px",
+                      "xs": "4px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "headline-sm": ["Inter"],
+                      "caption": ["Inter"],
+                      "label-md": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "display-md": ["Inter"],
+                      "button": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-lg h-16 bg-canvas border-b border-hairline">
+<div class="flex items-center gap-md">
+<span class="font-display-md text-display-md font-bold text-primary">SmartShift</span>
+<div class="ml-xl hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Schedules</a>
+<a class="text-primary font-bold border-b-2 border-primary font-body-md text-body-md py-xs" href="#">Shift Swap</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Attendance</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary p-2">notifications</button>
+<div class="flex items-center gap-sm pl-md border-l border-hairline">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-hairline">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged male executive with a warm, friendly expression, set against a clean, softly lit studio background. The aesthetic is high-end corporate modern with natural lighting and sharp focus, fitting a premium SaaS application profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSPiXG116M47UlxX5zCUP412OvStbqMx8xxnf_OdQLuzjcRUDlk6uP7m7Y02ZRTn8RTtkju9nafhFwlRgFlrue-9ccaPlaUJZLXonyZqRBmfHo3aUTQAfRxgkZKDuskW_izAj3Jn5V0i0PDTomaFKWcQh8RK7T4IbEZe-lDSFyVAmHgyjudvLCqVlwkWZiAL_lIFbdwBGPvg3q42tFjWyvGyagNUfFSFqoClrF_r0cO1bOvaq9qH4zE9YN3GLb6_OsB4hhZwgDTb9j"/>
+</div>
+<span class="font-label-md text-label-md hidden lg:block">Alex Sterling</span>
+</div>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-64 bg-canvas flex flex-col py-md px-sm border-r border-hairline pt-20 hidden md:flex">
+<div class="space-y-1">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">groups</span>
+                    Employees
+                </a>
+<a class="flex items-center gap-sm px-md py-sm bg-surface-container text-primary font-bold rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">swap_horiz</span>
+                    Shift Swap
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+                    Schedules
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                    Reports
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</div>
+<div class="mt-auto p-md bg-surface-container-low rounded-xl border border-hairline">
+<p class="font-label-md text-label-md text-primary mb-xs">Enterprise Plan</p>
+<div class="w-full bg-hairline h-1 rounded-full overflow-hidden">
+<div class="bg-primary w-3/4 h-full"></div>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-sm">75% of shifts swapped</p>
+</div>
+</nav>
+<!-- Main Content (List View) -->
+<main class="flex-1 md:ml-64 p-lg">
+<div class="max-w-6xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-xl">
+<div>
+<h1 class="font-headline-sm text-headline-sm text-primary">Shift Swap Requests</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Manage and approve shift exchange requests across all branches.</p>
+</div>
+<button class="bg-primary text-canvas px-lg py-sm rounded-lg font-button text-button flex items-center gap-xs hover:opacity-90 transition-all scale-[0.98] active:scale-95" id="openModalBtn">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                        Create Request
+                    </button>
+</div>
+<!-- Filters & Search -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md mb-lg">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-xl pr-md py-sm border border-hairline rounded-lg bg-canvas font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder="Search requests..." type="text"/>
+</div>
+<select class="px-md py-sm border border-hairline rounded-lg bg-canvas font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option>All Status</option>
+<option>Pending</option>
+<option>Approved</option>
+<option>Declined</option>
+</select>
+<select class="px-md py-sm border border-hairline rounded-lg bg-canvas font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+<option>All Branches</option>
+<option>Downtown</option>
+<option>Northside</option>
+</select>
+</div>
+<!-- Bento Grid Layout for Requests -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Stat Card 1 -->
+<div class="lg:col-span-3 bg-canvas p-lg rounded-xl border border-hairline">
+<div class="flex items-center justify-between mb-md">
+<span class="p-xs bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary">pending_actions</span>
+</span>
+<span class="text-success font-label-md text-label-md">+12%</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Pending</p>
+<p class="font-headline-sm text-headline-sm">24</p>
+</div>
+<!-- Stat Card 2 -->
+<div class="lg:col-span-3 bg-canvas p-lg rounded-xl border border-hairline">
+<div class="flex items-center justify-between mb-md">
+<span class="p-xs bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</span>
+<span class="text-on-surface-variant font-label-md text-label-md">-2%</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Approved</p>
+<p class="font-headline-sm text-headline-sm">186</p>
+</div>
+<!-- Main List Table -->
+<div class="lg:col-span-12 bg-canvas rounded-xl border border-hairline overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-hairline">
+<tr>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Requestor</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Current Shift</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Recipient</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Proposed Shift</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant">Status</th>
+<th class="px-lg py-md font-label-md text-label-md text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-hairline">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-sm">
+<img class="w-10 h-10 rounded-full border border-hairline" data-alt="A focused portrait of a young professional barista working in a high-end, minimalist coffee shop environment. The lighting is crisp and natural, highlighting a clean, white-toned interior that reflects a modern SaaS platform's aesthetic. The subject is dressed in professional work attire, maintaining a serious yet approachable demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_NPtZnvNKC2_EBl24Y-mYkWMJcr9UkdSAxOxouxYS5E5450TiWNcqiQtsJhLSuJXZo8KpEikgmnIUU9H4eWKj-kMHnDVzk-VSUhMsUgLV08Q1ApmLIz79YXEaJ86omH5bPbxO1BtBBin-N_PRGrwO77EzkkeAOH4_zumEUDwRn8vs7CmLfaab6WMth8vRxTEPSZ44szTRahPJlBkdsNxIlv7ePXTMQN7e6UJLqG7z-lPUbRUfnQi6mnp4hILQERTMuFVCQrUVJkps"/>
+<div>
+<p class="font-label-md text-label-md text-primary">Marcus Chen</p>
+<p class="font-caption text-caption text-on-surface-variant">Senior Barista</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md font-body-md text-body-md">
+                                            Oct 24, 08:00 - 16:00
+                                        </td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-sm">
+<img class="w-10 h-10 rounded-full border border-hairline" data-alt="A professional portrait of a female team lead in a bright, modern office space. The image is captured with a shallow depth of field, showcasing a clean, white-canvas background with soft black accents. The overall mood is reliable and precise, consistent with a high-utility corporate SaaS interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUqax6LJAfGbPzqp9JHn7g2iKvvf8cFIolUR6P08f8-aFzwAAfR0CPrF2OSy4Ht6C5IQqJP4-roWYaM51z1vIi-otoG3ZDVPhwsfXnWT2biWzHPF7s6Wn8gyQDZ254ypdGq3vshpeOfiJN5tfvg_4mOXAvTSXd29JInsI21RgdQbujcEtW68pMdCGpPHEza5iHl8hChfDZV4EeoSeIV0-obeT7hifXRPy9H01iEIfb8kwQUknHxYGxGtKnOijS0iMVR3zfSyTAmOR7"/>
+<p class="font-label-md text-label-md text-primary">Sarah Miller</p>
+</div>
+</td>
+<td class="px-lg py-md font-body-md text-body-md">
+                                            Oct 25, 12:00 - 20:00
+                                        </td>
+<td class="px-lg py-md">
+<span class="bg-surface-container text-on-surface-variant font-label-md text-[12px] px-sm py-1 rounded-full border border-hairline">PENDING</span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1">more_vert</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md">
+<div class="flex items-center gap-sm">
+<img class="w-10 h-10 rounded-full border border-hairline" data-alt="A profile photograph of a young male professional in a modern, well-lit workspace. The setting features clean lines, white walls, and professional equipment, emphasizing a high-contrast corporate aesthetic. The lighting is high-key and diffused, creating a professional and trustworthy visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDelmnSe26WnrYZXNkEcfjo1KHaCTbkolySjYQoPd0vc_fOzW2M4AddfCnT-jK1uXipqyi6QBjg0n16j051RkT4XD_WGUP_SIHDorkkQj4MItZIn08PTJztCqjGtW8I6yxvIpk48d83slhR7LGbh7gCbp2Bom_SWyQIiZNkoFl2dPyWWegUp57wt0P95I0kNP03p2EqHa-f5HUUcHOiNCQ4BISTqrY4wzV9PorSZ9z9QFbrub3p3-cO5hUGPU4N30jH4RqkHCM8Qlh1"/>
+<div>
+<p class="font-label-md text-label-md text-primary">James Wilson</p>
+<p class="font-caption text-caption text-on-surface-variant">Floor Manager</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-md font-body-md text-body-md">
+                                            Oct 24, 14:00 - 22:00
+                                        </td>
+<td class="px-lg py-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-hairline">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+<p class="font-label-md text-label-md text-primary">Elena Rodriguez</p>
+</div>
+</td>
+<td class="px-lg py-md font-body-md text-body-md">
+                                            Oct 26, 08:00 - 16:00
+                                        </td>
+<td class="px-lg py-md">
+<span class="bg-green-100 text-success font-label-md text-[12px] px-sm py-1 rounded-full border border-green-200">APPROVED</span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary p-1">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-md modal-overlay opacity-0 pointer-events-none transition-opacity duration-300" id="modalOverlay">
+<!-- Modal Container -->
+<div class="bg-canvas w-full max-w-lg rounded-xl shadow-2xl border border-hairline transform scale-95 transition-transform duration-300" id="modalContent">
+<!-- Modal Header -->
+<div class="px-lg py-md border-b border-hairline flex items-center justify-between bg-surface-container-low rounded-t-xl">
+<h2 class="font-headline-sm text-headline-sm text-primary">Request Shift Swap</h2>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" id="closeModalBtn">close</button>
+</div>
+<!-- Modal Form -->
+<div class="p-lg space-y-lg">
+<!-- Select Your Shift -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-primary block">Select Your Shift</label>
+<div class="relative">
+<select class="w-full appearance-none pl-md pr-xl py-sm bg-canvas border border-hairline rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all">
+<option value="">Choose an upcoming shift...</option>
+<option value="1">Oct 26: 08:00 - 16:00 (Downtown)</option>
+<option value="2">Oct 28: 12:00 - 20:00 (Northside)</option>
+<option value="3">Oct 30: 09:00 - 17:00 (Downtown)</option>
+</select>
+<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Select Colleague -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-primary block">Select Colleague</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-xl pr-md py-sm bg-canvas border border-hairline rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Search by name or role..." type="text"/>
+<div class="absolute right-sm top-1/2 -translate-y-1/2 flex items-center gap-xs">
+<span class="font-caption text-caption text-on-surface-variant">Alt + K</span>
+</div>
+</div>
+<!-- Quick Select Chips (Small micro-interaction example) -->
+<div class="flex gap-xs mt-sm overflow-x-auto pb-1 custom-scrollbar">
+<button class="px-sm py-1 border border-hairline rounded-full font-caption text-caption hover:bg-surface-container transition-colors whitespace-nowrap">Elena R.</button>
+<button class="px-sm py-1 border border-hairline rounded-full font-caption text-caption hover:bg-surface-container transition-colors whitespace-nowrap">Sarah M.</button>
+<button class="px-sm py-1 border border-hairline rounded-full font-caption text-caption hover:bg-surface-container transition-colors whitespace-nowrap">James W.</button>
+<button class="px-sm py-1 border border-hairline rounded-full font-caption text-caption hover:bg-surface-container transition-colors whitespace-nowrap">Mark D.</button>
+</div>
+</div>
+<!-- Reason for Swap -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-primary block">Reason for Swap</label>
+<textarea class="w-full p-md bg-canvas border border-hairline rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none" placeholder="Briefly explain the reason for your request..." rows="4"></textarea>
+</div>
+<!-- Alert Information -->
+<div class="bg-surface-container-low p-md rounded-lg flex gap-md border border-hairline">
+<span class="material-symbols-outlined text-secondary text-[20px]">info</span>
+<p class="font-caption text-caption text-on-surface-variant leading-relaxed">
+                        The recipient will receive a notification and must approve the swap before it is sent to the manager for final authorization.
+                    </p>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-lg py-md border-t border-hairline flex items-center justify-end gap-md bg-surface-container-lowest rounded-b-xl">
+<button class="px-lg py-sm font-button text-button text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all rounded-lg" id="cancelModalBtn">
+                    Cancel
+                </button>
+<button class="px-lg py-sm bg-primary text-canvas font-button text-button rounded-lg hover:opacity-90 transition-all scale-[0.98] active:scale-95 shadow-sm">
+                    Send Request
+                </button>
+</div>
+</div>
+</div>
+<script>
+        const openBtn = document.getElementById('openModalBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelModalBtn');
+        const modal = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+
+        function openModal() {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            document.body.style.overflow = 'auto';
+        }
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        // Close on clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Initialize with modal open as requested
+        window.onload = openModal;
+    </script>
+</body></html>

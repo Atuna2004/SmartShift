@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dark": "#101010",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e5e2e1",
+                        "background": "#fdf8f8",
+                        "error": "#ef4444",
+                        "on-secondary-container": "#fefcff",
+                        "primary-fixed": "#e5e2e1",
+                        "on-primary-fixed-variant": "#474646",
+                        "inverse-primary": "#c8c6c5",
+                        "surface": "#fdf8f8",
+                        "success": "#10b981",
+                        "on-primary-container": "#858383",
+                        "hairline": "#e5e7eb",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-container-low": "#f7f3f2",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "surface-variant": "#e5e2e1",
+                        "on-tertiary-container": "#868381",
+                        "tertiary-fixed": "#e6e1df",
+                        "outline": "#747878",
+                        "inverse-on-surface": "#f4f0ef",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#000000",
+                        "on-surface": "#1c1b1b",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#1c1b1b",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#5f5e5e",
+                        "surface-dim": "#ddd9d8",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-card": "#f5f5f5",
+                        "on-surface-variant": "#444748",
+                        "tertiary-container": "#1d1b1a",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-container-high": "#ebe7e6",
+                        "secondary-container": "#2170e4",
+                        "inverse-surface": "#313030",
+                        "surface-bright": "#fdf8f8",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "canvas": "#ffffff",
+                        "surface-container": "#f1edec",
+                        "secondary": "#0058be",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "tertiary-fixed-dim": "#cac6c3",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "error-container": "#ffdad6",
+                        "primary": "#000000",
+                        "outline-variant": "#c4c7c7",
+                        "on-background": "#1c1b1b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "md": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "display-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface">
+<!-- Sidebar Navigation Shell -->
+<aside class="w-64 h-screen fixed left-0 top-0 border-r border-hairline flex flex-col py-lg px-md gap-sm bg-surface dark:bg-surface-dark z-50">
+<div class="mb-lg px-md">
+<span class="font-display-md text-display-md font-bold text-primary dark:text-on-primary">SmartShift Admin</span>
+<p class="font-label-md text-on-surface-variant opacity-70">System Operations</p>
+</div>
+<nav class="flex flex-col gap-xs flex-1">
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboards</span>
+</div>
+<div class="flex items-center gap-md text-primary dark:text-on-primary-fixed bg-surface-container-high dark:bg-surface-container-highest rounded-lg px-md py-sm font-label-md text-label-md cursor-pointer">
+<span class="material-symbols-outlined" data-icon="business_center">business_center</span>
+<span>Business Management</span>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>User Management</span>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="event_repeat">event_repeat</span>
+<span>Subscriptions</span>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>Payments</span>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+<span>Support</span>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant dark:text-surface-variant px-md py-sm font-label-md text-label-md hover:bg-surface-container-low cursor-pointer transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span>Audit Logs</span>
+</div>
+</nav>
+<div class="mt-auto px-md flex items-center gap-md">
+<img alt="SmartShift Admin Profile" class="w-10 h-10 rounded-full border border-hairline" data-alt="A professional headshot of a senior system administrator in a high-key, modern office setting. The person has a friendly but authoritative expression, wearing a clean, minimalist white shirt. The background is softly blurred with subtle architectural lines of a contemporary tech workspace. Lighting is bright and even, reflecting a light-mode UI aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX2noLsNSM1g6wkbo70TGOuf29GInJq_SNtC5W29GZhcdwrNEkqORVr44McCAGvqx_LzmKj2IyO1lZbo1MkngDGd9VAcYQkypDWXHXXbBZb4S50-J5TZi8MLDgIwciZPLSJmIUdPGj6MrJHQgm-ZgdDSJxmt8mIuquSjNTdjYAI0gLMSOHWE0CZmnCrTM6U_pRiHjGJyjQrjiNW_daExaUT32cfrqmID7oqmtW-3h1N1fnfgeQMsUFkZ1egOT5_P9xH5GYrvcj89IY"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">Admin User</span>
+<span class="text-caption text-on-surface-variant">Global Access</span>
+</div>
+</div>
+</aside>
+<!-- Top Navigation Bar -->
+<header class="h-16 fixed top-0 right-0 left-64 z-40 flex justify-between items-center px-lg bg-canvas dark:bg-surface-dark border-b border-hairline">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-card border border-hairline rounded-lg pl-10 pr-md py-sm focus:outline-none focus:ring-1 focus:ring-primary text-body-md" placeholder="Search businesses, users, or tickets..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="dns">dns</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors" data-icon="settings">settings</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen p-lg bg-canvas">
+<div class="max-w-7xl mx-auto space-y-lg">
+<!-- Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+<div class="space-y-xs">
+<div class="flex items-center gap-sm">
+<span class="text-caption font-bold text-on-surface-variant uppercase tracking-widest">Business Account</span>
+<div class="w-1 h-1 rounded-full bg-on-surface-variant"></div>
+<span class="text-caption text-on-surface-variant">ID: ACME-8842-X</span>
+</div>
+<div class="flex items-center gap-md">
+<h1 class="font-display-md text-display-md font-extrabold text-primary">Acme Corp</h1>
+<span class="px-sm py-xs bg-success/10 text-success rounded-full text-caption font-bold uppercase tracking-tighter flex items-center gap-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> Active
+                        </span>
+</div>
+</div>
+<div class="flex gap-sm">
+<button class="px-lg py-sm border border-hairline rounded-lg font-button text-button hover:bg-surface-container-low transition-all active:scale-95">Edit Details</button>
+<button class="px-lg py-sm bg-error text-on-primary rounded-lg font-button text-button hover:opacity-90 transition-all active:scale-95 shadow-sm">Suspend Business</button>
+</div>
+</section>
+<!-- Metrics Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<div class="md:col-span-1 bg-surface-card rounded-xl p-lg border border-hairline flex flex-col justify-between group hover:border-primary transition-colors">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary bg-canvas p-sm rounded-lg" data-icon="account_tree">account_tree</span>
+<span class="text-success text-caption font-bold">+2 New</span>
+</div>
+<div class="mt-lg">
+<p class="text-caption text-on-surface-variant font-medium">Infrastructure</p>
+<h2 class="font-headline-sm text-headline-sm font-black">12 Branches</h2>
+</div>
+</div>
+<div class="md:col-span-1 bg-surface-card rounded-xl p-lg border border-hairline flex flex-col justify-between group hover:border-primary transition-colors">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary bg-canvas p-sm rounded-lg" data-icon="badge">badge</span>
+<span class="text-on-surface-variant text-caption font-bold">Total Staff</span>
+</div>
+<div class="mt-lg">
+<p class="text-caption text-on-surface-variant font-medium">Personnel</p>
+<h2 class="font-headline-sm text-headline-sm font-black">442 Employees</h2>
+</div>
+</div>
+<div class="md:col-span-2 bg-surface-card rounded-xl p-lg border border-hairline flex flex-col justify-between group hover:border-primary transition-colors">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary bg-canvas p-sm rounded-lg" data-icon="group_add">group_add</span>
+<div class="text-right">
+<span class="text-caption text-on-surface-variant font-bold">450 / 500 Seats Used</span>
+<div class="w-32 h-1 bg-hairline rounded-full mt-xs overflow-hidden">
+<div class="bg-primary h-full w-[90%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-lg">
+<p class="text-caption text-on-surface-variant font-medium">Capacity Utilization</p>
+<h2 class="font-headline-sm text-headline-sm font-black">90% Allocated</h2>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Main Info Column -->
+<div class="lg:col-span-2 space-y-lg">
+<!-- Subscription & Owner Split -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Owner Info -->
+<div class="bg-canvas border border-hairline rounded-xl p-lg space-y-md">
+<div class="flex items-center justify-between border-b border-hairline pb-md">
+<h3 class="font-label-md text-label-md font-black uppercase text-primary">Primary Contact</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-md" data-icon="verified_user">verified_user</span>
+</div>
+<div class="flex items-center gap-md">
+<img alt="Owner Profile" class="w-12 h-12 rounded-lg object-cover border border-hairline" data-alt="A close-up portrait of a professional business owner in a modern tech-integrated workspace. The individual has a confident, professional look, with subtle reflections of digital charts in the background. The aesthetic is clean, sharp, and corporate modern, utilizing a crisp white and soft gray color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMSr6IVSjMmQ2955q59HH_jykugFZa8g6UPh3PG4DptoBBDw-g8erFNtXY7B-3IPXJ96IxU6oZv_dIwWcv2MeSEJQ_eDqkNkOqIJjkUHplrZ9C-A4J1iJHoYX6HMvYz3jDsCauNJEciw0aZwt0kC7gcvnWD8h8wLDk-kqynE_aWsj70_Q6WzHB-joycIsCnGB0POMNFQCuew9uV2bmpfHxf0mWCa5M9-CjIUCz7vi-IjX-mw46-e5ZVbXPdsPh0J1-m1ryI1rt2KkP"/>
+<div>
+<p class="font-label-md text-label-md font-bold">Marcus Holloway</p>
+<p class="text-caption text-on-surface-variant">Managing Director</p>
+</div>
+</div>
+<div class="space-y-sm">
+<div class="flex items-center gap-sm text-body-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="mail">mail</span>
+<span>m.holloway@acme.corp</span>
+</div>
+<div class="flex items-center gap-sm text-body-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="call">call</span>
+<span>+1 (555) 012-9984</span>
+</div>
+</div>
+</div>
+<!-- Subscription Info -->
+<div class="bg-canvas border border-hairline rounded-xl p-lg space-y-md">
+<div class="flex items-center justify-between border-b border-hairline pb-md">
+<h3 class="font-label-md text-label-md font-black uppercase text-primary">Active Subscription</h3>
+<span class="material-symbols-outlined text-primary text-md" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="space-y-md">
+<div>
+<h4 class="text-display-md font-black leading-none">Organization</h4>
+<p class="text-caption text-on-surface-variant mt-xs font-bold uppercase tracking-widest">Annual Billing Cycle</p>
+</div>
+<div class="flex justify-between items-end">
+<div class="space-y-xs">
+<p class="text-caption text-on-surface-variant uppercase font-medium">Next Renewal</p>
+<p class="font-label-md text-label-md">Dec 12, 2024</p>
+</div>
+<span class="text-primary font-black">$4,999.00/yr</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment History Table -->
+<div class="bg-canvas border border-hairline rounded-xl overflow-hidden">
+<div class="px-lg py-md border-b border-hairline bg-surface-card flex justify-between items-center">
+<h3 class="font-label-md text-label-md font-black uppercase text-primary">Payment History</h3>
+<button class="text-caption font-bold text-secondary hover:underline">View All Invoices</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-caption font-bold text-on-surface-variant uppercase tracking-wider">
+<tr>
+<th class="px-lg py-sm">Invoice ID</th>
+<th class="px-lg py-sm">Date</th>
+<th class="px-lg py-sm">Amount</th>
+<th class="px-lg py-sm">Status</th>
+<th class="px-lg py-sm text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-hairline">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md font-label-md">INV-2023-012</td>
+<td class="px-lg py-md text-body-md">Dec 12, 2023</td>
+<td class="px-lg py-md font-bold">$4,999.00</td>
+<td class="px-lg py-md">
+<span class="bg-success/10 text-success px-sm py-xs rounded-full text-caption font-bold">Paid</span>
+</td>
+<td class="px-lg py-md text-right">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" data-icon="download">download</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md font-label-md">INV-2023-011</td>
+<td class="px-lg py-md text-body-md">Dec 12, 2022</td>
+<td class="px-lg py-md font-bold">$4,999.00</td>
+<td class="px-lg py-md">
+<span class="bg-success/10 text-success px-sm py-xs rounded-full text-caption font-bold">Paid</span>
+</td>
+<td class="px-lg py-md text-right">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" data-icon="download">download</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-lg py-md font-label-md">INV-2023-010</td>
+<td class="px-lg py-md text-body-md">Dec 12, 2021</td>
+<td class="px-lg py-md font-bold">$4,999.00</td>
+<td class="px-lg py-md">
+<span class="bg-success/10 text-success px-sm py-xs rounded-full text-caption font-bold">Paid</span>
+</td>
+<td class="px-lg py-md text-right">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary" data-icon="download">download</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Sidebar Details Column -->
+<div class="space-y-lg">
+<!-- Support Summary Card -->
+<div class="bg-surface-card border border-hairline rounded-xl p-lg space-y-md">
+<div class="flex items-center justify-between">
+<h3 class="font-label-md text-label-md font-black uppercase text-primary">Support Overview</h3>
+<span class="px-sm py-xs bg-error/10 text-error rounded-lg text-caption font-bold">2 Open</span>
+</div>
+<div class="space-y-sm">
+<div class="p-sm bg-canvas border border-hairline rounded-lg">
+<p class="text-caption font-bold text-primary truncate">API Integration Failure in Branch #4</p>
+<p class="text-caption text-on-surface-variant">Opened 2h ago • High Priority</p>
+</div>
+<div class="p-sm bg-canvas border border-hairline rounded-lg">
+<p class="text-caption font-bold text-primary truncate">Request for additional seat limit</p>
+<p class="text-caption text-on-surface-variant">Opened 1d ago • Medium Priority</p>
+</div>
+</div>
+<button class="w-full py-sm bg-primary text-on-primary rounded-lg font-button text-button hover:opacity-90 active:scale-[0.98] transition-all">Create Admin Ticket</button>
+</div>
+<!-- Recent Activity Log -->
+<div class="bg-canvas border border-hairline rounded-xl p-lg space-y-md">
+<h3 class="font-label-md text-label-md font-black uppercase text-primary">Recent Activity</h3>
+<div class="relative space-y-lg">
+<!-- Timeline Line -->
+<div class="absolute left-[11px] top-2 bottom-2 w-px bg-hairline"></div>
+<div class="relative flex gap-md">
+<div class="w-[24px] h-[24px] rounded-full bg-primary flex items-center justify-center z-10 shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[14px]" data-icon="edit">edit</span>
+</div>
+<div>
+<p class="text-caption text-primary"><strong>Marcus Holloway</strong> updated billing information</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold mt-xs">2 hours ago</p>
+</div>
+</div>
+<div class="relative flex gap-md">
+<div class="w-[24px] h-[24px] rounded-full bg-surface-container-high flex items-center justify-center z-10 shrink-0 border border-hairline">
+<span class="material-symbols-outlined text-primary text-[14px]" data-icon="person_add">person_add</span>
+</div>
+<div>
+<p class="text-caption text-primary">Bulk invite: <strong>12 new employees</strong> added to NYC branch</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold mt-xs">Yesterday, 4:12 PM</p>
+</div>
+</div>
+<div class="relative flex gap-md">
+<div class="w-[24px] h-[24px] rounded-full bg-surface-container-high flex items-center justify-center z-10 shrink-0 border border-hairline">
+<span class="material-symbols-outlined text-primary text-[14px]" data-icon="settings">settings</span>
+</div>
+<div>
+<p class="text-caption text-primary">Security policy changed: <strong>2FA Mandatory</strong></p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold mt-xs">Mar 10, 2024</p>
+</div>
+</div>
+<div class="relative flex gap-md">
+<div class="w-[24px] h-[24px] rounded-full bg-surface-container-high flex items-center justify-center z-10 shrink-0 border border-hairline">
+<span class="material-symbols-outlined text-primary text-[14px]" data-icon="domain">domain</span>
+</div>
+<div>
+<p class="text-caption text-primary">New branch registered: <strong>London HQ</strong></p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold mt-xs">Mar 08, 2024</p>
+</div>
+</div>
+</div>
+<button class="w-full py-sm border border-hairline rounded-lg font-button text-button hover:bg-surface-card transition-all">View Audit Trail</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for primary action button
+        const suspendBtn = document.querySelector('button.bg-error');
+        if(suspendBtn) {
+            suspendBtn.addEventListener('click', () => {
+                if(confirm('Are you sure you want to suspend Acme Corp? This will disable all active seats immediately.')) {
+                    alert('Business suspension process initiated.');
+                }
+            });
+        }
+    </script>
+</body></html>

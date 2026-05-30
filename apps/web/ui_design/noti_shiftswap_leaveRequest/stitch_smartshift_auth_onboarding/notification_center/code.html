@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift | Notifications</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#0058be",
+                        "canvas": "#ffffff",
+                        "primary": "#000000",
+                        "on-primary-fixed": "#1c1b1b",
+                        "tertiary-container": "#1d1b1a",
+                        "surface-dark": "#101010",
+                        "surface-dim": "#ddd9d8",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "on-background": "#1c1b1b",
+                        "success": "#10b981",
+                        "on-secondary-container": "#fefcff",
+                        "hairline": "#e5e7eb",
+                        "inverse-on-surface": "#f4f0ef",
+                        "primary-container": "#1c1b1b",
+                        "surface": "#fdf8f8",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "error": "#ef4444",
+                        "on-primary-container": "#858383",
+                        "surface-bright": "#fdf8f8",
+                        "surface-container-high": "#ebe7e6",
+                        "inverse-primary": "#c8c6c5",
+                        "surface-container": "#f1edec",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e6e1df",
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary-container": "#2170e4",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-container-low": "#f7f3f2",
+                        "outline": "#747878",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#868381",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e5e2e1",
+                        "on-surface-variant": "#444748",
+                        "surface-tint": "#5f5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "inverse-surface": "#313030",
+                        "surface-card": "#f5f5f5",
+                        "outline-variant": "#c4c7c7",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-primary": "#ffffff",
+                        "background": "#fdf8f8",
+                        "surface-variant": "#e5e2e1",
+                        "on-surface": "#1c1b1b",
+                        "tertiary": "#000000",
+                        "surface-container-highest": "#e5e2e1",
+                        "on-secondary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#cac6c3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "xs": "4px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "display-md": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fdf8f8;
+            font-family: 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar Shell -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-lg h-16 bg-canvas border-b border-hairline">
+<div class="flex items-center gap-xl">
+<span class="font-display-md text-display-md font-bold text-primary">SmartShift</span>
+<div class="hidden md:flex items-center gap-md ml-lg">
+<div class="relative">
+<input class="w-64 pl-xl pr-md py-sm bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-secondary text-label-md font-label-md" placeholder="Search notifications..." type="text"/>
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="flex items-center gap-sm px-md py-sm border border-hairline rounded-lg hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="store">store</span>
+<span class="font-label-md text-label-md">Downtown Branch</span>
+<span class="material-symbols-outlined" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</button>
+<div class="relative p-sm rounded-full hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="notifications" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</div>
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-hairline" data-alt="A professional headshot of a business executive in a high-end corporate setting. The lighting is soft and natural, emphasizing a clean and approachable demeanor. The background is a slightly blurred office environment with modern, minimalist architectural details in white and soft grays, matching the brand's sophisticated aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxDqQIA4o3k03rgV2KSIeFJmnjvlh1r0ezIv71Ba91ceh19wpnnPVFQs_AWsys52BUKN-AAMJjvC2Mn0RrxuL23e-sig3gH5bWEkb_MZK6KQCwH8EJbDgsQ5wjZCQf2TyfJmJhnaDJFGUng04YnaYeut3auB0C48tIyu3YDf_IKsSC6LwxlgnpdZuJq7_RNcE_SmNqnHlZCeITnPvMgZjh1KSggqLQ0_OMMu2JsiEYbd5tLxiTjC81iFr9HGcjkxSAlqiOEQAVT7eJ"/>
+</div>
+</header>
+<div class="flex">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-canvas flex flex-col py-md px-sm border-r border-hairline overflow-y-auto hide-scrollbar z-30">
+<nav class="flex flex-col gap-xs flex-1">
+<!-- Dashboard -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Employees -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Employees</span>
+</a>
+<!-- Branches -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="store">store</span>
+<span>Branches</span>
+</a>
+<!-- Shift Templates -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span>Shift Templates</span>
+</a>
+<!-- Schedules -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span>Schedules</span>
+</a>
+<!-- Attendance -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="clock_loader_60">clock_loader_60</span>
+<span>Attendance</span>
+</a>
+<!-- QR Check-in -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span>QR Check-in</span>
+</a>
+<!-- Shift Swap -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="swap_horiz">swap_horiz</span>
+<span>Shift Swap</span>
+</a>
+<!-- Leave Requests -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="event_busy">event_busy</span>
+<span>Leave Requests</span>
+</a>
+<!-- Notifications (ACTIVE) -->
+<a class="flex items-center gap-md px-md py-sm bg-surface-container text-primary font-bold transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="notifications" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span>Notifications</span>
+</a>
+<!-- Reports -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reports</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-hairline pt-md flex flex-col gap-xs">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>Subscription</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 min-h-[calc(100vh-64px)] p-lg lg:p-2xl">
+<div class="max-w-5xl mx-auto">
+<!-- Header -->
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h1 class="font-headline-sm text-headline-sm text-primary mb-xs">Notifications</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage and review all your enterprise alerts and staff requests.</p>
+</div>
+<button class="px-md py-sm border border-hairline rounded-lg font-button text-button hover:bg-surface-card transition-all active:scale-95">
+                        Mark all as read
+                    </button>
+</div>
+<!-- Tabs & Filters -->
+<div class="bg-canvas rounded-xl border border-hairline overflow-hidden shadow-sm">
+<div class="flex border-b border-hairline bg-surface-container-low px-md">
+<button class="px-lg py-md font-label-md text-label-md border-b-2 border-primary text-primary transition-all active-tab" id="tab-all" onclick="switchTab('all')">All</button>
+<button class="px-lg py-md font-label-md text-label-md text-on-surface-variant hover:text-primary transition-all border-b-2 border-transparent" id="tab-unread" onclick="switchTab('unread')">Unread</button>
+<button class="px-lg py-md font-label-md text-label-md text-on-surface-variant hover:text-primary transition-all border-b-2 border-transparent" id="tab-requests" onclick="switchTab('requests')">Requests</button>
+<button class="px-lg py-md font-label-md text-label-md text-on-surface-variant hover:text-primary transition-all border-b-2 border-transparent" id="tab-alerts" onclick="switchTab('alerts')">System Alerts</button>
+</div>
+<!-- Notification List (Content Area) -->
+<div class="min-h-[600px] flex flex-col" id="notification-content">
+<!-- List Wrapper (Visible by default) -->
+<div class="flex flex-col divide-y divide-hairline" id="all-notifications">
+<!-- Item 1: Swap Request -->
+<div class="group flex items-start gap-md p-lg hover:bg-surface-container-lowest transition-all cursor-pointer relative">
+<div class="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-8 bg-secondary rounded-full opacity-100"></div>
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary" data-icon="swap_horiz">swap_horiz</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-primary font-bold">Shift Swap Request</h3>
+<span class="font-caption text-caption text-on-surface-variant">2h ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">Sarah Jenkins requested to swap her 'Morning Barista' shift on Dec 14 with Michael Chen's 'Closing Barista' shift on Dec 15.</p>
+<div class="flex gap-sm">
+<button class="bg-primary text-on-primary px-md py-1.5 rounded-lg font-button text-button hover:opacity-90 transition-all">Approve</button>
+<button class="border border-hairline px-md py-1.5 rounded-lg font-button text-button hover:bg-surface-card transition-all">Decline</button>
+</div>
+</div>
+<div class="w-2 h-2 bg-secondary rounded-full mt-2 shrink-0"></div>
+</div>
+<!-- Item 2: System Alert -->
+<div class="group flex items-start gap-md p-lg hover:bg-surface-container-lowest transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-primary font-bold">Incomplete Schedule Warning</h3>
+<span class="font-caption text-caption text-on-surface-variant">5h ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">The 'North Side' branch schedule for next week is currently missing 3 required 'Floor Lead' positions.</p>
+</div>
+<div class="w-2 h-2 bg-secondary rounded-full mt-2 shrink-0"></div>
+</div>
+<!-- Item 3: Leave Approval -->
+<div class="group flex items-start gap-md p-lg hover:bg-surface-container-lowest transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-success" data-icon="calendar_month">calendar_month</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-primary font-bold">Leave Request Approved</h3>
+<span class="font-caption text-caption text-on-surface-variant">Yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">James Wilson's request for 'Personal Time' (Dec 20 - Dec 22) has been automatically approved based on company policy.</p>
+</div>
+<div class="w-2 h-2 bg-transparent rounded-full mt-2 shrink-0"></div>
+</div>
+<!-- Item 4: Report Ready -->
+<div class="group flex items-start gap-md p-lg hover:bg-surface-container-lowest transition-all cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="font-label-md text-label-md text-primary font-bold">Monthly Payroll Report Ready</h3>
+<span class="font-caption text-caption text-on-surface-variant">2 days ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">The payroll summary for November 2023 has been generated and is ready for review in the Reports section.</p>
+</div>
+<div class="w-2 h-2 bg-transparent rounded-full mt-2 shrink-0"></div>
+</div>
+</div>
+<!-- Empty State Wrapper (Hidden by default) -->
+<div class="hidden flex-1 flex flex-col items-center justify-center p-3xl text-center" id="unread-empty">
+<div class="w-48 h-48 mb-xl bg-surface-container rounded-full flex items-center justify-center relative overflow-hidden border border-hairline">
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent"></div>
+<span class="material-symbols-outlined text-primary/20 text-[64px]" data-icon="notifications_off">notifications_off</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary mb-sm">All caught up!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">You have no unread notifications at the moment. Check back later for shift updates or system alerts.</p>
+<button class="mt-lg px-xl py-md bg-primary text-on-primary rounded-lg font-button text-button hover:opacity-90 transition-all" onclick="switchTab('all')">View All Notifications</button>
+</div>
+</div>
+</div>
+<!-- Footer / Support Link -->
+<div class="mt-xl flex justify-center">
+<p class="font-caption text-caption text-on-surface-variant">Need help managing notifications? <a class="text-secondary hover:underline" href="#">Visit Support Center</a></p>
+</div>
+</div>
+</main>
+</div>
+<script>
+        function switchTab(tab) {
+            const tabs = ['all', 'unread', 'requests', 'alerts'];
+            const contentList = document.getElementById('all-notifications');
+            const emptyState = document.getElementById('unread-empty');
+            
+            // UI Tab Styling
+            tabs.forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (t === tab) {
+                    el.classList.remove('text-on-surface-variant', 'border-transparent');
+                    el.classList.add('text-primary', 'border-primary');
+                } else {
+                    el.classList.add('text-on-surface-variant', 'border-transparent');
+                    el.classList.remove('text-primary', 'border-primary');
+                }
+            });
+
+            // Content Logic Simulation
+            if (tab === 'unread') {
+                // Simulate an empty state for unread
+                contentList.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                contentList.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                
+                // Filtering Simulation (Visual feedback only for this prototype)
+                const items = contentList.querySelectorAll('.group');
+                items.forEach((item, index) => {
+                    item.style.display = 'flex'; // Default show
+                    if (tab === 'requests' && !item.querySelector('[data-icon="swap_horiz"]') && !item.querySelector('[data-icon="calendar_month"]')) {
+                        item.style.display = 'none';
+                    }
+                    if (tab === 'alerts' && !item.querySelector('[data-icon="warning"]')) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Add some micro-interactions
+        document.querySelectorAll('.group').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.transform = 'translateX(4px)';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'translateX(0)';
+            });
+        });
+    </script>
+</body></html>

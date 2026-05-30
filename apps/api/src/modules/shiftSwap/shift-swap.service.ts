@@ -21,6 +21,78 @@ const getDocumentId = (document: { _id: unknown }) => document._id as Types.Obje
 const asObjectId = (value: string | Types.ObjectId) =>
   typeof value === "string" ? new Types.ObjectId(value) : value;
 
+const startOfDay = (date: Date) => {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
+};
+
+const endOfDay = (date: Date) => {
+  const next = new Date(date);
+  next.setHours(23, 59, 59, 999);
+  return next;
+};
+
+const addDays = (date: Date, days: number) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const timeToMinutes = (time: string) => {
+  const [hours = 0, minutes = 0] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+const getShiftInterval = (workDate: Date, startTime: string, endTime: string) => {
+  const dayStart = startOfDay(workDate).getTime();
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+  const endOffset = endMinutes <= startMinutes ? endMinutes + 24 * 60 : endMinutes;
+
+  return {
+    start: dayStart + startMinutes * 60 * 1000,
+    end: dayStart + endOffset * 60 * 1000,
+  };
+};
+
+const intervalsOverlap = (
+  first: { start: number; end: number },
+  second: { start: number; end: number }
+) => first.start < second.end && second.start < first.end;
+
+const assertShiftNotStarted = (schedule: ISchedule, label: string) => {
+  const interval = getShiftInterval(
+    schedule.workDate,
+    schedule.shiftStartTime,
+    schedule.shiftEndTime
+  );
+
+  if (interval.start < Date.now()) {
+    throw new AppError(400, `${label} shift has already started`);
+  }
+};
+
+const toPublicScheduleSummary = (
+  schedule: ISchedule,
+  branchesById?: Map<string, IBranch>
+) => ({
+  id: getDocumentId(schedule).toString(),
+  organizationId: schedule.organizationId.toString(),
+  branchId: schedule.branchId.toString(),
+  ...(branchesById?.get(schedule.branchId.toString())?.name
+    ? { branchName: branchesById.get(schedule.branchId.toString())?.name }
+    : {}),
+  employeeId: schedule.employeeId.toString(),
+  shiftTemplateId: schedule.shiftTemplateId.toString(),
+  workDate: schedule.workDate,
+  shiftStartTime: schedule.shiftStartTime,
+  shiftEndTime: schedule.shiftEndTime,
+  status: schedule.status,
+  published: schedule.published,
+  ...(schedule.note ? { note: schedule.note } : {}),
+});
+
 const ensureActor = async (actor: AuthTokenPayload) => {
   if (!actor.userId) {
     throw new AppError(401, "You are not authorized");
@@ -87,27 +159,108 @@ const assertScheduleEligible = (schedule: ISchedule) => {
   }
 };
 
-const toPublicShiftSwap = (shiftSwap: IShiftSwapRequest) => ({
-  id: getDocumentId(shiftSwap).toString(),
-  organizationId: shiftSwap.organizationId.toString(),
-  branchId: shiftSwap.branchId.toString(),
-  fromEmployeeId: shiftSwap.fromEmployeeId.toString(),
-  toEmployeeId: shiftSwap.toEmployeeId.toString(),
-  fromScheduleId: shiftSwap.fromScheduleId.toString(),
-  receiverStatus: shiftSwap.receiverStatus,
-  managerStatus: shiftSwap.managerStatus,
-  finalStatus: shiftSwap.finalStatus,
-  ...(shiftSwap.toScheduleId ? { toScheduleId: shiftSwap.toScheduleId.toString() } : {}),
-  ...(shiftSwap.reason ? { reason: shiftSwap.reason } : {}),
-  ...(shiftSwap.receiverRespondedAt
-    ? { receiverRespondedAt: shiftSwap.receiverRespondedAt }
-    : {}),
-  ...(shiftSwap.managerId ? { managerId: shiftSwap.managerId.toString() } : {}),
-  ...(shiftSwap.managerRespondedAt
-    ? { managerRespondedAt: shiftSwap.managerRespondedAt }
-    : {}),
-  ...(shiftSwap.note ? { note: shiftSwap.note } : {}),
-});
+const assertNoOverlappingShiftAfterSwap = async (
+  employeeId: Types.ObjectId,
+  schedule: ISchedule,
+  excludeScheduleIds: Types.ObjectId[]
+) => {
+  const filter: Record<string, unknown> = {
+    employeeId,
+    workDate: {
+      $gte: startOfDay(addDays(schedule.workDate, -1)),
+      $lte: endOfDay(addDays(schedule.workDate, 1)),
+    },
+    deletedAt: { $exists: false },
+    status: { $ne: "cancelled" },
+  };
+
+  if (excludeScheduleIds.length > 0) {
+    filter._id = { $nin: excludeScheduleIds };
+  }
+
+  const existingSchedules = await ScheduleModel.find(filter);
+  const proposedInterval = getShiftInterval(
+    schedule.workDate,
+    schedule.shiftStartTime,
+    schedule.shiftEndTime
+  );
+  const hasOverlap = existingSchedules.some((existingSchedule) =>
+    intervalsOverlap(
+      proposedInterval,
+      getShiftInterval(
+        existingSchedule.workDate,
+        existingSchedule.shiftStartTime,
+        existingSchedule.shiftEndTime
+      )
+    )
+  );
+
+  if (hasOverlap) {
+    throw new AppError(409, "Shift swap would create an overlapping assigned shift");
+  }
+};
+
+const toPublicShiftSwap = (
+  shiftSwap: IShiftSwapRequest,
+  schedulesById?: Map<string, ISchedule>,
+  branchesById?: Map<string, IBranch>
+) => {
+  const fromScheduleId = shiftSwap.fromScheduleId.toString();
+  const toScheduleId = shiftSwap.toScheduleId?.toString();
+  const fromSchedule = schedulesById?.get(fromScheduleId);
+  const toSchedule = toScheduleId ? schedulesById?.get(toScheduleId) : undefined;
+
+  return {
+    id: getDocumentId(shiftSwap).toString(),
+    organizationId: shiftSwap.organizationId.toString(),
+    branchId: shiftSwap.branchId.toString(),
+    ...(branchesById?.get(shiftSwap.branchId.toString())?.name
+      ? { branchName: branchesById.get(shiftSwap.branchId.toString())?.name }
+      : {}),
+    fromEmployeeId: shiftSwap.fromEmployeeId.toString(),
+    toEmployeeId: shiftSwap.toEmployeeId.toString(),
+    fromScheduleId,
+    receiverStatus: shiftSwap.receiverStatus,
+    managerStatus: shiftSwap.managerStatus,
+    finalStatus: shiftSwap.finalStatus,
+    ...(toScheduleId ? { toScheduleId } : {}),
+    ...(fromSchedule ? { fromSchedule: toPublicScheduleSummary(fromSchedule, branchesById) } : {}),
+    ...(toSchedule ? { toSchedule: toPublicScheduleSummary(toSchedule, branchesById) } : {}),
+    ...(shiftSwap.reason ? { reason: shiftSwap.reason } : {}),
+    ...(shiftSwap.receiverRespondedAt
+      ? { receiverRespondedAt: shiftSwap.receiverRespondedAt }
+      : {}),
+    ...(shiftSwap.managerId ? { managerId: shiftSwap.managerId.toString() } : {}),
+    ...(shiftSwap.managerRespondedAt
+      ? { managerRespondedAt: shiftSwap.managerRespondedAt }
+      : {}),
+    ...(shiftSwap.note ? { note: shiftSwap.note } : {}),
+    createdAt: shiftSwap.createdAt,
+    updatedAt: shiftSwap.updatedAt,
+  };
+};
+
+const getSchedulesById = async (scheduleIds: Array<string | Types.ObjectId | undefined>) => {
+  const ids = [...new Set(scheduleIds.filter(Boolean).map((id) => id?.toString() as string))];
+
+  if (ids.length === 0) {
+    return new Map<string, ISchedule>();
+  }
+
+  const schedules = await ScheduleModel.find({ _id: { $in: ids.map(asObjectId) } });
+  return new Map(schedules.map((schedule) => [getDocumentId(schedule).toString(), schedule]));
+};
+
+const getBranchesById = async (branchIds: Array<string | Types.ObjectId | undefined>) => {
+  const ids = [...new Set(branchIds.filter(Boolean).map((id) => id?.toString() as string))];
+
+  if (ids.length === 0) {
+    return new Map<string, IBranch>();
+  }
+
+  const branches = await BranchModel.find({ _id: { $in: ids.map(asObjectId) } });
+  return new Map(branches.map((branch) => [getDocumentId(branch).toString(), branch]));
+};
 
 const getShiftSwapForActor = async (actor: IUser, shiftSwapId: string) => {
   const shiftSwap = await ShiftSwapRequestModel.findById(shiftSwapId);
@@ -162,6 +315,7 @@ const createShiftSwap = async (
   }
 
   assertScheduleEligible(fromSchedule);
+  assertShiftNotStarted(fromSchedule, "Source");
 
   if (!fromSchedule.employeeId.equals(getDocumentId(actor))) {
     throw new AppError(403, "You can only swap your own assigned shift");
@@ -179,6 +333,16 @@ const createShiftSwap = async (
 
   if (toSchedule) {
     assertScheduleEligible(toSchedule);
+    assertShiftNotStarted(toSchedule, "Target");
+
+    if (
+      intervalsOverlap(
+        getShiftInterval(fromSchedule.workDate, fromSchedule.shiftStartTime, fromSchedule.shiftEndTime),
+        getShiftInterval(toSchedule.workDate, toSchedule.shiftStartTime, toSchedule.shiftEndTime)
+      )
+    ) {
+      throw new AppError(409, "Cannot swap overlapping shifts");
+    }
 
     if (!toSchedule.branchId.equals(getDocumentId(branch))) {
       throw new AppError(403, "Target assigned shift is outside your branch");
@@ -187,6 +351,21 @@ const createShiftSwap = async (
     if (!toSchedule.employeeId.equals(getDocumentId(receiver))) {
       throw new AppError(400, "Target assigned shift does not belong to receiver");
     }
+
+    await Promise.all([
+      assertNoOverlappingShiftAfterSwap(getDocumentId(receiver), fromSchedule, [
+        getDocumentId(fromSchedule),
+        getDocumentId(toSchedule),
+      ]),
+      assertNoOverlappingShiftAfterSwap(getDocumentId(actor), toSchedule, [
+        getDocumentId(fromSchedule),
+        getDocumentId(toSchedule),
+      ]),
+    ]);
+  } else {
+    await assertNoOverlappingShiftAfterSwap(getDocumentId(receiver), fromSchedule, [
+      getDocumentId(fromSchedule),
+    ]);
   }
 
   const existingRequest = await ShiftSwapRequestModel.findOne({
@@ -211,7 +390,14 @@ const createShiftSwap = async (
     finalStatus: "pending_receiver",
   });
 
-  return toPublicShiftSwap(shiftSwap);
+  return toPublicShiftSwap(
+    shiftSwap,
+    new Map([
+      [getDocumentId(fromSchedule).toString(), fromSchedule],
+      ...(toSchedule ? [[getDocumentId(toSchedule).toString(), toSchedule] as const] : []),
+    ]),
+    new Map([[getDocumentId(branch).toString(), branch]])
+  );
 };
 
 const respondReceiver = async (
@@ -239,7 +425,13 @@ const respondReceiver = async (
   }
   await shiftSwap.save();
 
-  return toPublicShiftSwap(shiftSwap);
+  const schedulesById = await getSchedulesById([
+    shiftSwap.fromScheduleId,
+    shiftSwap.toScheduleId,
+  ]);
+  const branchesById = await getBranchesById([shiftSwap.branchId]);
+
+  return toPublicShiftSwap(shiftSwap, schedulesById, branchesById);
 };
 
 const approveShiftSwapSchedules = async (shiftSwap: IShiftSwapRequest) => {
@@ -268,6 +460,17 @@ const approveShiftSwapSchedules = async (shiftSwap: IShiftSwapRequest) => {
       throw new AppError(409, "Target assigned shift owner has changed");
     }
 
+    await Promise.all([
+      assertNoOverlappingShiftAfterSwap(shiftSwap.toEmployeeId, fromSchedule, [
+        getDocumentId(fromSchedule),
+        getDocumentId(toSchedule),
+      ]),
+      assertNoOverlappingShiftAfterSwap(shiftSwap.fromEmployeeId, toSchedule, [
+        getDocumentId(fromSchedule),
+        getDocumentId(toSchedule),
+      ]),
+    ]);
+
     fromSchedule.employeeId = shiftSwap.toEmployeeId;
     toSchedule.employeeId = shiftSwap.fromEmployeeId;
     fromSchedule.status = "swapped";
@@ -275,6 +478,10 @@ const approveShiftSwapSchedules = async (shiftSwap: IShiftSwapRequest) => {
     await Promise.all([fromSchedule.save(), toSchedule.save()]);
     return;
   }
+
+  await assertNoOverlappingShiftAfterSwap(shiftSwap.toEmployeeId, fromSchedule, [
+    getDocumentId(fromSchedule),
+  ]);
 
   fromSchedule.employeeId = shiftSwap.toEmployeeId;
   fromSchedule.status = "swapped";
@@ -313,14 +520,24 @@ const reviewByManager = async (
 
   await shiftSwap.save();
 
-  return toPublicShiftSwap(shiftSwap);
+  const schedulesById = await getSchedulesById([
+    shiftSwap.fromScheduleId,
+    shiftSwap.toScheduleId,
+  ]);
+  const branchesById = await getBranchesById([shiftSwap.branchId]);
+
+  return toPublicShiftSwap(shiftSwap, schedulesById, branchesById);
 };
 
 const cancelShiftSwap = async (actorPayload: AuthTokenPayload, shiftSwapId: string) => {
   const actor = await ensureActor(actorPayload);
   const shiftSwap = await getShiftSwapForActor(actor, shiftSwapId);
 
-  if (!shiftSwap.fromEmployeeId.equals(getDocumentId(actor)) && actor.role === "staff") {
+  if (actor.role !== "staff") {
+    throw new AppError(403, "Only requester can cancel this shift swap");
+  }
+
+  if (!shiftSwap.fromEmployeeId.equals(getDocumentId(actor))) {
     throw new AppError(403, "Only requester can cancel this shift swap");
   }
 
@@ -331,14 +548,25 @@ const cancelShiftSwap = async (actorPayload: AuthTokenPayload, shiftSwapId: stri
   shiftSwap.finalStatus = "cancelled";
   await shiftSwap.save();
 
-  return toPublicShiftSwap(shiftSwap);
+  const schedulesById = await getSchedulesById([
+    shiftSwap.fromScheduleId,
+    shiftSwap.toScheduleId,
+  ]);
+  const branchesById = await getBranchesById([shiftSwap.branchId]);
+
+  return toPublicShiftSwap(shiftSwap, schedulesById, branchesById);
 };
 
 const getShiftSwapById = async (actorPayload: AuthTokenPayload, shiftSwapId: string) => {
   const actor = await ensureActor(actorPayload);
   const shiftSwap = await getShiftSwapForActor(actor, shiftSwapId);
+  const schedulesById = await getSchedulesById([
+    shiftSwap.fromScheduleId,
+    shiftSwap.toScheduleId,
+  ]);
+  const branchesById = await getBranchesById([shiftSwap.branchId]);
 
-  return toPublicShiftSwap(shiftSwap);
+  return toPublicShiftSwap(shiftSwap, schedulesById, branchesById);
 };
 
 const getShiftSwapList = async (
@@ -350,12 +578,13 @@ const getShiftSwapList = async (
   const limit = query.limit;
   const skip = (page - 1) * limit;
   const filter: Record<string, unknown> = {};
+  const andFilters: Record<string, unknown>[] = [];
 
   if (actor.role === "staff") {
-    filter.$or = [
+    andFilters.push({ $or: [
       { fromEmployeeId: getDocumentId(actor) },
       { toEmployeeId: getDocumentId(actor) },
-    ];
+    ] });
   } else if (query.branchId) {
     const branch = await getBranchForActor(actor, query.branchId);
     filter.branchId = getDocumentId(branch);
@@ -370,17 +599,78 @@ const getShiftSwapList = async (
 
   if (query.employeeId) {
     const employeeId = asObjectId(query.employeeId);
-    filter.$or = [{ fromEmployeeId: employeeId }, { toEmployeeId: employeeId }];
+    andFilters.push({ $or: [{ fromEmployeeId: employeeId }, { toEmployeeId: employeeId }] });
+  }
+
+  if (query.fromEmployeeId) {
+    filter.fromEmployeeId = asObjectId(query.fromEmployeeId);
+  }
+
+  if (query.toEmployeeId) {
+    filter.toEmployeeId = asObjectId(query.toEmployeeId);
+  }
+
+  if (query.fromScheduleId) {
+    filter.fromScheduleId = asObjectId(query.fromScheduleId);
+  }
+
+  if (query.toScheduleId) {
+    filter.toScheduleId = asObjectId(query.toScheduleId);
+  }
+
+  if (query.managerId) {
+    filter.managerId = asObjectId(query.managerId);
+  }
+
+  if (actor.role !== "staff" && query.finalStatus === "pending_receiver") {
+    throw new AppError(403, "Shift swap is still waiting for receiver response");
   }
 
   if (query.finalStatus) {
     filter.finalStatus = query.finalStatus;
+  } else if (actor.role !== "staff") {
+    filter.finalStatus = { $ne: "pending_receiver" };
+  }
+
+  if (query.receiverStatus) {
+    filter.receiverStatus = query.receiverStatus;
+  }
+
+  if (query.managerStatus) {
+    filter.managerStatus = query.managerStatus;
+  }
+
+  if (query.createdFrom || query.createdTo) {
+    filter.createdAt = {
+      ...(query.createdFrom ? { $gte: query.createdFrom } : {}),
+      ...(query.createdTo ? { $lte: query.createdTo } : {}),
+    };
+  }
+
+  if (query.respondedFrom || query.respondedTo) {
+    const respondedAtFilter = {
+      ...(query.respondedFrom ? { $gte: query.respondedFrom } : {}),
+      ...(query.respondedTo ? { $lte: query.respondedTo } : {}),
+    };
+    andFilters.push({ $or: [
+      { receiverRespondedAt: respondedAtFilter },
+      { managerRespondedAt: respondedAtFilter },
+    ] });
+  }
+
+  if (andFilters.length > 0) {
+    filter.$and = andFilters;
   }
 
   const [items, total] = await Promise.all([
     ShiftSwapRequestModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     ShiftSwapRequestModel.countDocuments(filter),
   ]);
+
+  const schedulesById = await getSchedulesById(
+    items.flatMap((item) => [item.fromScheduleId, item.toScheduleId])
+  );
+  const branchesById = await getBranchesById(items.map((item) => item.branchId));
 
   return {
     meta: {
@@ -389,7 +679,7 @@ const getShiftSwapList = async (
       total,
       totalPages: Math.ceil(total / limit),
     },
-    data: items.map(toPublicShiftSwap),
+    data: items.map((item) => toPublicShiftSwap(item, schedulesById, branchesById)),
   };
 };
 

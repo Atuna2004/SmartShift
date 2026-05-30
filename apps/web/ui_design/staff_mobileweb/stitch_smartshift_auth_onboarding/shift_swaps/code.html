@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workforce - Shift Swaps</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#f4f0ef",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "canvas": "#ffffff",
+                        "tertiary": "#000000",
+                        "surface-container": "#f1edec",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1c1b1b",
+                        "tertiary-container": "#1d1b1a",
+                        "surface": "#fdf8f8",
+                        "surface-bright": "#fdf8f8",
+                        "surface-tint": "#5f5e5e",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ef4444",
+                        "on-secondary-container": "#fefcff",
+                        "on-error-container": "#93000a",
+                        "background": "#fdf8f8",
+                        "primary": "#000000",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-primary-container": "#858383",
+                        "inverse-primary": "#c8c6c5",
+                        "secondary": "#0058be",
+                        "primary-container": "#1c1b1b",
+                        "on-surface-variant": "#444748",
+                        "on-secondary-fixed": "#001a42",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#313030",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-container-low": "#f7f3f2",
+                        "tertiary-fixed-dim": "#cac6c3",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-error": "#ffffff",
+                        "on-surface": "#1c1b1b",
+                        "surface-dim": "#ddd9d8",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#474646",
+                        "tertiary-fixed": "#e6e1df",
+                        "surface-container-high": "#ebe7e6",
+                        "outline-variant": "#c4c7c7",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-fixed": "#e5e2e1",
+                        "surface-card": "#f5f5f5",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "secondary-container": "#2170e4",
+                        "hairline": "#e5e7eb",
+                        "outline": "#747878",
+                        "on-tertiary-container": "#868381",
+                        "surface-dark": "#101010",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e5e2e1",
+                        "success": "#10b981"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "2xl": "48px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "display-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-canvas text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-surface dark:bg-surface-dark border-b border-hairline dark:border-outline-variant">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-full transition-opacity duration-150 active:opacity-80">
+<span class="material-symbols-outlined text-primary dark:text-on-primary-fixed">menu</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm font-black text-primary dark:text-on-primary-fixed">Workforce</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-full transition-opacity duration-150 active:opacity-80">
+<span class="material-symbols-outlined text-primary dark:text-on-primary-fixed">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 px-4 md:px-lg max-w-4xl mx-auto">
+<!-- Welcome/Header Section -->
+<section class="mb-lg">
+<h2 class="font-headline-sm text-headline-sm text-primary mb-xs">Shift Swaps</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your requests and browse available openings.</p>
+</section>
+<!-- Tabs Container -->
+<div class="flex gap-4 border-b border-hairline mb-md">
+<button class="pb-3 px-2 font-label-md text-label-md border-b-2 border-primary text-primary transition-all duration-200" id="tab-my-requests" onclick="switchTab('my-requests')">
+                My Requests
+            </button>
+<button class="pb-3 px-2 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-all duration-200" id="tab-available-swaps" onclick="switchTab('available-swaps')">
+                Available Swaps
+            </button>
+</div>
+<!-- My Requests View -->
+<div class="space-y-md" id="view-my-requests">
+<!-- Card 1 -->
+<div class="bg-surface-card rounded-xl p-md border border-hairline hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Morning Shift</span>
+<span class="font-label-md text-label-md text-primary mt-xs">Mon, Oct 24 • 08:00 - 16:00</span>
+</div>
+<div class="bg-surface-container-highest text-on-tertiary-container px-3 py-1 rounded-full font-caption text-caption">
+                        Pending
+                    </div>
+</div>
+<div class="flex items-center gap-3 py-sm border-t border-hairline mt-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-dim">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged man with a friendly expression, wearing a crisp white shirt against a neutral office background. The lighting is bright and clean, emphasizing a high-end corporate SaaS aesthetic with sharp focus and natural skin tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo3e1l7rMCkeBZRW5cyOYtQ8Jt8JL_wLo3WXW0ipe41751NUVqK4uVsyZkbDHifH4fjGTROjCEoH3aG_a9jgpajfyAWyYlegZ-bxFG4bWGui4Hpimm7ADdFQ75asO5tagl5IsahU-noWq7mOLfJCQlWFZvS9m1hlRhHriOSTnfzvXC2aL2Ikqr7Zy2Zlk0WYlF1LCPM2yKIfcVslkrgbQmCFynac9fvshJOlUH2H2bYubMyuujEjG-3oq04ZIYePq5R_qMA2g8gUud"/>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Swap requested with <span class="font-semibold">David Chen</span></p>
+</div>
+<div class="mt-sm flex justify-end gap-2">
+<button class="px-4 py-2 bg-transparent text-primary border border-hairline rounded-lg font-button text-button hover:bg-surface-container transition-colors">Cancel Request</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-card rounded-xl p-md border border-hairline hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Night Shift</span>
+<span class="font-label-md text-label-md text-primary mt-xs">Fri, Oct 21 • 22:00 - 06:00</span>
+</div>
+<div class="bg-success/10 text-success px-3 py-1 rounded-full font-caption text-caption">
+                        Approved
+                    </div>
+</div>
+<div class="flex items-center gap-3 py-sm border-t border-hairline mt-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-dim">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of a professional woman smiling warmly, set in a modern, brightly lit workplace. The image features soft, even lighting and a shallow depth of field, reflecting a minimalist and efficient SaaS brand identity focused on human connection and professional reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqe2JCpiuTdgvVW9084yMvj1vR8iN0FI0mjnOL66WNtcYfPjrtj69uVXDiGyLl-Zuj9y_bGbRqGAJ41TBLQp-fD0aPbE_Jv9Waf5HKKLjRd-UR2f_nMY49SbKz93AW8GDAHaaWVAqhN9THXQz3Chxr4Zcs4KUy1vFTvzYJghNrhlR6vk3506S5_JMP9qnbo4288dznZo0D4MdkpccbwVtdHJ_va1jvMDkamX0JZFOYY1u9gZFrz1c-Xd7CAVK5Z-qn7JsaXhDdz1kD"/>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Swapped with <span class="font-semibold">Sarah Jenkins</span></p>
+</div>
+</div>
+</div>
+<!-- Available Swaps View (Hidden by default) -->
+<div class="hidden space-y-md" id="view-available-swaps">
+<!-- Available Card 1 -->
+<div class="bg-surface-card rounded-xl p-md border border-hairline hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Kitchen Staff • Saturday</span>
+<span class="font-label-md text-label-md text-primary mt-xs">Oct 29 • 12:00 - 20:00</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+<div class="flex items-center justify-between py-sm border-t border-hairline mt-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-dim">
+<img class="w-full h-full object-cover" data-alt="A high-quality studio portrait of a male professional in his late 20s, looking confidently at the camera. The background is a flat, cool grey, aligning with a modern, high-contrast UI design system. The lighting is crisp and clear, creating a professional and trustworthy visual." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDit_5OfXqF2WW6sBlgrwfAi0s8mh5g29NisORIz-uf7wMGJHvmV8bEuCcObGUVHwiuCVVkObD92IktkfrwhWCmeViMZNh8e5q37M7rq62ihdx4IQVzvUhZXh9V-4vjN6y0HVFhW9KBA7OIGL0mcj2_8J0KXLJ1oOE9NmSWBjXqKT_quOzGhSN437-xuYw8JR3FKKT5N2n4BDKbCLk1wdXL8ch_adsC2p9oaa1x_KlFg7uno3dNm8-wH-7HZjGxeVw9e3sfOJpJeEPM"/>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Posted by <span class="font-semibold">Marcus Low</span></p>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-button text-button hover:opacity-90 active:scale-95 transition-all">Claim Shift</button>
+</div>
+</div>
+<!-- Available Card 2 -->
+<div class="bg-surface-card rounded-xl p-md border border-hairline hover:border-outline-variant transition-colors group cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex flex-col">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Floor Manager • Sunday</span>
+<span class="font-label-md text-label-md text-primary mt-xs">Oct 30 • 09:00 - 17:00</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+<div class="flex items-center justify-between py-sm border-t border-hairline mt-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-dim">
+<img class="w-full h-full object-cover" data-alt="A detailed professional portrait of a woman of color, smiling brightly in a contemporary office setting. The image is clean, sharp, and high-contrast, perfectly matching a professional service-industry SaaS theme with a palette of white, black, and neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMTuTUi1v_Ak9pEPhsVI_5zSy_gFaYgMSo5zu7pBgVuiKw3aOhe8sbEihP5ZXtxmocyUJ-HOwa8q5eJR3NEecBuIu76yfq89q_x01ZvxE6R_YxYtGa6pIwUQbzapfjv23ZMSDdW0kZNcRGk6DmezGJDMGTIta1XyBTSUfyXY1j4hjmRMqZKNvts4VNZ5fxLramDhRJPQueibh8O9lP9LmM3REeTzgZLtazrgkWey2C9Ya6VK6-PRnhzbWbN3RRN007RdZS8pHKgeZ4"/>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Posted by <span class="font-semibold">Elena Rodriguez</span></p>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-button text-button hover:opacity-90 active:scale-95 transition-all">Claim Shift</button>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for New Swap Request -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-90 transition-all z-40 group">
+<span class="material-symbols-outlined text-[32px]">add</span>
+<span class="absolute right-full mr-4 bg-primary text-on-primary px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap font-label-md">New Swap Request</span>
+</button>
+<!-- BottomNavBar (Requests is active) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface dark:bg-surface-dark border-t border-hairline dark:border-outline-variant">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-highest active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<!-- Schedule -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-highest active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</a>
+<!-- Check-in -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-highest active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-label-md text-label-md">Check-in</span>
+</a>
+<!-- Requests (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-xl px-3 py-1 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+<span class="font-label-md text-label-md">Requests</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-3 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-highest active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+        function switchTab(view) {
+            const myRequestsTab = document.getElementById('tab-my-requests');
+            const availableSwapsTab = document.getElementById('tab-available-swaps');
+            const myRequestsView = document.getElementById('view-my-requests');
+            const availableSwapsView = document.getElementById('view-available-swaps');
+
+            if (view === 'my-requests') {
+                myRequestsTab.classList.add('border-primary', 'text-primary');
+                myRequestsTab.classList.remove('border-transparent', 'text-on-surface-variant');
+                availableSwapsTab.classList.remove('border-primary', 'text-primary');
+                availableSwapsTab.classList.add('border-transparent', 'text-on-surface-variant');
+                
+                myRequestsView.classList.remove('hidden');
+                availableSwapsView.classList.add('hidden');
+            } else {
+                availableSwapsTab.classList.add('border-primary', 'text-primary');
+                availableSwapsTab.classList.remove('border-transparent', 'text-on-surface-variant');
+                myRequestsTab.classList.remove('border-primary', 'text-primary');
+                myRequestsTab.classList.add('border-transparent', 'text-on-surface-variant');
+                
+                availableSwapsView.classList.remove('hidden');
+                myRequestsView.classList.add('hidden');
+            }
+        }
+    </script>
+</body></html>

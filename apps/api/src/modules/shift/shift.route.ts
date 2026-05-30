@@ -33,6 +33,11 @@ router.patch(
   validateRequest(updateShiftTemplateSchema),
   ShiftController.updateShiftTemplate
 );
+router.patch(
+  "/:shiftTemplateId/enable",
+  validateRequest(shiftTemplateIdParamSchema),
+  ShiftController.enableShiftTemplate
+);
 router.delete(
   "/:shiftTemplateId",
   validateRequest(shiftTemplateIdParamSchema),
