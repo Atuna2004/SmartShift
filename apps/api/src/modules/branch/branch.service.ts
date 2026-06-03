@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { AppError } from "../../common/errors/AppError.js";
 import type { AuthTokenPayload } from "../../common/utils/jwt.js";
+import { SubscriptionService } from "../subscription/subscription.service.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import { BranchModel } from "./branch.model.js";
@@ -168,6 +169,7 @@ const createBranch = async (actorPayload: AuthTokenPayload, payload: CreateBranc
 
   const organizationId = getActorOrganizationId(actor, payload.organizationId);
 
+  await SubscriptionService.assertCanCreateBranch(organizationId);
   await assertUniqueCode(organizationId, payload.code);
 
   const branch = await BranchModel.create({

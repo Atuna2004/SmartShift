@@ -17,11 +17,59 @@ const getPaymentIdParam = (req: Request) => {
   const paymentId = req.params.paymentId;
 
   if (typeof paymentId !== "string") {
-    throw new AppError(400, "Payment id is required");
+    throw new AppError(400, "Thiếu mã giao dịch thanh toán");
   }
 
   return paymentId;
 };
+
+const getIntentIdParam = (req: Request) => {
+  const intentId = req.params.intentId;
+
+  if (typeof intentId !== "string") {
+    throw new AppError(400, "Registration intent id is required");
+  }
+
+  return intentId;
+};
+
+const createRegistrationCheckout = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await PaymentService.createRegistrationCheckout(req.body);
+
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "Registration checkout created successfully",
+      data: result,
+    });
+  }
+);
+
+const getRegistrationIntent = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentService.getRegistrationIntent(getIntentIdParam(req));
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Registration intent retrieved successfully",
+    data: result,
+  });
+});
+
+const completeRegistration = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentService.completeRegistration(
+    getIntentIdParam(req),
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Registration completion checked successfully",
+    data: result,
+  });
+});
 
 const createSubscriptionPayment = catchAsync(
   async (req: Request, res: Response) => {
@@ -71,7 +119,7 @@ const markPaymentPaid = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Payment marked as paid successfully",
+    message: "Đã đánh dấu giao dịch là đã thanh toán",
     data: result,
   });
 });
@@ -85,7 +133,7 @@ const cancelPayment = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Payment cancelled successfully",
+    message: "Đã hủy giao dịch thanh toán",
     data: result,
   });
 });
@@ -99,7 +147,7 @@ const refundPayment = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Payment refunded successfully",
+    message: "Đã hoàn tiền giao dịch thanh toán",
     data: result,
   });
 });
@@ -113,7 +161,7 @@ const getPaymentList = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Payment list retrieved successfully",
+    message: "Đã tải danh sách thanh toán",
     data: result,
   });
 });
@@ -127,7 +175,7 @@ const getPaymentById = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Payment detail retrieved successfully",
+    message: "Đã tải chi tiết thanh toán",
     data: result,
   });
 });
@@ -144,6 +192,9 @@ const handlePayosWebhook = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const PaymentController = {
+  createRegistrationCheckout,
+  getRegistrationIntent,
+  completeRegistration,
   createSubscriptionPayment,
   calculatePayroll,
   createPayrollPayment,

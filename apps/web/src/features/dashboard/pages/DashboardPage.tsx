@@ -26,6 +26,7 @@ import { leaveRequestApi } from "@/features/requests/leaveRequest.api";
 import { organizationApi } from "@/features/organization/organization.api";
 import { paymentApi } from "@/features/payment/payment.api";
 import { subscriptionApi } from "@/features/subscription/subscription.api";
+import { scheduleApi } from "@/features/shift/schedule.api";
 import { useAuthStore } from "@/store";
 
 const avatars = {
@@ -51,96 +52,119 @@ export const DashboardPage = () => {
   return <OwnerDashboard ownerName={user?.fullName ?? "Alex Sterling"} />;
 };
 
-const ManagerDashboard = ({ managerName }: { managerName: string }) => (
-  <DashboardCanvas
-    actions={
-      <>
-        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 text-sm font-semibold text-black transition hover:bg-[#f7f3f2]">
-          <QrCode className="h-4 w-4" />
-          Tạo QR
-        </button>
-        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white transition hover:opacity-90">
-          <Plus className="h-4 w-4" />
-          Tạo lịch
-        </button>
-      </>
-    }
-    eyebrow={`Chào mừng trở lại, ${managerName.split(" ")[0] ?? "Manager"}`}
-    title="Bảng điều khiển quản lý"
-  >
-    <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <KpiCard icon={<CalendarDays />} label="Ca hôm nay" meta="+12% so với kỳ trước" metaTone="success" value="42" />
-      <KpiCard icon={<BadgeCheck />} label="Đang trực" value="18/24" avatars />
-      <KpiCard icon={<AlertTriangle />} label="Cảnh báo chấm công" meta="Cần xử lý" metaTone="danger" value="3" danger />
-      <KpiCard icon={<Clock3 />} label="Chờ phê duyệt" value="12" arrow />
-    </section>
+const ManagerDashboard = ({ managerName }: { managerName: string }) => {
+  const today = new Date();
+  const todayISO = toDateInputValue(today);
+  const weekStart = toDateInputValue(getWeekStart(today));
+  const monthStartISO = toDateInputValue(startOfMonth(today));
+  const branchesQuery = useQuery({
+    queryKey: ["branches", "managerDashboard"],
+    queryFn: () => branchApi.list({ limit: 100, status: "active" }),
+  });
+  const employeesQuery = useQuery({
+    queryKey: ["employees", "managerDashboard"],
+    queryFn: () => employeeApi.list({ limit: 100, status: "active" }),
+  });
+  const scheduleQuery = useQuery({
+    queryKey: ["schedules", "managerDashboard", { weekStart }],
+    queryFn: () => scheduleApi.weekly({ weekStart, published: true }),
+  });
+  const attendanceQuery = useQuery({
+    queryKey: ["attendances", "managerDashboard", { todayISO }],
+    queryFn: () => attendanceApi.history({ from: todayISO, to: todayISO, limit: 100 }),
+  });
+  const leaveRequestsQuery = useQuery({
+    queryKey: ["leave-requests", "managerDashboard", { monthStartISO, todayISO }],
+    queryFn: () => leaveRequestApi.list({ from: monthStartISO, to: todayISO, limit: 20 }),
+  });
 
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-      <div className="space-y-6 xl:col-span-2">
-        <Panel
-          action={<button className="text-sm font-semibold text-[#0058be] hover:underline">Xem tất cả</button>}
-          title="Nhân viên đi trễ"
-        >
-          <LateEmployee name="Alex Rivera" photo={avatars.emp1} shift="Morning Shift - North Branch" time="Trễ 18 phút" />
-          <LateEmployee name="Samantha Blue" photo={avatars.emp2} shift="Inventory Check - Main Store" time="Trễ 42 phút" />
-        </Panel>
+  const employees = employeesQuery.data?.data ?? [];
+  const employeeById = useMemo(() => new Map(employees.map((employee) => [employee.id, employee] as const)), [employees]);
+  const branchesById = useMemo(() => new Map((branchesQuery.data?.data ?? []).map((branch) => [branch.id, branch.name] as const)), [branchesQuery.data?.data]);
+  const todaySchedules = (scheduleQuery.data?.data ?? []).filter((schedule) => toDateInputValue(schedule.workDate) === todayISO);
+  const attendances = attendanceQuery.data?.data ?? [];
+  const checkedIn = attendances.filter((attendance) => attendance.checkInTime && !attendance.checkOutTime).length;
+  const lateAttendances = attendances.filter((attendance) => attendance.attendanceStatus === "late");
+  const pendingLeave = (leaveRequestsQuery.data?.data ?? []).filter((request) => request.status === "pending");
+  const totalScheduledHours = todaySchedules.reduce((sum, schedule) => sum + getShiftHours(schedule.shiftStartTime, schedule.shiftEndTime), 0);
+  const recentActivity = [...attendances]
+    .filter((attendance) => attendance.checkInTime || attendance.checkOutTime)
+    .sort((a, b) => (b.checkOutTime ?? b.checkInTime ?? "").localeCompare(a.checkOutTime ?? a.checkInTime ?? ""))
+    .slice(0, 4);
 
-        <Panel
-          action={<span className="text-xs text-[#444748]">Cập nhật lần cuối: vừa xong</span>}
-          title={
-            <span className="inline-flex items-center gap-2">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[#10b981]" />
-              Luồng ca làm trực tiếp
-            </span>
-          }
-        >
-          <div className="relative space-y-4 p-4 before:absolute before:bottom-6 before:left-[35px] before:top-6 before:w-px before:bg-[#e5e7eb]">
-            <FeedItem color="success" text={<><b>Jordan Lee</b> đã điểm danh bằng QR</>} time="09:12 AM" sub="Trạng thái: đúng giờ - Chi nhánh: phía Bắc" />
-            <FeedItem
-              color="secondary"
-              text={<><b>Maria Garcia</b> đã yêu cầu đổi ca</>}
-              time="08:45 AM"
-              sub="Thay ca: ca 14:00 thứ Sáu - Lý do: sức khỏe"
-              actions
-            />
-            <FeedItem color="danger" text={<><b>Cảnh báo hệ thống:</b> Ca chưa có người</>} time="08:00 AM" sub='Ca "Evening Runner" vẫn chưa có người nhận cho ngày mai.' />
-          </div>
-        </Panel>
+  return (
+    <DashboardCanvas
+      actions={
+        <>
+          <a className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 text-sm font-semibold text-black transition hover:bg-[#f7f3f2]" href="/dashboard/attendance/qr">
+            <QrCode className="h-4 w-4" />
+            Tạo QR
+          </a>
+          <a className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white transition hover:opacity-90" href="/dashboard/shifts/new">
+            <Plus className="h-4 w-4" />
+            Tạo lịch
+          </a>
+        </>
+      }
+      eyebrow={`Chào mừng trở lại, ${managerName.split(" ")[0] ?? "Manager"}`}
+      title="Bảng điều khiển quản lý"
+    >
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <KpiCard icon={<CalendarDays />} label="Ca hôm nay" meta={`${todaySchedules.length} ca đã xuất bản`} metaTone="success" value={String(todaySchedules.length)} />
+        <KpiCard icon={<BadgeCheck />} label="Đang trực" value={`${checkedIn}/${todaySchedules.length}`} avatars />
+        <KpiCard icon={<AlertTriangle />} label="Cảnh báo chấm công" meta="Cần xử lý" metaTone="danger" value={String(lateAttendances.length)} danger />
+        <KpiCard icon={<Clock3 />} label="Chờ phê duyệt" value={String(pendingLeave.length)} arrow />
+      </section>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="space-y-6 xl:col-span-2">
+          <Panel action={<a className="text-sm font-semibold text-[#0058be] hover:underline" href="/dashboard/attendance">Xem tất cả</a>} title="Nhân viên đi trễ">
+            {lateAttendances.length === 0 ? <p className="p-4 text-sm font-semibold text-[#444748]">Không có bản ghi đi muộn hôm nay.</p> : lateAttendances.slice(0, 4).map((attendance) => {
+              const employee = employeeById.get(attendance.employeeId);
+              return <LateEmployee key={attendance.id} name={employee?.fullName ?? attendance.employeeId} photo={employee?.avatar ?? avatars.emp1} shift={branchesById.get(attendance.branchId) ?? attendance.branchId} time={`Trễ ${attendance.lateMinutes} phút`} />;
+            })}
+          </Panel>
+
+          <Panel action={<span className="text-xs text-[#444748]">Dữ liệu hôm nay</span>} title={<span className="inline-flex items-center gap-2"><span className="h-2 w-2 animate-pulse rounded-full bg-[#10b981]" />Luồng ca làm trực tiếp</span>}>
+            <div className="relative space-y-4 p-4 before:absolute before:bottom-6 before:left-[35px] before:top-6 before:w-px before:bg-[#e5e7eb]">
+              {recentActivity.length === 0 ? <p className="text-sm font-semibold text-[#444748]">Chưa có hoạt động chấm công.</p> : recentActivity.map((attendance) => {
+                const employee = employeeById.get(attendance.employeeId);
+                const time = attendance.checkOutTime ?? attendance.checkInTime;
+                return <FeedItem color={attendance.attendanceStatus === "late" ? "danger" : "success"} key={attendance.id} text={<><b>{employee?.fullName ?? attendance.employeeId}</b> {attendance.checkOutTime ? "đã check-out" : "đã check-in"}</>} time={time ? formatTime(time) : "--"} sub={`Chi nhánh: ${branchesById.get(attendance.branchId) ?? attendance.branchId}`} />;
+              })}
+            </div>
+          </Panel>
+        </div>
+
+        <div className="space-y-6">
+          <section className="relative overflow-hidden rounded-2xl bg-black p-6 text-white shadow-xl">
+            <h3 className="mb-4 text-2xl font-semibold tracking-tight">Tổng quan ca làm</h3>
+            <SummaryLine icon={<Timer />} label="Tổng giờ đã xếp" value={`${totalScheduledHours.toFixed(1)}h`} />
+            <SummaryLine icon={<BarChart3 />} label="Nhân viên active" value={String(employees.length)} />
+            <a className="mt-8 flex h-12 w-full items-center justify-center rounded-xl bg-white text-sm font-semibold text-black transition hover:bg-[#f1edec]" href="/dashboard/reports">Xem báo cáo chi tiết</a>
+            <div className="absolute -bottom-10 -right-10 h-36 w-36 rounded-full bg-white/5 blur-2xl" />
+          </section>
+
+          <Panel title="Yêu cầu nghỉ phép">
+            <div className="space-y-4 p-4">
+              {pendingLeave.length === 0 ? <p className="text-sm font-semibold text-[#444748]">Không có yêu cầu chờ duyệt.</p> : pendingLeave.slice(0, 3).map((request) => <LeaveItem date={request.schedule?.workDate ? formatDate(request.schedule.workDate) : formatDate(request.requestedAt)} key={request.id} name={request.employeeName ?? employeeById.get(request.employeeId)?.fullName ?? request.employeeId} photo={avatars.leave1} />)}
+              <a className="flex h-10 w-full items-center justify-center rounded-lg bg-[#f7f3f2] text-xs font-semibold text-[#444748] transition hover:bg-[#f1edec]" href="/dashboard/leave-requests">Xem yêu cầu</a>
+            </div>
+          </Panel>
+
+          <section className="rounded-xl border border-dashed border-[#e5e7eb] bg-[#f5f5f5] p-6 text-center">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-lg border border-[#e5e7eb] bg-white shadow-sm">
+              <QrCode className="h-10 w-10 text-black" />
+            </div>
+            <h4 className="text-sm font-bold text-black">{branchesQuery.data?.data[0]?.name ?? "Chi nhánh"}</h4>
+            <p className="mb-4 mt-1 text-xs text-[#444748]">Đang hoạt động cho các ca hôm nay</p>
+            <a className="text-sm font-semibold text-[#0058be] hover:underline" href="/dashboard/attendance/qr">Mở mã QR</a>
+          </section>
+        </div>
       </div>
-
-      <div className="space-y-6">
-        <section className="relative overflow-hidden rounded-2xl bg-black p-6 text-white shadow-xl">
-          <h3 className="mb-4 text-2xl font-semibold tracking-tight">Tổng quan ca làm</h3>
-          <SummaryLine icon={<Timer />} label="Tổng giờ đã xếp" value="142h" />
-          <SummaryLine icon={<BarChart3 />} label="Lương ước tính" value="$3,840.00" />
-          <button className="mt-8 h-12 w-full rounded-xl bg-white text-sm font-semibold text-black transition hover:bg-[#f1edec]">
-            Xem báo cáo chi tiết
-          </button>
-          <div className="absolute -bottom-10 -right-10 h-36 w-36 rounded-full bg-white/5 blur-2xl" />
-        </section>
-
-        <Panel title="Yêu cầu nghỉ phép">
-          <div className="space-y-4 p-4">
-            <LeaveItem date="Oct 24 - Oct 26 (3 Days)" name="Kevin Vo" photo={avatars.leave1} />
-            <LeaveItem date="Nov 02 (Personal)" name="Sarah Miller" photo={avatars.leave2} />
-            <button className="h-10 w-full rounded-lg bg-[#f7f3f2] text-xs font-semibold text-[#444748] transition hover:bg-[#f1edec]">
-              Xem 8 yêu cầu chờ xử lý
-            </button>
-          </div>
-        </Panel>
-
-        <section className="rounded-xl border border-dashed border-[#e5e7eb] bg-[#f5f5f5] p-6 text-center">
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-lg border border-[#e5e7eb] bg-white shadow-sm">
-            <QrCode className="h-10 w-10 text-black" />
-          </div>
-          <h4 className="text-sm font-bold text-black">Điểm danh chi nhánh phía Bắc</h4>
-          <p className="mb-4 mt-1 text-xs text-[#444748]">Đang hoạt động cho các ca sáng hôm nay</p>
-          <button className="text-sm font-semibold text-[#0058be] hover:underline">In mã</button>
-        </section>
-      </div>
-    </div>
-  </DashboardCanvas>
-);
+    </DashboardCanvas>
+  );
+};
 
 const OwnerDashboard = ({ ownerName }: { ownerName: string }) => {
   const user = useAuthStore((state) => state.user);
@@ -428,6 +452,13 @@ const addMonths = (date: Date, months: number) => {
   next.setMonth(next.getMonth() + months);
   return next;
 };
+const getWeekStart = (date: Date) => {
+  const next = new Date(date);
+  const day = next.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  next.setDate(next.getDate() + diff);
+  return next;
+};
 const toDateInputValue = (value: Date | string) => {
   const date = typeof value === "string" ? new Date(value) : value;
   const year = date.getFullYear();
@@ -437,8 +468,17 @@ const toDateInputValue = (value: Date | string) => {
 };
 const percent = (part: number, total: number) => (total > 0 ? (part / total) * 100 : 0);
 const formatDate = (value: string) => new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(new Date(value));
+const formatTime = (value: string) => new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 const formatCurrency = (value: number, currency: "VND" | "USD") =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency, maximumFractionDigits: currency === "VND" ? 0 : 2 }).format(value);
+const getShiftHours = (start: string, end: string) => {
+  const [startHour = 0, startMinute = 0] = start.split(":").map(Number);
+  const [endHour = 0, endMinute = 0] = end.split(":").map(Number);
+  const startMinutes = startHour * 60 + startMinute;
+  let endMinutes = endHour * 60 + endMinute;
+  if (endMinutes <= startMinutes) endMinutes += 24 * 60;
+  return (endMinutes - startMinutes) / 60;
+};
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 const buildDailyRevenueSeries = (payments: { amount: number; paidAt?: string }[], from: string, to: string) => {
   const points: Array<{ date: string; value: number }> = [];

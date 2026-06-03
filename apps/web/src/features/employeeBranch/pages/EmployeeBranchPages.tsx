@@ -16,7 +16,6 @@ import {
   Plus,
   Repeat,
   Search,
-  ShieldCheck,
   Store,
   TrendingUp,
   UserCheck,
@@ -46,41 +45,11 @@ const colors = {
   error: "#ef4444",
 };
 
-const employeePhotos = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCGw0aN_e0T2iueIkEVjJrLkQ0aR7pg9b1k6ApavS3dJWDGD_EvGC6m1Rp3JzUmL0UKyeHPP5zaCiavd-97VGtGfbziDgFv8uAr1D-aaGwMc1AcjkMPwSleye-dbIt-6SoI361TIleHq7lYdSkcfuxbqMm9CPbvPgxLz4xywHDcukTrvWpoPb2N2j8Bmax5KdUvb9CnDKimksvmtGdMK5GN6vIlu2if31Uy-fxWnuqujKtI85O6xjKeGdWt4DDiPVhAr69SDk2ztJUI",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC2-W5iryVB8BleTwnG6tgcW-X2J7DGdYj7urdvsF0oDDqLYiiT3DK0-SMvwCj-0Mb321E5BY4-U4WPPVGm-mTEO4ZOcBt0ZZ8AlsOpGOwL9YORHDaW7T-QpbbmWkpnUbGm5w_UPG6V7S7hP73UqIUF3ZtHcN7yeWsyg9Oko34XmjSvK-91iz8aro5Mb8Z6uK3qi8i2ne7DaozcIRrstK5e2kmx-u1aj4uKe-kArs7L2Dtb00Ey-lO5QzdxiTbUydmdWI7bS2Cb1Bxw",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDg-WiZS3t_JcEXdNmJKifJmsaVylCDgisCw_9deVEZ2Yblcqe8uEVyfhkdTHSg3HsnF-g_xhj9kWLPziMrbf4eDJSqBJe6G_bUS7AdI5ov6IEDDfTfZnWJLHXf12wVEDaaaVqR4fzv4cVbgzYPNtRt7IWWu9peM20Ixq_TrFedb7A5Kcb3xMS-IFbbAqa_kk25FE8f_LY_HqPRsFSPN1RHpujdZaEOdrt9rmCqzt4f-qvnPiZIgoY_vpAhH9PqnAOAkyP_7ZVWC7pC",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCtQoPPt-Ky1HhuknP6GQABOCO-xkgYbIzNSFdGzixDXce4vZchqoGq_xTCNpSgh6bLz8_VraIzcC9YW4jIji-WLegdfS-v2Es8mV8J7zrkRuOnzPSoLKoX8GReqQBkSZswxd_ZEjIla6oUK3rjbmtk-n_0L7V5zdJ2Es2tboFF8lbXlwnHy4UYOJZnrB61Z0RG8dDNEzwbvtCoUrYAjXqh5HQIC7QnCMlnUElX167paNBG8KE1Wc1s9HKTQar306jWqZI7lFtXrDFR",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuB56ELbBE1haKd29ql22DN5_QCZOK5fD_tQ3bzA7whJmdTUiTUIPOVNplplXvH086iDppSO-w25dCNmjAqE6e4_j2DuyW9mJlAchFX1SujTFC-3-mD1cXAkxQSQM3QKi23j1nV3OQBstvlOh-s366zeIi26jQmGlvvReweu3jBXhcyYrxH8UtCDykAWSthsxsBXpsWhenIMm3sS855uroQDvKqKEum4NvIoLvEmkkdqpXip7Tmk3I3Cm4dTQFrkJZhojblBbPB-MCSb",
-];
-
 const branchPhotos = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuB91eGT71w3cE0MMjyUztefC1iVNXPHCAVUVWr1lamQsFCDUoQucRA5WVnaCDespI9peUQM6N1xyoEwgJbRQ323o05HvUrCsmvZgbP5pimBA44Oa3mG0F_vl0x7-MoU1ct9-SwJwOxbeE9mDcOS2rU_lPe2_GIU3MngfkjlbPexJ9XASAg21kgoywyFGNnp7LPIQmBoFJo_FD6RFIjhvLv-g761vpY5kbafmsHsUWmUSo_bOeYSgkwshrLKQDzt4Art8J5bsN3sc1rs",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCQFht8xIXIRL2o2QvW6mmnZW-FMJYRBiurTSM8faQmA5aIt_tzEEXlA8neH7eQP-V1z2ACVLPJaSeRwl6GtKBZXQ4oui7Inh39mZvXCSe68WsFAXs-RSU-nBzmZvSGbacAuCl7G-CKq-nKZ8jBNPRr2jSWTYxl9jXxwPs396SfttvmarDbZOJBxFPORn2aVDrccsEI3jsB4Iymoqy_7STq6yiX_bbhyB_F5-aUu8UbzqyXYlEXnopEbbvs0xgr9iKJ0hmCg-R33ywj",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBfr-pKeV4u4T-63MXiTMDY5BtrJ7wdnjzzfEAfHyZI-HsxTiJWNeZgGEhem-jsOEGhlcX1L9DrCMT2qg1DcL5BfwH1-YN9a17xXxARq_lLKDECMpVpQLqA984PY4bpqK1QjocPQOV38YiPPGSNgcHFdgCKludKkfEs5xTf_l9EaMAC1svF-29NZ8-H9sym6-P6cC_Vo_jWG5ugeCpozF-2uGt3DgidPEF0MHvsVNHAyyMrl1Udx-v_B9b2CptafZUg0Jjnc0gWhh8t",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAOFcffqZjgEL63j4xlJ-FD3fgrAOLZHKGCsSROEPxPcO9o7iiQuk8iWwi_2s9_uzvOh-nVjkcr56C1wBUg8T86iBf-2Prmip3m7X7JZdN_teESrSrzbr1UMTmoAyYe8KhGB7roEf3iygNNqQNvlFgc7wTmO7cBfV3_xYEPlLCSbBspeFrzzINOkAt6oxzHHS6lar365ST2wvcCmApg3tO-dUL6axuCbDtYDjjBJK7xBM6eTpEHwvk2nU8pVxYNwpsIinmsQbfHjmfF",
-];
-
-const managerPhotos = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDZxLSvKSqeNb1EwWAf9uASdYinmrOIFK1h02PZ7vNAX-PbDNGud_j-kXaLd3X8zWNoABdSiWKpVqihHeANH2xMOofdYSqY4gHN0eIZ0IErTKjzkzIfeHuZ1n_t45XmFyuRUvF4uH4_mJaNOs1cnpQbC3MhwVrMqP_6yqSsldswdmDshe9xpf_603SHL0AY7Iud7GglC6uqkuoC9-5oueBexztmblIHvBGRzyx85AFpfHtMSzmNrBp9M_hQUaC_0sbiRSHnCteKo9TH",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBcrEOSq5NB1XBPMBWcS-U6bV_hcTglvaytrRtAa1OPiwrlOj0WFYvHUYSod4BYMlA00wVTXjJ5yKfT48PR-sS7iQfTfiotI1OMRhtaPnXUVL5WPQlIHYLWdOY2kd1I47hmNpzq5NCvQYsSW8wLvd2GyW5lurqZVdqDW0VbXIDJGau0Budxt1ZO8cLvc315KFxTBc8_sUAo9BfLfFo4muotWAI6QDT2yBfa9uQDDR3g7T8gRaxxrw3V0PQTzVeW_wvyMAl3Bz_8dbQE",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDpCXRT-77hgEmthu8wNoFTRZy-SFaMYCsWqbEy0ByaJk_PhJsi6V0sfOaa5Dd-yHFQ5O4kLUobXqMT-Va1uJJngP3_HxgC5Pcn1QLmK2IY3DRKxDkUg3aRdwN2rsQhXLK3Iugsz0ofes6aPprKeUlBoaly_2LXl_o7GNr8BYz15i5JDZCdeEzYxb8Ehsw5uFUR9nredp9i1uDA6uZYnhsnLcDvRh1OxIoORTg_eZoremTqNtHwKdKcio9RJzogMqvzCltQdb4Xfy6B",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuD3PRZfXBy1qmD-t-j97wnWliASze1o7NKDLi8pEkxdkJwkBYpVqKC-IYDYeGIpA-pE9w6Rf00zlhmy_5Al3xHBH-ObxjHGpSwrZrQwa2vCpAHUFfVUz3hoTgqWtrrWWyZaGRimBILyJZ7Iz_ajdv5qR0HGynktwMc0WTeytboiWvHk0VLtVLZ0IjA01AwnlYrMERtK0ZAGBoJ3wyVweIHY9ufH-njt5H27xsoRp1KPm9IdIA9awDPqZOLswxFRAXfLhOvhxy-Vc_XV",
-];
-
-const employees = [
-  { name: "Marcus Thorne", email: "marcus.t@smartshift.io", role: "Quản lý ca cấp cao", branch: "Trung tâm Downtown", status: "Đang hoạt động", photo: employeePhotos[0] },
-  { name: "Sarah Jenkins", email: "s.jenkins@smartshift.io", role: "Giám sát lễ tân", branch: "Chi nhánh Westside", status: "Đang nghỉ phép", photo: employeePhotos[1] },
-  { name: "Arthur Lofton", email: "a.lofton@smartshift.io", role: "Điều phối logistics", branch: "North Plaza", status: "Ngừng hoạt động" },
-  { name: "Nina Kim", email: "nina.k@smartshift.io", role: "Nhân sự", branch: "Văn phòng chính", status: "Đang hoạt động", photo: employeePhotos[3] },
-  { name: "David Chen", email: "d.chen@smartshift.io", role: "Trưởng bộ phận hỗ trợ", branch: "Trung tâm Downtown", status: "Đang hoạt động", photo: employeePhotos[4] },
-];
-
-const branches = [
-  { name: "Trung tâm Main St.", address: "742 Main St, New York, NY", manager: "Alex Rivera", staff: 86, tag: "CHI NHÁNH CHÍNH", image: branchPhotos[0], managerPhoto: managerPhotos[0] },
-  { name: "Trung tâm bán lẻ Eastside", address: "2200 East Pkwy, Brooklyn, NY", manager: "Marcus Chen", staff: 42, image: branchPhotos[1], managerPhoto: managerPhotos[1] },
-  { name: "Y tế Upper West", address: "102 W 86th St, New York, NY", manager: "Sarah Jenkins", staff: 12, tag: "THIẾU NHÂN SỰ", tagTone: "error", image: branchPhotos[2], managerPhoto: managerPhotos[2] },
-  { name: "Kho vận sân bay Bắc", address: "10 Terminal Dr, Queens, NY", manager: "David Miller", staff: 156, image: branchPhotos[3], managerPhoto: managerPhotos[3] },
 ];
 
 export const EmployeeListPage = () => {
@@ -217,7 +186,7 @@ export const EmployeeDetailsPage = () => {
         {employeeQuery.isLoading ? (
           <StatePanel title="Đang tải nhân viên..." description="Đang lấy hồ sơ nhân viên từ API." />
         ) : employeeQuery.isError ? (
-          <StatePanel title="Unable to load employee" description={getApiErrorMessage(employeeQuery.error, "Please try again later.")} />
+          <StatePanel title="Không thể tải nhân viên" description={getApiErrorMessage(employeeQuery.error, "Vui lòng thử lại sau.")} />
         ) : employeeQuery.data ? (
           <>
             <EmployeeProfileHeader
@@ -719,7 +688,7 @@ const Modal = ({ children, closeTo, subtitle, title }: { children: ReactNode; cl
 
 const ModalFooter = ({ cancelTo, primary }: { cancelTo: string; primary: string }) => (
   <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-    <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to={cancelTo}>Cancel</Link>
+    <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to={cancelTo}>Hủy</Link>
     <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90">{primary}</button>
   </div>
 );
@@ -758,7 +727,7 @@ const EmployeeCreateModal = () => {
       await queryClient.invalidateQueries({ queryKey: ["employees"] });
       navigate("/dashboard/employees", { replace: true });
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to create employee.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể tạo nhân viên.")),
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -804,7 +773,7 @@ const EmployeeCreateModal = () => {
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
         <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/employees">Cancel</Link>
+          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/employees">Hủy</Link>
           <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={createMutation.isPending} type="submit">
             {createMutation.isPending ? "Đang thêm..." : "Thêm nhân viên"}
           </button>
@@ -853,7 +822,7 @@ const BranchCreateModal = () => {
       await queryClient.invalidateQueries({ queryKey: ["branches"] });
       navigate("/dashboard/branches", { replace: true });
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to create branch.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể tạo chi nhánh.")),
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -873,7 +842,7 @@ const BranchCreateModal = () => {
           </div>
           <InputField label="Physical Address" onChange={setAddress} placeholder="Enter full street address" value={address} />
           <div className="grid gap-4 sm:grid-cols-3">
-            <InputField label="Timezone" onChange={setTimezone} required value={timezone} />
+            <InputField label="Múi giờ" onChange={setTimezone} required value={timezone} />
             <InputField label="Opening Time" onChange={setOpeningTime} required type="time" value={openingTime} />
             <InputField label="Closing Time" onChange={setClosingTime} required type="time" value={closingTime} />
           </div>
@@ -887,7 +856,7 @@ const BranchCreateModal = () => {
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
         <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/branches">Cancel</Link>
+          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/branches">Hủy</Link>
           <button
             className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
             disabled={createMutation.isPending}
@@ -1049,7 +1018,7 @@ const EmployeeEditModal = ({
         ...(joinDate ? { joinDate } : {}),
       }),
     onSuccess: onSaved,
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to update employee.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể cập nhật nhân viên.")),
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -1089,7 +1058,7 @@ const EmployeeEditModal = ({
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
         <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-          <button className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" onClick={onClose} type="button">Cancel</button>
+          <button className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" onClick={onClose} type="button">Hủy</button>
           <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={updateMutation.isPending} type="submit">
             {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </button>
@@ -1196,65 +1165,6 @@ const ActivityNode = ({
     <p className="text-xs text-[#444748]">{time}</p>
     {detail ? <p className="mt-2 text-xs text-[#747878]">{detail}</p> : null}
     {children}
-  </div>
-);
-
-const PersonalInfoPanel = () => (
-  <section className="rounded-xl border border-[#e5e7eb] bg-white p-6">
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-      <div>
-        <h3 className="mb-4 text-sm font-semibold text-black">Personal Information</h3>
-        <div className="space-y-4">
-          <InfoRow label="Email Address" value="m.thompson@smartshift.com" />
-          <InfoRow label="Phone Number" value="+1 (555) 234-8892" />
-          <InfoRow label="Emergency Contact" value="Sarah T. (Wife)" />
-          <InfoRow label="Date of Hire" value="Oct 12, 2022" />
-        </div>
-      </div>
-      <div>
-        <h3 className="mb-4 text-sm font-semibold text-black">Skills & Certifications</h3>
-        <div className="flex flex-wrap gap-2">
-          {["Health & Safety Level 3", "Team Management", "Inventory Pro"].map((skill) => (
-            <span className="inline-flex items-center gap-2 rounded-lg bg-[#f1edec] px-4 py-2 text-xs font-bold" key={skill}>
-              <ShieldCheck className="h-4 w-4 text-[#0058be]" />
-              {skill}
-            </span>
-          ))}
-          <button className="inline-flex items-center gap-2 rounded-lg border border-dashed border-[#c4c7c7] px-4 py-2 text-xs font-bold text-[#444748] transition hover:bg-[#f7f3f2]">
-            <Plus className="h-4 w-4" />
-            Add Skill
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-const PayrollCard = () => (
-  <section className="relative overflow-hidden rounded-xl bg-black p-6 text-white">
-    <div className="relative z-10">
-      <p className="mb-1 text-xs text-white/80">Estimated Gross Monthly Pay</p>
-      <h2 className="mb-6 text-4xl font-semibold tracking-tight">$4,820.50</h2>
-      <div className="space-y-3">
-        <PayrollLine label="Base Pay (160h)" value="$4,000.00" />
-        <PayrollLine label="Overtime (12.5h)" value="$468.75" />
-        <div className="flex justify-between text-xs">
-          <span>Bonuses</span>
-          <span>$351.75</span>
-        </div>
-      </div>
-      <button className="mt-8 h-10 w-full rounded-lg bg-white text-sm font-semibold text-black transition hover:bg-[#f1edec]">
-        View Payslip Details
-      </button>
-    </div>
-    <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#0058be]/20 blur-3xl" />
-  </section>
-);
-
-const PayrollLine = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between border-b border-white/10 pb-3 text-xs">
-    <span>{label}</span>
-    <span>{value}</span>
   </div>
 );
 
@@ -1411,7 +1321,7 @@ const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
       ]);
       setSuccess("Đã lưu cài đặt chi nhánh.");
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to save branch settings.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể lưu cài đặt chi nhánh.")),
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -1438,7 +1348,7 @@ const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
           {branchQuery.isLoading ? (
             <StatePanel title="Đang tải chi nhánh..." description="Đang lấy cấu hình chi nhánh." />
           ) : branchQuery.isError ? (
-            <StatePanel title="Unable to load branch" description={getApiErrorMessage(branchQuery.error, "Please try again later.")} />
+            <StatePanel title="Không thể tải chi nhánh" description={getApiErrorMessage(branchQuery.error, "Vui lòng thử lại sau.")} />
           ) : (
             <form className="space-y-8" onSubmit={handleSubmit}>
               <SettingsSection icon={<Store />} title="Thông tin chi nhánh">
@@ -1446,7 +1356,7 @@ const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
                   <InputField label="Tên chi nhánh" onChange={setName} required value={name} />
                   <InputField label="Mã chi nhánh" onChange={setCode} value={code} />
                   <InputField label="Phone" onChange={setPhone} value={phone} />
-                  <InputField label="Timezone" onChange={setTimezone} required value={timezone} />
+                  <InputField label="Múi giờ" onChange={setTimezone} required value={timezone} />
                   <div className="md:col-span-2"><InputField label="Physical Address" onChange={setAddress} value={address} /></div>
                 </div>
               </SettingsSection>
@@ -1468,7 +1378,7 @@ const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
               {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
               {success ? <p className="rounded-lg bg-[#10b981]/10 px-4 py-3 text-sm font-semibold text-[#047857]">{success}</p> : null}
               <footer className="flex flex-col items-center justify-end gap-4 border-t border-[#e5e7eb] pt-8 sm:flex-row">
-                <Link className="w-full rounded-lg px-8 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-[#f1edec] sm:w-auto" to="/dashboard/branches">Cancel</Link>
+                <Link className="w-full rounded-lg px-8 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-[#f1edec] sm:w-auto" to="/dashboard/branches">Hủy</Link>
                 <button className="w-full rounded-lg bg-black px-12 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 sm:w-auto" disabled={saveMutation.isPending} type="submit">
                   {saveMutation.isPending ? "Saving..." : "Save Changes"}
                 </button>

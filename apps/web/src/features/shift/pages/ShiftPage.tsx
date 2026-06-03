@@ -38,37 +38,6 @@ type LocalDraftAssignedShift = AssignedShift & {
 const workplaceImage =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBD10SV1xwMpHvBTCoOhsK582aHXZD8LoSqeVPXCAzw5JAsQR08dCikrDBtAf2rjpd6liDN_7ztKxjHKlm9PK49AvyvEnM0NsHz0jjpxDvt06fFUHTi3ABRZMictAYHjCaadXM4KGTCBLDBTNFKAg5xx2SwJiUwkx1agNSUZTx7GyA2VYAaQdyWDy-WuDg5J5CIGE-Rokg_ztAqFeNuHX8A-Q8LToLFfSTZ3Kb-lujwmGN1euRSd3LSyL0GZBjZJE89kfwOlAgVTD9d";
 
-const staff = [
-  {
-    name: "Alex Rivera",
-    role: "Floor Manager",
-    photo:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBDMU2AQMAbPtJU66Yel2ddibOuCZ7V_Yn97YRTEVD3qlUQmatY2-EsuBtRI08gqVOo93C5MZLA5lAy6IIZ3iZfe5uGUkkvzOam7fdXc7Bt1BPTXVAckTc_tBoOZAKJ304sJBNnp5GGKhq-T2YefTUkCMFALWSIdw4X00keZzAvG6fLeBowCUddg3HwAioo0x877muin9KucSrYARubMbB9RqAUx3nJCOaEdZtHZx4p7puogWsEwafJikUtbYYkhyZY-u4fqLct7MDK",
-    shifts: ["Opening Shift", "Opening Shift", "", "Opening Shift", "Opening Shift", "Off", "Off"],
-  },
-  {
-    name: "Jordan Lee",
-    role: "Lead Barista",
-    photo:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCqOLvmQOr5n6EZUuDRBBeZEmeopXkUXZdNUl_6CMZ4FKL73-6iHYg7wuzFy0pdvXlpIQWDQVNuzwhft1Mdcx_PMhgWjm3cPoat13oWDSFc6Bw8s_Ce6TGjoaOZJsiwQW1b2bKJZjlG9S4OFISpp1aE7LzsId31JUb0zLyb6sQcF6QCI9jBOz87L2kunXBS205ZCbBlF4prUhuMYc13HA6WiwXWdgh-xwCpmRYD2mwDaXgqIYp4q5tIdBi9YBbkC84to-0ZXUHCcoPy",
-    shifts: ["", "Closing Support", "Closing Support", "Closing Support", "Closing Support", "Weekend Lead", "Weekend Lead"],
-  },
-  {
-    name: "Sam Smith",
-    role: "Junior Barista",
-    photo:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCEw1gtF0I6a9bLmWtlYYpyPkdOv7E_3lq4kdvgNDbQYQF11UCp3xO5uPPEkrHP3Y6kWpbLJStTVguPh9ss_LjO9d7SLUskOCGXY_GgN9Mf5vx4H1YvqLtozyA4ZRLxydS4NEKAGVehqMRUa-TMlYfZpWKlgf4JsTGgzdevAj52qZaFHm4kphDBPn_3-eIt8m0Mu9ZwpfTj0A30Fih6jnYHY5SGi9sdXwcDd8PB3YFdl-9mAfazev96yAtjx03QCF7fSbnURjerqUKS",
-    shifts: ["Unavailable", "Night Shift", "", "Night Shift", "Night Shift", "", ""],
-  },
-  {
-    name: "Casey Quinn",
-    role: "General Staff",
-    photo:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAqcI_586dEAoaYSZDHgA0Fc5McVabP3JIZ7Oxtr0N_eXKN12EaeRxaL0tRvzEfTtgzeHUkiQdbgGGIodHR8wIQj1hTlfQ7Yr9QqNTwrlO3SpFWJ2AzbNQN7WOGkALsbdSEikBs5Q6WtaeWa8cKiDRP1lk2TbC3FuEVkxdpK-wyR4QkIBJyqUO4rsGF17_kyMFWZ4e3yc97t3uCo4WopdA6AQKB-IfYOsLiv-oRayOGu9LLqWY9wfR0_Wi0uDP1Llo6Oun1BPGpsC43",
-    shifts: ["Floor Support", "", "Floor Support", "", "Floor Support", "", ""],
-  },
-];
-
 export const ShiftPage = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -1571,34 +1540,6 @@ const CalendarCell = ({
           <p className="truncate text-[10px] font-bold text-black">+{cell.shifts.length - 3} more</p>
         </div>
       ) : null}
-    </div>
-  </div>
-);
-
-const ShiftModal = () => (
-  <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-black/20 p-4 backdrop-blur-sm">
-    <div className="w-full max-w-[640px] overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-2xl">
-      <div className="flex items-center justify-between border-b border-[#e5e7eb] bg-[#fdf8f8] px-6 py-4">
-        <div><h2 className="text-2xl font-semibold tracking-tight text-black">Thêm ca mới</h2><p className="text-xs text-[#444748]">Thứ Hai, 23/10 - Chi nhánh Downtown</p></div>
-        <Link className="rounded-full p-2 hover:bg-[#ebe7e6]" to="/dashboard/schedule"><X className="h-5 w-5" /></Link>
-      </div>
-      <div className="space-y-6 p-6">
-        <div className="flex items-start gap-4 rounded-lg border border-[#ef4444]/20 bg-[#ffdad6]/40 p-4">
-          <AlertTriangle className="h-5 w-5 text-[#ef4444]" />
-          <div><p className="text-sm font-semibold text-[#93000a]">Phát hiện trùng lịch</p><p className="text-xs text-[#93000a]/80">Nhân viên "Jordan Smith" đã được xếp ca Sáng (8:00 AM - 12:00 PM) tại địa điểm này.</p></div>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <label className="space-y-2"><span className="text-sm font-semibold">Mẫu ca</span><select className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none"><option>Ca mở cửa chuẩn (8:00 AM - 4:00 PM)</option><option>Hỗ trợ giữa ngày (11:00 AM - 7:00 PM)</option><option>Ca đóng cửa (4:00 PM - 12:00 AM)</option></select></label>
-          <label className="space-y-2"><span className="text-sm font-semibold">Gán nhân viên</span><div className="flex h-10 items-center gap-3 rounded-lg border border-[#e5e7eb] bg-white px-4"><span className="flex-grow text-sm font-semibold">Jordan Smith</span><Search className="h-4 w-4 text-[#444748]" /></div></label>
-          <div className="col-span-full grid grid-cols-2 gap-4 rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] p-4"><label><span className="text-xs text-[#444748]">Giờ bắt đầu</span><input className="block w-full border-0 bg-transparent p-0 text-2xl font-semibold outline-none" type="time" defaultValue="08:00" /></label><label><span className="text-xs text-[#444748]">Giờ kết thúc</span><input className="block w-full border-0 bg-transparent p-0 text-2xl font-semibold outline-none" type="time" defaultValue="16:00" /></label></div>
-          <label className="col-span-full flex items-center gap-3"><input className="h-5 w-5 rounded border-[#e5e7eb]" type="checkbox" />Bao gồm nghỉ không lương 30 phút</label>
-          <label className="col-span-full space-y-2"><span className="text-sm font-semibold">Ghi chú ca (không bắt buộc)</span><textarea className="min-h-[100px] w-full resize-none rounded-lg border border-[#e5e7eb] px-4 py-2 outline-none" placeholder="Nhiệm vụ cụ thể, yêu cầu phủ ca hoặc nhắc nhở..." /></label>
-        </div>
-      </div>
-      <div className="flex items-center justify-between border-t border-[#e5e7eb] bg-[#fdf8f8] px-6 py-4">
-        <button className="text-sm font-semibold text-[#444748] hover:text-black">Xóa bản nháp</button>
-        <div className="flex gap-3"><Link className="rounded-lg border border-[#e5e7eb] px-6 py-2 text-sm font-semibold hover:bg-[#f7f3f2]" to="/dashboard/schedule">Hủy</Link><button className="rounded-lg bg-black px-8 py-2 text-sm font-semibold text-white">Xuất bản ca</button></div>
-      </div>
     </div>
   </div>
 );

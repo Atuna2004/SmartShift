@@ -40,29 +40,6 @@ import type { AttendanceRecord, AttendanceStatus } from "../attendance.types";
 import { dailyQrApi } from "../dailyQr.api";
 import type { DailyQrCode } from "../dailyQr.types";
 
-const employees = [
-  { initials: "JD", name: "Jameson Dun", role: "Bếp trưởng", branch: "Trung tâm", schedule: "08:00 - 16:00", checkIn: "07:55", checkOut: "--:--", status: "Đúng giờ" },
-  { initials: "SK", name: "Sarah Kinsley", role: "Quản lý sàn", branch: "Trung tâm", schedule: "09:00 - 17:00", checkIn: "09:22", checkOut: "--:--", status: "Đi muộn" },
-  { initials: "MR", name: "Marcus Reed", role: "Lễ tân", branch: "Trung tâm", schedule: "08:00 - 16:00", checkIn: "--:--", checkOut: "--:--", status: "Vắng" },
-  { initials: "EL", name: "Elena Lu", role: "Phụ bếp", branch: "Trung tâm", schedule: "06:00 - 14:00", checkIn: "05:58", checkOut: "14:05", status: "Hoàn thành" },
-  { initials: "TB", name: "Tom Berenger", role: "Tổ vệ sinh", branch: "Trung tâm", schedule: "10:00 - 18:00", checkIn: "10:00", checkOut: "--:--", status: "Đúng giờ" },
-];
-
-const historyEntries = [
-  { shift: "Ca sáng", area: "Khu A", date: "Thứ Hai, 23/10", checkIn: "08:00", checkOut: "16:30", total: "8.5h", status: "Đúng giờ" },
-  { shift: "Ca giữa ngày", area: "Khu B", date: "Thứ Ba, 24/10", checkIn: "10:15", checkOut: "18:15", total: "8.0h", status: "Đi muộn" },
-  { shift: "Hỗ trợ buổi tối", area: "Kho", date: "Thứ Tư, 25/10", checkIn: "14:00", checkOut: "23:00", total: "9.0h", status: "Đúng giờ" },
-  { shift: "Ca sáng", area: "Khu A", date: "Thứ Năm, 26/10", checkIn: "08:00", checkOut: "16:30", total: "8.5h", status: "Đúng giờ" },
-  { shift: "Họp tuần", area: "Văn phòng", date: "Thứ Sáu, 27/10", checkIn: "09:00", checkOut: "13:30", total: "4.5h", status: "Đúng giờ" },
-];
-
-const activity = [
-  { name: "Alex Rivera", detail: "Đã check-in - Ca B", time: "2 phút trước" },
-  { name: "Sarah Chen", detail: "Đã check-out - Tăng ca", time: "14 phút trước" },
-  { name: "Jordan Smith", detail: "Đã check-in - Ca A", time: "28 phút trước" },
-  { name: "Mark Fletcher", detail: "Đã check-out - Nghỉ giải lao", time: "1 giờ trước", muted: true },
-];
-
 export const AttendanceDashboardPage = () => {
   const queryClient = useQueryClient();
   const [branchId, setBranchId] = useState("all");
@@ -330,7 +307,7 @@ export const AttendanceQrPage = () => {
             </div>
           </div>
         </section>
-        <ActivityFeed />
+        <ActivityFeed attendances={[]} employeesById={new Map<string, Employee>()} />
       </main>
     </AttendanceShell>
   );
@@ -728,34 +705,45 @@ const InfoCard = ({ icon, label, tone, value }: { icon: ReactNode; label: string
   </div>
 );
 
-const ActivityFeed = () => (
+const ActivityFeed = ({ attendances, employeesById }: { attendances: AttendanceRecord[]; employeesById: Map<string, Employee> }) => {
+  const items = [...attendances]
+    .filter((item) => item.checkInTime || item.checkOutTime)
+    .sort((a, b) => (b.checkOutTime ?? b.checkInTime ?? "").localeCompare(a.checkOutTime ?? a.checkInTime ?? ""))
+    .slice(0, 8);
+
+  return (
   <aside className="hidden border-l border-[#e5e7eb] bg-white lg:flex lg:flex-col">
     <div className="border-b border-[#e5e7eb] p-6">
       <h3 className="text-2xl font-semibold tracking-tight text-black">Hoạt động gần đây</h3>
       <p className="text-xs text-[#444748]">Real-time check-in stream</p>
     </div>
     <div className="flex-1 space-y-4 overflow-y-auto p-4">
-      {activity.map((item) => (
-        <div className={item.muted ? "rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4 opacity-60" : "rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4"} key={item.name}>
+      {items.length === 0 ? <p className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4 text-sm font-semibold text-[#444748]">Chưa có hoạt động chấm công hôm nay.</p> : items.map((item) => {
+        const employee = employeesById.get(item.employeeId);
+        const name = employee?.fullName ?? item.employeeId;
+        const time = item.checkOutTime ?? item.checkInTime;
+        return (
+        <div className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4" key={item.id}>
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e5e7eb] bg-white text-xs font-bold">{item.name.split(" ").map((part) => part[0]).join("")}</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e5e7eb] bg-white text-xs font-bold">{name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
-                <p className="truncate text-sm font-semibold text-black">{item.name}</p>
-                <span className="shrink-0 text-[10px] text-[#444748]">{item.time}</span>
+                <p className="truncate text-sm font-semibold text-black">{name}</p>
+                <span className="shrink-0 text-[10px] text-[#444748]">{time ? formatTime(time) : "--"}</span>
               </div>
-              <p className="text-xs text-[#444748]">{item.detail}</p>
-              {!item.muted ? <p className="mt-2 flex items-center gap-1 text-[10px] font-bold uppercase text-[#10b981]"><span className="h-2 w-2 rounded-full bg-[#10b981]" />Verified</p> : null}
+              <p className="text-xs text-[#444748]">{item.checkOutTime ? "Đã check-out" : "Đã check-in"} - {toAttendanceLabel(item.attendanceStatus)}</p>
+              <p className="mt-2 flex items-center gap-1 text-[10px] font-bold uppercase text-[#10b981]"><span className="h-2 w-2 rounded-full bg-[#10b981]" />Verified</p>
             </div>
           </div>
         </div>
-      ))}
+      );})}
     </div>
     <div className="border-t border-[#e5e7eb] p-4">
       <Link className="flex h-10 w-full items-center justify-center rounded-lg border border-[#e5e7eb] text-sm font-semibold hover:bg-[#f7f3f2]" to="/dashboard/attendance/history">Xem toàn bộ lịch sử</Link>
     </div>
   </aside>
-);
+  );
+};
 
 const HistoryEntry = ({ entry }: { entry: AttendanceRecord }) => (
   <article className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4 transition hover:bg-[#f1edec]">

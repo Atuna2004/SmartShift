@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
-export type PaymentPurpose = "subscription" | "payroll" | "other";
+export type PaymentPurpose = "subscription" | "registration" | "payroll" | "other";
 export type PaymentProvider = "payos" | "manual";
 export type PaymentMethod = "payos" | "cash" | "bank_transfer";
 export type PaymentStatus =
@@ -17,8 +17,8 @@ export interface IPayment extends Document {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
 
-  organizationId: Types.ObjectId;
-  ownerId: Types.ObjectId;
+  organizationId?: Types.ObjectId;
+  ownerId?: Types.ObjectId;
   branchId?: Types.ObjectId;
   subscriptionId?: Types.ObjectId;
   employeeId?: Types.ObjectId;
@@ -51,6 +51,7 @@ export interface IPayment extends Document {
   cancelledAt?: Date;
   refundedAt?: Date;
   failedAt?: Date;
+  expiresAt?: Date;
   note?: string;
   createdBy?: Types.ObjectId;
   updatedBy?: Types.ObjectId;
@@ -76,7 +77,7 @@ const paymentSchema = new Schema<IPayment>(
   {
     purpose: {
       type: String,
-      enum: ["subscription", "payroll", "other"],
+      enum: ["subscription", "registration", "payroll", "other"],
       required: true,
     },
     provider: {
@@ -97,12 +98,10 @@ const paymentSchema = new Schema<IPayment>(
     organizationId: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
-      required: true,
     },
     ownerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     branchId: { type: Schema.Types.ObjectId, ref: "Branch" },
     subscriptionId: { type: Schema.Types.ObjectId, ref: "Subscription" },
@@ -121,6 +120,7 @@ const paymentSchema = new Schema<IPayment>(
     cancelledAt: { type: Date },
     refundedAt: { type: Date },
     failedAt: { type: Date },
+    expiresAt: { type: Date },
     note: { type: String, trim: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },

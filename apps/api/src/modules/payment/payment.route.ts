@@ -4,8 +4,11 @@ import { validateRequest } from "../../common/middlewares/validateRequest.js";
 import { PaymentController } from "./payment.controller.js";
 import {
   calculatePayrollSchema,
+  completeRegistrationSchema,
+  createRegistrationCheckoutSchema,
   createPayrollPaymentSchema,
   createSubscriptionPaymentSchema,
+  registrationIntentStatusSchema,
   markPaymentPaidSchema,
   paymentIdParamSchema,
   paymentListSchema,
@@ -18,6 +21,21 @@ router.post(
   "/payos/webhook",
   validateRequest(webhookSchema),
   PaymentController.handlePayosWebhook
+);
+router.post(
+  "/registration-checkout",
+  validateRequest(createRegistrationCheckoutSchema),
+  PaymentController.createRegistrationCheckout
+);
+router.get(
+  "/registration-intents/:intentId",
+  validateRequest(registrationIntentStatusSchema),
+  PaymentController.getRegistrationIntent
+);
+router.post(
+  "/registration-intents/:intentId/complete",
+  validateRequest(completeRegistrationSchema),
+  PaymentController.completeRegistration
 );
 
 router.use(auth());

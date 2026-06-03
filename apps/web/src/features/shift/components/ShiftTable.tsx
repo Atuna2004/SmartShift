@@ -13,7 +13,7 @@ export const ShiftTable = ({ data }: ShiftTableProps) => {
           <th className={tableHeaderClass}>Name</th>
           <th className={tableHeaderClass}>Time</th>
           <th className={tableHeaderClass}>Break</th>
-          <th className={tableHeaderClass}>Status</th>
+          <th className={tableHeaderClass}>Trạng thái</th>
         </tr>
       </thead>
       <tbody>

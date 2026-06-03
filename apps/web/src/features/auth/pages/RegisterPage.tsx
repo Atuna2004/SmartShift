@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 import { AuthShell } from "@/features/auth/components/AuthShell";
 import { cn } from "@/shared/utils/cn";
-import { authApi } from "@/features/auth/auth.api";
 import { getApiErrorMessage } from "@/shared/api";
-import { useAuthStore } from "@/store";
+import { paymentApi } from "@/features/payment/payment.api";
 
 const inputClass =
   "h-12 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black";
@@ -28,25 +27,7 @@ const toOrganizationBusinessType = (value: string): "cafe" | "restaurant" | "ret
   return "other";
 };
 
-const toSubscriptionPlan = (value: "basic" | "organization" | "") => {
-  if (value === "organization") {
-    return "pro";
-  }
-
-  return value || "free";
-};
-
-const toMaxEmployees = (value: string) => {
-  if (value === "1-5") return 5;
-  if (value === "6-20") return 20;
-  if (value === "21-50") return 50;
-  if (value === "50+") return 0;
-  return undefined;
-};
-
 export const RegisterPage = () => {
-  const navigate = useNavigate();
-  const setAuth = useAuthStore((state) => state.setAuth);
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -81,11 +62,12 @@ export const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await authApi.registerOwner({
+      const result = await paymentApi.createRegistrationCheckout({
         fullName,
         email,
         password,
         ...(phone ? { phone } : {}),
+        planCode: plan === "organization" ? "pro_99k" : "basic_49k",
         organization: {
           name: branchName,
           businessType: toOrganizationBusinessType(businessType),
@@ -98,19 +80,11 @@ export const RegisterPage = () => {
           ...(branchAddress ? { address: branchAddress } : {}),
           ...(phone ? { phone } : {}),
         },
-        subscription: {
-          plan: toSubscriptionPlan(plan),
-          status: "trialing",
-          startedAt: new Date().toISOString(),
-          maxBranches: plan === "organization" ? 0 : 1,
-          ...(toMaxEmployees(employeeSize) !== undefined
-            ? { maxEmployees: toMaxEmployees(employeeSize) }
-            : {}),
-        },
       });
 
-      setAuth(result);
-      navigate("/dashboard", { replace: true });
+      sessionStorage.setItem("registrationIntentId", result.intentId);
+      sessionStorage.setItem("registrationCompletionToken", result.completionToken);
+      window.location.assign(result.checkoutUrl);
     } catch (err) {
       setError(getApiErrorMessage(err, "Không thể tạo tài khoản. Vui lòng thử lại."));
     } finally {
@@ -241,7 +215,7 @@ export const RegisterPage = () => {
                 features={["Tối đa 10 nhân viên", "Lập lịch tự động cơ bản", "Truy cập ứng dụng di động cho đội ngũ", "Hỗ trợ qua email"]}
                 label="Dành cho cá nhân"
                 name="Gói cơ bản"
-                price="$29"
+                price="49.000đ"
                 selected={plan === "basic"}
                 onClick={() => setPlan("basic")}
               />
@@ -250,7 +224,7 @@ export const RegisterPage = () => {
                 features={["Không giới hạn nhân viên", "Lập lịch thông minh bằng AI", "Bảng phân tích nâng cao", "Hỗ trợ ưu tiên 24/7"]}
                 label="Dành cho đội nhóm"
                 name="Gói tổ chức"
-                price="$89"
+                price="99.000đ"
                 selected={plan === "organization"}
                 onClick={() => setPlan("organization")}
               />
