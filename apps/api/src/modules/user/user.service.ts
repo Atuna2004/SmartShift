@@ -59,7 +59,7 @@ const getOwnerScopeFilter = (owner: IUser) => {
   const filter: Record<string, unknown> = {};
 
   if (owner.organizationId) {
-    filter.organizationId = owner.organizationId;
+    filter.$or = [{ organizationId: owner.organizationId }, { createdBy: owner._id }];
     return filter;
   }
 
@@ -279,12 +279,21 @@ const getEmployeeList = async (actorPayload: AuthTokenPayload, query: EmployeeLi
   }
 
   if (query.search) {
-    filter.$or = [
+    const searchFilter = {
+      $or: [
       { fullName: { $regex: query.search, $options: "i" } },
       { email: { $regex: query.search, $options: "i" } },
       { phone: { $regex: query.search, $options: "i" } },
       { employeeCode: { $regex: query.search, $options: "i" } },
-    ];
+      ],
+    };
+
+    if (filter.$or) {
+      filter.$and = [{ $or: filter.$or }, searchFilter];
+      delete filter.$or;
+    } else {
+      Object.assign(filter, searchFilter);
+    }
   }
 
   const [users, total] = await Promise.all([

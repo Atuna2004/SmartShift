@@ -2,8 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Building2, CreditCard, Save, Settings2, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 import { organizationApi } from "@/features/organization/organization.api";
-import type { OrganizationBusinessType, OrganizationSubscriptionPlan, OrganizationSubscriptionStatus } from "@/features/organization/organization.types";
+import type { OrganizationBusinessType } from "@/features/organization/organization.types";
 import { subscriptionApi } from "@/features/subscription/subscription.api";
 import { getApiErrorMessage } from "@/shared/api";
 import { useAuthStore } from "@/store";
@@ -37,12 +38,6 @@ export const OrganizationPage = () => {
     defaultAllowEarlyCheckInMinutes: 0,
     defaultAllowLateCheckOutMinutes: 0,
   });
-  const [subscriptionInfo, setSubscriptionInfo] = useState({
-    plan: "free" as OrganizationSubscriptionPlan,
-    status: "trialing" as OrganizationSubscriptionStatus,
-    maxBranches: 0,
-    maxEmployees: 0,
-  });
 
   useEffect(() => {
     if (!organization) return;
@@ -56,12 +51,6 @@ export const OrganizationPage = () => {
       logo: organization.logo ?? "",
     });
     setSettings(organization.settings);
-    setSubscriptionInfo({
-      plan: organization.subscription.plan,
-      status: organization.subscription.status,
-      maxBranches: organization.subscription.maxBranches ?? 0,
-      maxEmployees: organization.subscription.maxEmployees ?? 0,
-    });
   }, [organization]);
 
   const invalidate = () => {
@@ -85,17 +74,14 @@ export const OrganizationPage = () => {
     mutationFn: () => organizationApi.updateSettings(settings, organizationId),
     onSuccess: invalidate,
   });
-  const subscriptionMutation = useMutation({
-    mutationFn: () => organizationApi.updateSubscriptionInfo(subscriptionInfo, organizationId),
-    onSuccess: invalidate,
-  });
-  const error = organizationQuery.error ?? subscriptionQuery.error ?? profileMutation.error ?? settingsMutation.error ?? subscriptionMutation.error;
+  const error = organizationQuery.error ?? subscriptionQuery.error ?? profileMutation.error ?? settingsMutation.error;
+  const subscription = subscriptionQuery.data;
 
   return (
     <main className="space-y-6 p-4 md:p-6">
       <header>
         <h1 className="text-4xl font-semibold tracking-tight">Thông tin doanh nghiệp</h1>
-        <p className="text-sm text-[#444748]">Cập nhật hồ sơ, cài đặt vận hành và metadata gói đăng ký.</p>
+        <p className="text-sm text-[#444748]">Cập nhật hồ sơ, cài đặt vận hành và xem thông tin gói hiện tại.</p>
       </header>
       {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(error, "Không thể lưu thông tin doanh nghiệp.")}</p> : null}
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -130,16 +116,24 @@ export const OrganizationPage = () => {
           <SubmitButton loading={settingsMutation.isPending} />
         </form>
       </div>
-      <form className="rounded-xl border border-[#e5e7eb] bg-white p-6" onSubmit={(event) => submit(event, subscriptionMutation.mutate)}>
-        <SectionTitle icon={<CreditCard />} title="Metadata gói đăng ký" />
-        <div className="grid gap-4 md:grid-cols-4">
-          <SelectField label="Gói" onChange={(value) => setSubscriptionInfo((current) => ({ ...current, plan: value as OrganizationSubscriptionPlan }))} options={["free", "basic", "pro"]} value={subscriptionInfo.plan} />
-          <SelectField label="Trạng thái" onChange={(value) => setSubscriptionInfo((current) => ({ ...current, status: value as OrganizationSubscriptionStatus }))} options={["trialing", "active", "past_due", "cancelled"]} value={subscriptionInfo.status} />
-          <NumberField label="Số chi nhánh tối đa" onChange={(value) => setSubscriptionInfo((current) => ({ ...current, maxBranches: value }))} value={subscriptionInfo.maxBranches} />
-          <NumberField label="Số nhân viên tối đa" onChange={(value) => setSubscriptionInfo((current) => ({ ...current, maxEmployees: value }))} value={subscriptionInfo.maxEmployees} />
+      <section className="rounded-xl border border-[#e5e7eb] bg-white p-6">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+          <SectionTitle icon={<CreditCard />} title="Gói đăng ký" />
+          <Link className="inline-flex h-10 items-center justify-center rounded-lg bg-black px-4 text-sm font-semibold text-white" to="/dashboard/subscription">
+            Quản lý gói
+          </Link>
         </div>
-        <SubmitButton loading={subscriptionMutation.isPending} />
-      </form>
+        <div className="grid gap-4 md:grid-cols-4">
+          <ReadOnlyField label="Gói hiện tại" value={subscription?.planName ?? organization?.subscription.plan ?? "--"} />
+          <ReadOnlyField label="Trạng thái" value={subscription?.status ?? organization?.subscription.status ?? "--"} />
+          <ReadOnlyField label="Chi nhánh tối đa" value={String(subscription?.limits.maxBranches ?? organization?.subscription.maxBranches ?? "--")} />
+          <ReadOnlyField label="Nhân viên tối đa" value={String(subscription?.limits.maxEmployees ?? organization?.subscription.maxEmployees ?? "--")} />
+          <ReadOnlyField label="Ngày bắt đầu" value={formatDate(subscription?.startDate ?? organization?.subscription.startedAt)} />
+          <ReadOnlyField label="Ngày hết hạn" value={formatDate(subscription?.endDate ?? organization?.subscription.expiredAt)} />
+          <ReadOnlyField label="Giá tháng" value={subscription ? formatCurrency(subscription.priceMonthly, subscription.currency) : "--"} />
+          <ReadOnlyField label="Tự động gia hạn" value={subscription?.autoRenew ? "Bật" : "Tắt"} />
+        </div>
+      </section>
     </main>
   );
 };
@@ -155,3 +149,6 @@ const NumberField = ({ label, onChange, value }: { label: string; onChange: (val
 const SelectField = ({ label, onChange, options, value }: { label: string; onChange: (value: string) => void; options: string[]; value: string }) => <label className="block space-y-1"><span className="text-sm font-semibold">{label}</span><select className="h-11 w-full rounded-lg border border-[#e5e7eb] px-3 outline-none focus:ring-1 focus:ring-black" onChange={(event) => onChange(event.target.value)} value={value}>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
 const SubmitButton = ({ loading }: { loading: boolean }) => <button className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-black px-5 text-sm font-semibold text-white disabled:opacity-60" disabled={loading} type="submit"><Save className="h-4 w-4" />{loading ? "Đang lưu..." : "Lưu thay đổi"}</button>;
 const Metric = ({ icon, label, value }: { icon: ReactNode; label: string; value: string }) => <div className="rounded-xl border border-[#e5e7eb] bg-white p-5"><div className="mb-3 text-[#444748]">{icon}</div><p className="text-xs font-bold uppercase text-[#444748]">{label}</p><p className="text-2xl font-semibold">{value}</p></div>;
+const ReadOnlyField = ({ label, value }: { label: string; value: string }) => <div className="rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] px-4 py-3"><p className="text-xs font-bold uppercase text-[#444748]">{label}</p><p className="mt-1 text-sm font-semibold text-black">{value}</p></div>;
+const formatDate = (value?: string) => value ? new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(new Date(value)) : "--";
+const formatCurrency = (value: number, currency: "VND" | "USD") => new Intl.NumberFormat("vi-VN", { currency, maximumFractionDigits: currency === "VND" ? 0 : 2, style: "currency" }).format(value);

@@ -42,7 +42,7 @@ const systemItems = [
   { label: "Tổ chức", path: "/dashboard/organization", icon: Building2 },
   { label: "Thông báo", path: "/dashboard/notifications", icon: Bell },
   { label: "Gói đăng ký", path: "/dashboard/subscription", icon: CreditCard },
-  { label: "Cài đặt", path: "/dashboard/payments", icon: Settings },
+  { label: "Thanh toán", path: "/dashboard/payments", icon: Settings },
 ];
 
 export const DashboardLayout = () => {
@@ -50,6 +50,10 @@ export const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const visibleSystemItems =
+    user?.role === "manager"
+      ? systemItems.filter((item) => !["/dashboard/organization", "/dashboard/subscription", "/dashboard/payments"].includes(item.path))
+      : systemItems;
   const roleLabel = user?.role === "manager" ? "Quản lý chi nhánh" : user?.role === "owner" ? "Chủ sở hữu" : user?.role ?? "Quản trị";
   const displayName = user?.fullName ?? (user?.role === "manager" ? "Marcus Chen" : "Alex Sterling");
   const branchName = user?.role === "manager" ? "Chi nhánh phía Bắc" : "Chi nhánh trung tâm";
@@ -111,7 +115,7 @@ export const DashboardLayout = () => {
             <SidebarLink end={item.path === "/dashboard"} item={item} key={`${item.path}-${index}`} />
           ))}
           <div className="mt-4 border-t border-[#e5e7eb] pt-4">
-            {systemItems.map((item) => (
+            {visibleSystemItems.map((item) => (
               <SidebarLink item={item} key={item.path} />
             ))}
           </div>

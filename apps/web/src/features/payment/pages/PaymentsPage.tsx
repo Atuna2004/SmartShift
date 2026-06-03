@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { BadgeDollarSign, CheckCircle2, CreditCard, RotateCcw, Search, XCircle } from "lucide-react";
+import { BadgeDollarSign, CheckCircle2, CreditCard, Search, XCircle } from "lucide-react";
 import { employeeApi } from "@/features/employeeBranch/employee.api";
 import { paymentApi } from "@/features/payment/payment.api";
 import type { Payment, PaymentPurpose, PaymentStatus } from "@/features/payment/payment.types";
@@ -39,11 +39,7 @@ export const PaymentsPage = () => {
     mutationFn: (paymentId: string) => paymentApi.cancel(paymentId),
     onSuccess: invalidatePayments,
   });
-  const refundMutation = useMutation({
-    mutationFn: (paymentId: string) => paymentApi.refund(paymentId),
-    onSuccess: invalidatePayments,
-  });
-  const error = paymentsQuery.error ?? employeesQuery.error ?? markPaidMutation.error ?? cancelMutation.error ?? refundMutation.error;
+  const error = paymentsQuery.error ?? employeesQuery.error ?? markPaidMutation.error ?? cancelMutation.error;
   const payments = paymentsQuery.data?.data ?? [];
   const totals = useMemo(() => ({
     paid: payments.filter((payment) => payment.paymentStatus === "paid").reduce((sum, payment) => sum + payment.amount, 0),
@@ -94,7 +90,7 @@ export const PaymentsPage = () => {
           </div>
         </section>
         <aside className="space-y-6">
-          <PaymentDetailCard canceling={cancelMutation.isPending} marking={markPaidMutation.isPending} onCancel={() => selectedPayment && cancelMutation.mutate(selectedPayment.id)} onMarkPaid={() => selectedPayment && markPaidMutation.mutate(selectedPayment.id)} onRefund={() => selectedPayment && refundMutation.mutate(selectedPayment.id)} payment={selectedPayment} refunding={refundMutation.isPending} />
+          <PaymentDetailCard canceling={cancelMutation.isPending} marking={markPaidMutation.isPending} onCancel={() => selectedPayment && cancelMutation.mutate(selectedPayment.id)} onMarkPaid={() => selectedPayment && markPaidMutation.mutate(selectedPayment.id)} payment={selectedPayment} />
           <PayrollPaymentForm employees={employeesQuery.data?.data ?? []} organizationId={organizationId} />
         </aside>
       </div>
@@ -141,10 +137,45 @@ const PayrollPaymentForm = ({ employees, organizationId }: { employees: Array<{ 
   );
 };
 
-const PaymentDetailCard = ({ canceling, marking, onCancel, onMarkPaid, onRefund, payment, refunding }: { canceling: boolean; marking: boolean; onCancel: () => void; onMarkPaid: () => void; onRefund: () => void; payment?: Payment; refunding: boolean }) => (
+const PaymentDetailCard = ({ canceling, marking, onCancel, onMarkPaid, payment }: { canceling: boolean; marking: boolean; onCancel: () => void; onMarkPaid: () => void; payment?: Payment }) => (
   <section className="rounded-xl border border-[#e5e7eb] bg-white p-5">
     <h2 className="mb-4 text-xl font-semibold">Chi tiết giao dịch</h2>
-    {!payment ? <p className="text-sm font-semibold text-[#444748]">Chọn một giao dịch.</p> : <div className="space-y-3 text-sm"><Line label="Mã" value={`SSPAY-${payment.orderCode}`} /><Line label="Nhà cung cấp" value={toPaymentProviderLabel(payment.provider)} /><Line label="Phương thức" value={toPaymentMethodLabel(payment.paymentMethod)} /><Line label="Mã giao dịch" value={payment.transactionCode ?? "--"} /><Line label="Ghi chú" value={payment.note ?? "--"} />{payment.purpose === "subscription" ? <p className="rounded-lg bg-[#f5f5f5] px-3 py-2 text-xs font-semibold text-[#444748]">Không hoàn tiền trực tiếp cho thanh toán gói đăng ký. Vui lòng xử lý theo quy trình hủy hoặc điều chỉnh gói.</p> : null}<div className="grid grid-cols-1 gap-2 pt-2"><button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-black text-sm font-semibold text-white disabled:opacity-50" disabled={payment.paymentStatus === "paid" || marking} onClick={onMarkPaid} type="button"><CheckCircle2 className="h-4 w-4" />Đánh dấu đã thanh toán</button><button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] text-sm font-semibold disabled:opacity-50" disabled={payment.paymentStatus !== "pending" || canceling} onClick={onCancel} type="button"><XCircle className="h-4 w-4" />Hủy giao dịch</button><button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] text-sm font-semibold disabled:opacity-50" disabled={payment.paymentStatus !== "paid" || payment.purpose === "subscription" || refunding} onClick={onRefund} type="button"><RotateCcw className="h-4 w-4" />Hoàn tiền</button></div></div>}
+    {!payment ? (
+      <p className="text-sm font-semibold text-[#444748]">Chọn một giao dịch.</p>
+    ) : (
+      <div className="space-y-3 text-sm">
+        <Line label="Mã" value={`SSPAY-${payment.orderCode}`} />
+        <Line label="Nhà cung cấp" value={toPaymentProviderLabel(payment.provider)} />
+        <Line label="Phương thức" value={toPaymentMethodLabel(payment.paymentMethod)} />
+        <Line label="Mã giao dịch" value={payment.transactionCode ?? "--"} />
+        <Line label="Ghi chú" value={payment.note ?? "--"} />
+        {payment.purpose === "subscription" ? (
+          <p className="rounded-lg bg-[#f5f5f5] px-3 py-2 text-xs font-semibold text-[#444748]">
+            Thanh toán gói đăng ký được đối soát qua PayOS hoặc bộ phận admin. Chủ sở hữu không tự đánh dấu đã thanh toán hay hoàn tiền gói.
+          </p>
+        ) : null}
+        <div className="grid grid-cols-1 gap-2 pt-2">
+          <button
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-black text-sm font-semibold text-white disabled:opacity-50"
+            disabled={payment.paymentStatus === "paid" || payment.purpose === "subscription" || marking}
+            onClick={onMarkPaid}
+            type="button"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Đánh dấu đã thanh toán
+          </button>
+          <button
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] text-sm font-semibold disabled:opacity-50"
+            disabled={payment.paymentStatus !== "pending" || canceling}
+            onClick={onCancel}
+            type="button"
+          >
+            <XCircle className="h-4 w-4" />
+            Hủy giao dịch
+          </button>
+        </div>
+      </div>
+    )}
   </section>
 );
 
