@@ -10,8 +10,8 @@ export const api = {
     const response = await apiClient.post<ApiResponse<T>>(url, payload);
     return response.data.data;
   },
-  patch: async <T>(url: string, payload?: unknown) => {
-    const response = await apiClient.patch<ApiResponse<T>>(url, payload);
+  patch: async <T>(url: string, payload?: unknown, params?: Record<string, unknown>) => {
+    const response = await apiClient.patch<ApiResponse<T>>(url, payload, params ? { params } : undefined);
     return response.data.data;
   },
   delete: async <T>(url: string) => {

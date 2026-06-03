@@ -3,6 +3,7 @@ import { AppError } from "../../common/errors/AppError.js";
 import type { AuthTokenPayload } from "../../common/utils/jwt.js";
 import { hashPassword } from "../../common/utils/hash.js";
 import { BranchModel } from "../branch/branch.model.js";
+import { SubscriptionService } from "../subscription/subscription.service.js";
 import { UserModel } from "./user.model.js";
 import type { IUser, UserRole } from "./user.model.js";
 import type {
@@ -192,6 +193,10 @@ const createEmployee = async (actorPayload: AuthTokenPayload, payload: CreateEmp
     actor.role === "admin"
       ? asObjectId(payload.organizationId as string)
       : actor.organizationId ?? (payload.organizationId ? asObjectId(payload.organizationId) : undefined);
+
+  if (organizationId && ["manager", "staff"].includes(payload.role)) {
+    await SubscriptionService.assertCanCreateEmployee(organizationId, payload.role);
+  }
 
   const user = await UserModel.create({
     fullName: payload.fullName,

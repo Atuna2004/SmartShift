@@ -40,3 +40,17 @@ export type Organization = {
 };
 
 export type OrganizationResponse = Organization;
+
+export type UpdateOrganizationProfileRequest = {
+  name?: string;
+  slug?: string;
+  businessType?: OrganizationBusinessType;
+  phone?: string;
+  email?: string;
+  address?: string;
+  logo?: string;
+};
+
+export type UpdateOrganizationSettingsRequest = Partial<Organization["settings"]>;
+
+export type UpdateOrganizationSubscriptionRequest = Partial<OrganizationSubscriptionInfo>;

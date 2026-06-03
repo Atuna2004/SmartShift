@@ -34,6 +34,12 @@ import { AboutContactPage } from "@/features/home/pages/AboutContactPage";
 import { FeaturesPage } from "@/features/home/pages/FeaturesPage";
 import { HomePage } from "@/features/home/pages/HomePage";
 import { PricingPage } from "@/features/home/pages/PricingPage";
+import { OrganizationPage } from "@/features/organization/pages/OrganizationPage";
+import { PaymentsPage } from "@/features/payment/pages/PaymentsPage";
+import {
+  RegistrationPaymentCancelPage,
+  RegistrationPaymentSuccessPage,
+} from "@/features/payment/pages/RegistrationPaymentPages";
 import {
   CreateShiftSwapPage,
   LeaveRequestsPage,
@@ -66,7 +72,6 @@ import {
   StaffShiftDetailPage,
   StaffShiftSwapsPage,
 } from "@/features/staffMobile/pages/StaffMobilePages";
-import { PlaceholderPage } from "@/shared/components/PlaceholderPage";
 
 export const router = createBrowserRouter([
   {
@@ -110,6 +115,14 @@ export const router = createBrowserRouter([
       {
         path: "/reset-password",
         element: <ResetPasswordPage />,
+      },
+      {
+        path: "/payment/success",
+        element: <RegistrationPaymentSuccessPage />,
+      },
+      {
+        path: "/payment/cancel",
+        element: <RegistrationPaymentCancelPage />,
       },
       {
         path: "/staff",
@@ -282,12 +295,7 @@ export const router = createBrowserRouter([
           { index: true, element: <DashboardPage /> },
           {
             path: "organization",
-            element: (
-              <PlaceholderPage
-                description="Manage organization profile, settings, and subscription metadata."
-                title="Organization"
-              />
-            ),
+            element: <OrganizationPage />,
           },
           {
             path: "branches",
@@ -389,12 +397,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "payments",
-            element: (
-              <PlaceholderPage
-                description="Handle subscription checkout, PayOS status, payroll, and refunds."
-                title="Payments"
-              />
-            ),
+            element: <PaymentsPage />,
           },
           {
             path: "payments/success",

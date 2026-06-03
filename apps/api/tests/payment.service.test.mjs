@@ -32,6 +32,10 @@ afterEach(() => {
     target[key] = value;
   }
   delete process.env.PAYOS_CHECKSUM_KEY;
+  delete process.env.VIETQR_BANK_BIN;
+  delete process.env.VIETQR_ACCOUNT_NO;
+  delete process.env.VIETQR_ACCOUNT_NAME;
+  delete process.env.VIETQR_TEMPLATE;
 });
 
 const actorPayload = (user) => ({
@@ -163,6 +167,9 @@ const signPayosData = (data, checksumKey) => {
 };
 
 test("Create Subscription Payment: creates pending subscription and payment", async () => {
+  process.env.VIETQR_BANK_BIN = "970405";
+  process.env.VIETQR_ACCOUNT_NO = "5104205120465";
+  process.env.VIETQR_ACCOUNT_NAME = "SMARTSHIFT";
   const owner = createUserDoc();
   const organization = createOrganizationDoc();
   const plan = createPlanDoc();
@@ -192,8 +199,11 @@ test("Create Subscription Payment: creates pending subscription and payment", as
   assert.equal(result.subscriptionId, subscriptionId.toString());
   assert.equal(result.payment.amount, 398000);
   assert.equal(result.payment.paymentStatus, "pending");
+  assert.equal(result.bankTransfer.transferContent, `SSPAY-${result.payment.orderCode}`);
+  assert.match(result.bankTransfer.qrImageUrl, /img\.vietqr\.io\/image\/970405-5104205120465-compact2\.png/);
   assert.equal(createdSubscriptionPayload.status, "pending");
   assert.equal(createdPaymentPayload.subscriptionId.toString(), subscriptionId.toString());
+  assert.deepEqual(createdSubscriptionPayload.status, "pending");
 });
 
 test("Mark Payment Paid: activates pending subscription", async () => {
@@ -206,6 +216,7 @@ test("Mark Payment Paid: activates pending subscription", async () => {
   stub(OrganizationModel, "findById", async () => organization);
   stub(PaymentModel, "findById", async () => payment);
   stub(SubscriptionModel, "findById", async () => subscription);
+  stub(SubscriptionModel, "updateMany", async () => ({ modifiedCount: 1 }));
 
   const result = await PaymentService.markPaymentPaid(
     actorPayload(owner),
@@ -316,6 +327,7 @@ test("PayOS Webhook: verifies signature and marks payment paid", async () => {
 
   stub(PaymentModel, "findOne", async () => payment);
   stub(SubscriptionModel, "findById", async () => subscription);
+  stub(SubscriptionModel, "updateMany", async () => ({ modifiedCount: 1 }));
   stub(OrganizationModel, "findById", async () => createOrganizationDoc());
 
   const result = await PaymentService.handlePayosWebhook({

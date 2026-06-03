@@ -26,6 +26,8 @@ import { branchApi } from "@/features/employeeBranch/branch.api";
 import { employeeApi } from "@/features/employeeBranch/employee.api";
 import { leaveRequestApi } from "@/features/requests/leaveRequest.api";
 import type { LeaveRequest, LeaveRequestStatus } from "@/features/requests/leaveRequest.types";
+import { notificationApi } from "@/features/notification/notification.api";
+import type { Notification, NotificationListQuery, NotificationType } from "@/features/notification/notification.types";
 import { scheduleApi } from "@/features/shift/schedule.api";
 import type { AssignedShift } from "@/features/shift/schedule.types";
 import { shiftSwapApi } from "@/features/requests/shiftSwap.api";
@@ -35,20 +37,6 @@ import { useAuthStore } from "@/store";
 
 type ShiftSwapAction = "accept" | "rejectReceiver" | "approve" | "rejectManager" | "cancel";
 type StaffShiftSwapView = "needs_response" | "pending_manager" | "my_requests" | "history";
-
-const swapRequests = [
-  { from: "Sarah Chen", to: "Marcus Wright", id: "#SW-9021", shift: "Oct 24, 08:00 - 16:00", proposed: "Oct 25, 12:00 - 20:00", role: "Senior Barista", status: "Chờ phê duyệt", reason: "Family emergency requires me to travel out of town for the weekend." },
-  { from: "Liam Johnson", to: "Elena Rodriguez", id: "#SW-8944", shift: "Oct 25, 14:00 - 22:00", proposed: "Oct 26, 08:00 - 16:00", role: "Shift Manager", status: "Đã duyệt", reason: "Scheduling conflict with university exam. Elena has agreed to cover." },
-  { from: "Maya Patel", to: "David Wilson", id: "#SW-8812", shift: "Oct 26, 06:00 - 14:00", proposed: "Oct 27, 10:00 - 18:00", role: "Kitchen Staff", status: "Từ chối", reason: "Personal appointment that cannot be rescheduled.", note: "David is already reaching maximum overtime for this pay period." },
-  { from: "Tom Harris", to: "Sarah Chen", id: "#SW-9105", shift: "Oct 28, 16:00 - 00:00", proposed: "Oct 30, 08:00 - 16:00", role: "Floor Staff", status: "Chờ phê duyệt", reason: "Swapping for Sarah's morning shift on Monday to balance my schedule." },
-];
-
-const notifications = [
-  { title: "Shift Swap Request", detail: "Sarah Jenkins requested to swap her Morning Barista shift on Dec 14 with Michael Chen's Closing Barista shift on Dec 15.", time: "2h ago", type: "request", unread: true },
-  { title: "Incomplete Schedule Warning", detail: "The North Side branch schedule for next week is currently missing 3 required Floor Lead positions.", time: "5h ago", type: "alert", unread: true },
-  { title: "Leave Request Đã duyệt", detail: "James Wilson's request for Personal Time (Dec 20 - Dec 22) has been automatically approved based on company policy.", time: "Yesterday", type: "request", unread: false },
-  { title: "Monthly Payroll Report Ready", detail: "The payroll summary for November 2023 has been generated and is ready for review in the Reports section.", time: "2 days ago", type: "report", unread: false },
-];
 
 export const ShiftSwapPage = () => {
   const queryClient = useQueryClient();
@@ -180,7 +168,7 @@ export const ShiftSwapPage = () => {
         />
         {user?.role === "staff" ? (
           <section className="flex flex-wrap gap-2 rounded-xl border border-[#e5e7eb] bg-white p-2">
-            <StaffSwapTab active={staffView === "needs_response"} count={staffCounts.needsResponse} label="Needs My Response" onClick={() => setStaffView("needs_response")} />
+            <StaffSwapTab active={staffView === "needs_response"} count={staffCounts.needsResponse} label="Cần tôi phản hồi" onClick={() => setStaffView("needs_response")} />
             <StaffSwapTab active={staffView === "pending_manager"} count={staffCounts.pendingManager} label="Chờ quản lý" onClick={() => setStaffView("pending_manager")} />
             <StaffSwapTab active={staffView === "my_requests"} count={staffCounts.myRequests} label="Yêu cầu của tôi" onClick={() => setStaffView("my_requests")} />
             <StaffSwapTab active={staffView === "history"} count={staffCounts.history} label="Lịch sử" onClick={() => setStaffView("history")} />
@@ -537,40 +525,63 @@ export const LeaveRequestsPage = () => {
 };
 
 export const NotificationsPage = () => {
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<"all" | "unread" | "requests" | "alerts">("all");
-  const visible = notifications.filter((item) => tab === "all" || (tab === "unread" ? item.unread : tab === "requests" ? item.type === "request" : item.type === "alert"));
+  const query = useMemo<NotificationListQuery>(() => ({
+    page: 1,
+    limit: 50,
+    ...(tab === "unread" ? { isRead: false } : {}),
+    ...(tab === "requests" ? { type: "shift_swap_requested" as NotificationType } : {}),
+    ...(tab === "alerts" ? { type: "attendance_warning" as NotificationType } : {}),
+  }), [tab]);
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications", query],
+    queryFn: () => notificationApi.list(query),
+  });
+  const markAllMutation = useMutation({
+    mutationFn: () => notificationApi.markAllAsRead(),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+  const markReadMutation = useMutation({
+    mutationFn: (notificationId: string) => notificationApi.markAsRead(notificationId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+  const visible = notificationsQuery.data?.data ?? [];
 
   return (
-    <RequestShell title="Thông báo" search="Search notifications...">
+    <RequestShell title="Thông báo" search="Tìm thông báo...">
       <main className="mx-auto max-w-5xl p-4 md:p-6">
-        <PageTitle title="Thông báo" description="Manage and review all your enterprise alerts and staff requests." action={<button className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold hover:bg-[#f7f3f2]">Đánh dấu tất cả đã đọc</button>} />
+        <PageTitle title="Thông báo" description="Quản lý cảnh báo hệ thống, đổi ca, nghỉ phép và nhắc chấm công." action={<button className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold hover:bg-[#f7f3f2] disabled:opacity-50" disabled={markAllMutation.isPending} onClick={() => markAllMutation.mutate()} type="button">Đánh dấu tất cả đã đọc</button>} />
+        {(notificationsQuery.error || markAllMutation.error || markReadMutation.error) ? <p className="mb-4 rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(notificationsQuery.error ?? markAllMutation.error ?? markReadMutation.error, "Không thể tải thông báo.")}</p> : null}
         <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-sm">
           <div className="flex overflow-x-auto border-b border-[#e5e7eb] bg-[#f7f3f2] px-4">
             {[
-              ["all", "All"],
-              ["unread", "Unread"],
-              ["requests", "Requests"],
-              ["alerts", "System Alerts"],
+              ["all", "Tất cả"],
+              ["unread", `Chưa đọc${notificationsQuery.data ? ` (${notificationsQuery.data.meta.unreadCount})` : ""}`],
+              ["requests", "Yêu cầu"],
+              ["alerts", "Cảnh báo"],
             ].map(([value, label]) => (
               <button className={tab === value ? "border-b-2 border-black px-6 py-4 text-sm font-semibold text-black" : "border-b-2 border-transparent px-6 py-4 text-sm font-semibold text-[#444748] hover:text-black"} key={value} onClick={() => setTab(value as typeof tab)}>
                 {label}
               </button>
             ))}
           </div>
-          {visible.length === 0 ? (
+          {notificationsQuery.isLoading ? (
+            <div className="p-8 text-sm font-semibold text-[#444748]">Đang tải thông báo...</div>
+          ) : visible.length === 0 ? (
             <div className="flex min-h-[520px] flex-col items-center justify-center p-12 text-center">
               <div className="mb-8 flex h-48 w-48 items-center justify-center rounded-full border border-[#e5e7eb] bg-[#f1edec]"><Bell className="h-16 w-16 text-black/20" /></div>
               <h2 className="mb-2 text-2xl font-semibold tracking-tight text-black">Không còn gì mới!</h2>
               <p className="max-w-md text-base text-[#444748]">You have no unread notifications at the moment. Check back later for shift updates or system alerts.</p>
-              <button className="mt-6 rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white" onClick={() => setTab("all")}>View All Thông báo</button>
+              <button className="mt-6 rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white" onClick={() => setTab("all")}>Xem tất cả thông báo</button>
             </div>
           ) : (
             <div className="divide-y divide-[#e5e7eb]">
-              {visible.map((item) => <NotificationItem item={item} key={item.title} />)}
+              {visible.map((item) => <NotificationItem item={item} key={item.id} onRead={() => markReadMutation.mutate(item.id)} pending={markReadMutation.isPending} />)}
             </div>
           )}
         </section>
-        <p className="mt-8 text-center text-xs text-[#444748]">Need help managing notifications? <span className="font-semibold text-[#0058be]">Visit Support Center</span></p>
+        <p className="mt-8 text-center text-xs text-[#444748]">Cần hỗ trợ quản lý thông báo? <span className="font-semibold text-[#0058be]">Trung tâm hỗ trợ</span></p>
       </main>
     </RequestShell>
   );
@@ -859,23 +870,25 @@ const LeaveRow = ({
   </tr>
 );
 
-const NotificationItem = ({ item }: { item: (typeof notifications)[number] }) => {
-  const icon = item.type === "request" ? <Repeat /> : item.type === "alert" ? <AlertTriangle /> : <BarChart3 />;
-  const tone = item.type === "request" ? "bg-[#0058be]/10 text-[#0058be]" : item.type === "alert" ? "bg-[#ef4444]/10 text-[#ef4444]" : "bg-[#f1edec] text-black";
+const NotificationItem = ({ item, onRead, pending }: { item: Notification; onRead: () => void; pending: boolean }) => {
+  const isRequest = item.type.includes("requested") || item.type.includes("leave_");
+  const isAlert = item.type === "attendance_warning" || item.type === "system";
+  const icon = isRequest ? <Repeat /> : isAlert ? <AlertTriangle /> : <BarChart3 />;
+  const tone = isRequest ? "bg-[#0058be]/10 text-[#0058be]" : isAlert ? "bg-[#ef4444]/10 text-[#ef4444]" : "bg-[#f1edec] text-black";
 
   return (
     <div className="relative flex items-start gap-4 p-6 transition hover:bg-[#f7f3f2]">
-      {item.unread ? <span className="absolute left-2 top-1/2 h-8 w-1 -translate-y-1/2 rounded-full bg-[#0058be]" /> : null}
+      {!item.isRead ? <span className="absolute left-2 top-1/2 h-8 w-1 -translate-y-1/2 rounded-full bg-[#0058be]" /> : null}
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg [&>svg]:h-5 [&>svg]:w-5 ${tone}`}>{icon}</div>
       <div className="flex-1">
         <div className="mb-1 flex items-start justify-between gap-4">
           <h3 className="text-sm font-bold text-black">{item.title}</h3>
-          <span className="shrink-0 text-xs text-[#444748]">{item.time}</span>
+          <span className="shrink-0 text-xs text-[#444748]">{formatDateTime(item.createdAt)}</span>
         </div>
-        <p className="mb-4 text-base text-[#444748]">{item.detail}</p>
-        {item.type === "request" && item.unread ? <div className="flex gap-2"><button className="rounded-lg bg-black px-4 py-1.5 text-sm font-semibold text-white">Approve</button><button className="rounded-lg border border-[#e5e7eb] px-4 py-1.5 text-sm font-semibold hover:bg-white">Decline</button></div> : null}
+        <p className="mb-4 text-base text-[#444748]">{item.message}</p>
+        {!item.isRead ? <button className="rounded-lg border border-[#e5e7eb] px-4 py-1.5 text-sm font-semibold hover:bg-white disabled:opacity-50" disabled={pending} onClick={onRead} type="button">Đánh dấu đã đọc</button> : null}
       </div>
-      {item.unread ? <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#0058be]" /> : null}
+      {!item.isRead ? <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#0058be]" /> : null}
     </div>
   );
 };
@@ -964,20 +977,20 @@ const ShiftSwapModal = () => {
           <Link className="text-[#444748] hover:text-black" to="/dashboard/shift-swaps"><X className="h-5 w-5" /></Link>
         </div>
         <div className="space-y-6 p-6">
-          {user?.role !== "staff" ? <p className="rounded-lg bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">Only staff accounts can create shift swap requests.</p> : null}
-          {createMutation.isSuccess ? <p className="rounded-lg bg-[#10b981]/10 p-3 text-sm font-semibold text-[#10b981]">Shift swap request sent.</p> : null}
-          {createMutation.isError ? <p className="rounded-lg bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(createMutation.error, "Unable to create shift swap.")}</p> : null}
+          {user?.role !== "staff" ? <p className="rounded-lg bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">Chỉ tài khoản nhân viên mới có thể tạo yêu cầu đổi ca.</p> : null}
+          {createMutation.isSuccess ? <p className="rounded-lg bg-[#10b981]/10 p-3 text-sm font-semibold text-[#10b981]">Đã gửi yêu cầu đổi ca.</p> : null}
+          {createMutation.isError ? <p className="rounded-lg bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(createMutation.error, "Không thể tạo yêu cầu đổi ca.")}</p> : null}
           <label className="block space-y-1">
             <span className="text-sm font-semibold text-black">Chọn ca của bạn</span>
             <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none focus:ring-1 focus:ring-black" onChange={(event) => { setFromScheduleId(event.target.value); setToEmployeeId(""); setToScheduleId(""); setSwapMode("cover"); }} value={fromScheduleId}>
-              <option value="">Choose an upcoming shift...</option>
+              <option value="">Chọn ca sắp tới...</option>
               {futureMySchedules.map((schedule) => <option key={schedule.id} value={schedule.id}>{formatShift(schedule.workDate, schedule.shiftStartTime, schedule.shiftEndTime)}</option>)}
             </select>
           </label>
           <label className="block space-y-1">
             <span className="text-sm font-semibold text-black">Chọn đồng nghiệp</span>
             <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none focus:ring-1 focus:ring-black" disabled={!selectedSchedule} onChange={(event) => { setToEmployeeId(event.target.value); setToScheduleId(""); setSwapMode("cover"); }} value={toEmployeeId}>
-              <option value="">Choose a colleague...</option>
+              <option value="">Chọn đồng nghiệp...</option>
               {colleagues.map((employee) => <option key={employee.id} value={employee.id}>{employee.fullName}</option>)}
             </select>
           </label>
@@ -994,7 +1007,7 @@ const ShiftSwapModal = () => {
                 type="button"
               >
                 Chỉ phủ ca
-                <span className="mt-1 block text-xs font-normal text-[#747878]">{coverHasOverlap ? "Unavailable because this colleague has an overlapping shift." : "The colleague receives your selected shift."}</span>
+                <span className="mt-1 block text-xs font-normal text-[#747878]">{coverHasOverlap ? "Không khả dụng vì đồng nghiệp này có ca bị trùng giờ." : "Đồng nghiệp sẽ nhận ca bạn đã chọn."}</span>
               </button>
               <button
                 className={swapMode === "swap" ? "rounded-lg border border-black bg-white px-3 py-3 text-left text-sm font-semibold text-black shadow-sm" : "rounded-lg border border-[#e5e7eb] bg-white px-3 py-3 text-left text-sm font-semibold text-[#444748] hover:border-black/30 disabled:opacity-50"}
@@ -1024,19 +1037,19 @@ const ShiftSwapModal = () => {
 
                     return (
                       <option disabled={conflictsAfterSwap} key={schedule.id} value={schedule.id}>
-                        {formatShift(schedule.workDate, schedule.shiftStartTime, schedule.shiftEndTime)}{conflictsAfterSwap ? " (conflicts after swap)" : ""}
+                        {formatShift(schedule.workDate, schedule.shiftStartTime, schedule.shiftEndTime)}{conflictsAfterSwap ? " (trùng ca sau khi đổi)" : ""}
                       </option>
                     );
                   })}
                 </select>
-                {toEmployeeId && !receiverSchedulesQuery.isLoading && receiverSchedules.length === 0 ? <p className="text-xs font-semibold text-[#93000a]">This colleague has no published shifts in the selected week to swap with.</p> : null}
-                {toEmployeeId && toScheduleId && selectedSwapHasOverlap ? <p className="text-xs font-semibold text-[#93000a]">This swap would create overlapping shifts after the exchange.</p> : null}
+                {toEmployeeId && !receiverSchedulesQuery.isLoading && receiverSchedules.length === 0 ? <p className="text-xs font-semibold text-[#93000a]">Đồng nghiệp này không có ca đã công bố trong tuần đã chọn để đổi.</p> : null}
+                {toEmployeeId && toScheduleId && selectedSwapHasOverlap ? <p className="text-xs font-semibold text-[#93000a]">Yêu cầu đổi ca này sẽ tạo ca trùng giờ sau khi đổi.</p> : null}
               </label>
             ) : null}
           </section>
           <label className="block space-y-1">
             <span className="text-sm font-semibold text-black">Lý do đổi ca</span>
-            <textarea className="min-h-28 w-full resize-none rounded-lg border border-[#e5e7eb] p-4 outline-none focus:ring-1 focus:ring-black" onChange={(event) => setReason(event.target.value)} placeholder="Briefly explain the reason for your request..." value={reason} />
+            <textarea className="min-h-28 w-full resize-none rounded-lg border border-[#e5e7eb] p-4 outline-none focus:ring-1 focus:ring-black" onChange={(event) => setReason(event.target.value)} placeholder="Nhập ngắn gọn lý do yêu cầu..." value={reason} />
           </label>
           <div className="flex gap-3 rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] p-4">
             <Info className="h-5 w-5 text-[#0058be]" />

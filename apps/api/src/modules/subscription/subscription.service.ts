@@ -65,7 +65,7 @@ const ensureActor = async (actor: AuthTokenPayload) => {
 
 const assertOwnerOrAdmin = (actor: IUser) => {
   if (!["admin", "owner"].includes(actor.role)) {
-    throw new AppError(403, "Only owners or admins can manage subscriptions");
+    throw new AppError(403, "Chỉ chủ sở hữu hoặc quản trị viên mới có thể quản lý gói đăng ký");
   }
 };
 
@@ -574,6 +574,47 @@ const checkSubscriptionLimits = async (
   };
 };
 
+const assertCanCreateBranch = async (organizationId: Types.ObjectId) => {
+  const subscription = await getCurrentSubscriptionForOrganization(organizationId);
+  const branches = await BranchModel.countDocuments({
+    organizationId,
+    deletedAt: { $exists: false },
+    status: "active",
+  });
+
+  if (branches >= subscription.limits.maxBranches) {
+    throw new AppError(403, "Your subscription branch limit has been reached");
+  }
+};
+
+const assertCanCreateEmployee = async (
+  organizationId: Types.ObjectId,
+  role: "manager" | "staff" | string
+) => {
+  const subscription = await getCurrentSubscriptionForOrganization(organizationId);
+  const employees = await UserModel.countDocuments({
+    organizationId,
+    role: { $in: ["manager", "staff"] },
+    status: "active",
+  });
+
+  if (employees >= subscription.limits.maxEmployees) {
+    throw new AppError(403, "Your subscription employee limit has been reached");
+  }
+
+  if (role === "manager") {
+    const managers = await UserModel.countDocuments({
+      organizationId,
+      role: "manager",
+      status: "active",
+    });
+
+    if (managers >= subscription.limits.maxManagers) {
+      throw new AppError(403, "Your subscription manager limit has been reached");
+    }
+  }
+};
+
 export const SubscriptionService = {
   createSubscriptionPlan,
   updateSubscriptionPlan,
@@ -586,4 +627,6 @@ export const SubscriptionService = {
   cancelSubscription,
   renewSubscription,
   checkSubscriptionLimits,
+  assertCanCreateBranch,
+  assertCanCreateEmployee,
 };

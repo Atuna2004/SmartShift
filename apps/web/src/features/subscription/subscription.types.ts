@@ -37,3 +37,62 @@ export type Subscription = {
   renewedAt?: string;
   changedAt?: string;
 };
+
+export type SubscriptionPlan = {
+  id: string;
+  name: string;
+  code: SubscriptionPlanCode;
+  priceMonthly: number;
+  currency: SubscriptionCurrency;
+  limits: SubscriptionLimits;
+  features: SubscriptionFeatures;
+  status: "active" | "disabled";
+  description?: string;
+  createdBy?: string;
+  updatedBy?: string;
+};
+
+export type SubscriptionPlanListQuery = {
+  status?: "active" | "disabled";
+  search?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type SubscriptionPlanListResponse = {
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  data: SubscriptionPlan[];
+};
+
+export type SubscriptionLimitUsage = {
+  used: number;
+  limit: number | null;
+  remaining: number | null;
+  allowed: boolean;
+};
+
+export type SubscriptionLimitsCheck = {
+  subscription: Subscription;
+  usage: {
+    branches: number;
+    employees: number;
+    managers: number;
+    shiftTemplates: number;
+    assignedShiftsThisMonth: number;
+  };
+  limits: {
+    branches: SubscriptionLimitUsage;
+    employees: SubscriptionLimitUsage;
+    managers: SubscriptionLimitUsage;
+    shiftTemplates: SubscriptionLimitUsage;
+    assignedShiftsPerMonth: SubscriptionLimitUsage;
+  };
+  features: SubscriptionFeatures;
+  feature?: keyof SubscriptionFeatures;
+  allowed?: boolean;
+};
