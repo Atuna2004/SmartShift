@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f1edec",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "background": "#fdf8f8",
+                        "tertiary-container": "#1d1b1a",
+                        "on-tertiary-container": "#868381",
+                        "on-primary-fixed-variant": "#474646",
+                        "tertiary": "#000000",
+                        "success": "#10b981",
+                        "primary-fixed": "#e5e2e1",
+                        "on-primary-container": "#858383",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-variant": "#e5e2e1",
+                        "primary-container": "#1c1b1b",
+                        "on-secondary-fixed-variant": "#004395",
+                        "outline-variant": "#c4c7c7",
+                        "on-secondary-container": "#fefcff",
+                        "hairline": "#e5e7eb",
+                        "outline": "#747878",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface": "#fdf8f8",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface-variant": "#444748",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f7f3f2",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "surface-container-high": "#ebe7e6",
+                        "surface-dim": "#ddd9d8",
+                        "error": "#ef4444",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#c8c6c5",
+                        "on-background": "#1c1b1b",
+                        "inverse-surface": "#313030",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "surface-tint": "#5f5e5e",
+                        "on-secondary": "#ffffff",
+                        "surface-card": "#f5f5f5",
+                        "secondary": "#0058be",
+                        "surface-dark": "#101010",
+                        "canvas": "#ffffff",
+                        "primary": "#000000",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#fdf8f8",
+                        "tertiary-fixed": "#e6e1df",
+                        "on-surface": "#1c1b1b",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#2170e4",
+                        "inverse-on-surface": "#f4f0ef",
+                        "tertiary-fixed-dim": "#cac6c3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "3xl": "64px",
+                        "2xl": "48px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .qr-pattern {
+            background-color: #ffffff;
+            background-image:  radial-gradient(#000000 1.5px, transparent 1.5px), radial-gradient(#000000 1.5px, #ffffff 1.5px);
+            background-size: 30px 30px;
+            background-position: 0 0,15px 15px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-canvas border-b border-hairline fixed top-0 w-full z-50 flex justify-between items-center px-lg h-16">
+<div class="flex items-center gap-md">
+<span class="font-display-md text-display-md font-bold text-primary">SmartShift</span>
+<div class="hidden md:flex items-center ml-xl gap-lg">
+<nav class="flex gap-md h-full items-center">
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-sm py-xs rounded-lg font-label-md text-label-md" href="#">Dashboard</a>
+<a class="text-primary font-bold border-b-2 border-primary h-16 flex items-center px-sm" href="#">Attendance</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-sm py-xs rounded-lg font-label-md text-label-md" href="#">Schedules</a>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs px-md py-xs bg-surface-container-low rounded-full border border-hairline cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary" style="font-size: 18px;">store</span>
+<span class="font-label-md text-label-md text-primary">Branch Manager</span>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+<button class="p-xs rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-xs rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6bP3IAHTf4uskItlOIcULj03VLkP1yZZFtSxmS7mJDS9scJt160v0xMTOFWjvcFFIRwQGe8RJxxt4iPrZj1crc3RfZAn7dZCSsF4DzNnKQ5TR7e4zr2KOeDDSBocCYrSOW6QHGa9TB3pmuxqvm6C8b8COOnlSm2li4Sl4urXXh4VipISM0QfdCc4yZeqcG1s_J1xlFij29dTtM94f8ppa3hGuWhgeCImq9LNxcItKOOJFXEKE1nJJv8W_2zgMLbI3KelI8h2TEFtU"/>
+</div>
+</div>
+</header>
+<div class="flex pt-16 h-screen overflow-hidden">
+<!-- SideNavBar (Hidden on small screens) -->
+<aside class="hidden md:flex flex-col w-64 h-full bg-surface-container-lowest border-r border-hairline p-md">
+<div class="flex flex-col gap-xs flex-1">
+<div class="flex items-center gap-md p-sm bg-primary-container text-on-primary-container font-bold rounded-lg scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">event_available</span>
+<span class="font-label-md text-label-md">Attendance</span>
+</div>
+<div class="flex items-center gap-md p-sm text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer rounded-lg">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</div>
+<div class="flex items-center gap-md p-sm text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer rounded-lg">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-md text-label-md">Schedules</span>
+</div>
+<div class="flex items-center gap-md p-sm text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer rounded-lg">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-md text-label-md">Staff</span>
+</div>
+<div class="flex items-center gap-md p-sm text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer rounded-lg">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</div>
+</div>
+<div class="mt-auto border-t border-hairline pt-md flex flex-col gap-xs">
+<div class="flex items-center gap-md p-sm text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer rounded-lg">
+<span class="material-symbols-outlined">support_agent</span>
+<span class="font-label-md text-label-md">Support</span>
+</div>
+<div class="flex items-center gap-md p-sm text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer rounded-lg text-error">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex overflow-hidden">
+<!-- Center Canvas -->
+<section class="flex-1 overflow-y-auto p-lg flex flex-col items-center">
+<div class="max-w-4xl w-full">
+<header class="mb-xl">
+<h1 class="font-display-md text-display-md text-primary mb-xs">Attendance Gateway</h1>
+<p class="font-body-md text-on-surface-variant">Live station for staff clock-in and clock-out.</p>
+</header>
+<!-- QR Generator Card (Bento-like central focus) -->
+<div class="bg-canvas border border-hairline rounded-xl p-2xl flex flex-col items-center relative overflow-hidden group shadow-sm">
+<!-- Background Accent -->
+<div class="absolute top-0 right-0 p-lg opacity-5 pointer-events-none">
+<span class="material-symbols-outlined" style="font-size: 200px;">qr_code_2</span>
+</div>
+<div class="text-center mb-xl">
+<div class="inline-flex items-center gap-xs px-md py-sm bg-error-container text-on-error-container rounded-full mb-md animate-pulse">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+<span class="font-label-md text-label-md" id="timer">Expires in 08:42</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary mb-sm">Scan to Log Session</h2>
+<p class="font-body-md text-on-surface-variant max-w-md">Point your mobile scanner at this code to clock in/out. The code refreshes automatically for security.</p>
+</div>
+<!-- QR Container -->
+<div class="relative p-md bg-canvas border-2 border-primary rounded-xl mb-xl shadow-xl transition-transform hover:scale-[1.02]">
+<div class="w-64 h-64 bg-white flex items-center justify-center relative overflow-hidden rounded-lg">
+<!-- Simulated QR Code with CSS and data-alt image -->
+<img alt="SmartShift QR Code" class="w-full h-full object-contain" data-alt="A high-contrast, professional QR code centered on a clean white background. The image has a crisp, minimalist aesthetic with sharp black geometric patterns. It is framed by a thin, elegant black border, suggesting a modern digital interface for a secure workforce management application. The lighting is flat and even, characteristic of a high-end SaaS product dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7aJN5vDBgM2Oqqsg30x9oMuyHtbLlI3mYSXrrAo2EOGDcWuG6JlCqK-dbw-UWwTemM7ugTFstLwbCtzx_j-FxJ3_TfwrcEvGAj5K1dqETFG99BjtPkZ4cIsdo39LTKuan2tCXTPVfMDw-xCFuzm8j0NIO2m7Y5cXpxY50PilTrnAo0VBzcEU1aMLprPT7qj1FcBZ8rGYwoqnxZtLEOFtHtHaAThelq_ROb4sQvBjL8BxFXnzJ2W1bf9XihO2_SH9ocCXvtcOTBN1E"/>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap justify-center gap-md">
+<button class="flex items-center gap-sm px-xl py-md bg-primary text-on-primary rounded-lg font-button text-button hover:opacity-90 transition-opacity active:scale-95" onclick="regenerateQR()">
+<span class="material-symbols-outlined">refresh</span>
+                                Regenerate QR
+                            </button>
+<button class="flex items-center gap-sm px-xl py-md border border-hairline text-primary rounded-lg font-button text-button hover:bg-surface-container-low transition-all active:scale-95" onclick="toggleFullscreen()">
+<span class="material-symbols-outlined">fullscreen</span>
+                                Fullscreen Mode
+                            </button>
+</div>
+</div>
+<!-- Bottom Info Row -->
+<div class="mt-lg grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="p-md border border-hairline rounded-lg bg-surface-container-lowest flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">devices</span>
+</div>
+<div>
+<p class="text-caption font-bold text-on-surface-variant uppercase tracking-wider">Device ID</p>
+<p class="font-label-md text-primary">HUB-STATION-04</p>
+</div>
+</div>
+<div class="p-md border border-hairline rounded-lg bg-surface-container-lowest flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">location_on</span>
+</div>
+<div>
+<p class="text-caption font-bold text-on-surface-variant uppercase tracking-wider">Station</p>
+<p class="font-label-md text-primary">Main Entrance A</p>
+</div>
+</div>
+<div class="p-md border border-hairline rounded-lg bg-surface-container-lowest flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-fixed">verified_user</span>
+</div>
+<div>
+<p class="text-caption font-bold text-on-surface-variant uppercase tracking-wider">Security</p>
+<p class="font-label-md text-primary">Dynamic Encryption</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Side Feed: Recent Activity -->
+<aside class="w-80 h-full border-l border-hairline bg-canvas hidden lg:flex flex-col">
+<div class="p-lg border-b border-hairline">
+<h3 class="font-headline-sm text-headline-sm text-primary">Recent Activity</h3>
+<p class="text-caption text-on-surface-variant">Real-time check-in stream</p>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-md">
+<!-- Activity Item -->
+<div class="p-md rounded-xl border border-hairline bg-surface-container-low hover:border-outline-variant transition-colors group">
+<div class="flex items-start gap-md">
+<img alt="Employee" class="w-10 h-10 rounded-full border border-hairline" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA99sUWSAjJVwd7NPPBFLYSfWpqSyyvVADjElUcaz4JtLQ0gDSWWO2w0A-M3l4A7RY8mKw3TnplgohYdOnagDl39zdl8gsNANiPU8dJm6VCM2nz1ss9KrSCFMyVScMFIndU9gopMlcCXF0OYPYKRzxVenJkqoa89NY81Mbk06m7cV_TamggfFXnNl_4Am8a2VGnIujjLW-2-HRIrXmnGLIAPvOa0prDpfy47XZPZLihfdVKpOl0GWeZMst5DVSVzGGXOa4c01ocbiw9"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="font-label-md text-primary truncate">Alex Rivera</p>
+<span class="text-[10px] text-on-surface-variant whitespace-nowrap">2m ago</span>
+</div>
+<p class="text-caption text-on-surface-variant">Clocked In • Shift B</p>
+<div class="mt-sm flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-[10px] font-bold text-success uppercase">Verified</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Item -->
+<div class="p-md rounded-xl border border-hairline bg-surface-container-low hover:border-outline-variant transition-colors group">
+<div class="flex items-start gap-md">
+<img alt="Employee" class="w-10 h-10 rounded-full border border-hairline" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaptG-X3ecLuvPvP13gU5sheAat3uH-4MHaWdMuVWw2iN-cWK4oXdgzSxMos9hAILiaQCZRxwTqguGLMtQT_f05EZ7168XXjODn5WfPbVtN3KynGrFTdYKxKzwjmrhzjIl9esyFaOAr1TRYB_al5QoabNjyHbhPRo2oOxgw4uUVs5iJ3MHE4_lhcAhBZd600QJRZ0QTLMdmWXUJhcIox39yCzBd2hpuWvrc9Ss-LOl9ciuKyxAULC00LUxCSlegvfWjNN7LjdUMDXg"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="font-label-md text-primary truncate">Sarah Chen</p>
+<span class="text-[10px] text-on-surface-variant whitespace-nowrap">14m ago</span>
+</div>
+<p class="text-caption text-on-surface-variant">Clocked Out • Overtime</p>
+<div class="mt-sm flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-[10px] font-bold text-success uppercase">Verified</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Item -->
+<div class="p-md rounded-xl border border-hairline bg-surface-container-low hover:border-outline-variant transition-colors group">
+<div class="flex items-start gap-md">
+<img alt="Employee" class="w-10 h-10 rounded-full border border-hairline" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQbdv4zspDrA50HTKCOktzUxGZli0uxeAoT5QvyDxETjle5m5Rms6SIJX8w5wn51BsSZ9n1I1CPsHN_9dQCeVo4g_DAJCB1VD2ycJJy9cOX-myKMPoKbiwpYtSW9Onty42VuievqpuO-5Bp-rRBGhrZig5HTwJ3tDQMmwTPUwET1BvDUqu44OhXF3EMq8x2U1AWDvOZgYNiOU57mZIw9HJxKREfuFpSY4yW1N2tNgAIx6h2Q9f4Ixw-XB3nMf32V6MnjXuhEq6S4nL"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="font-label-md text-primary truncate">Jordan Smith</p>
+<span class="text-[10px] text-on-surface-variant whitespace-nowrap">28m ago</span>
+</div>
+<p class="text-caption text-on-surface-variant">Clocked In • Shift A</p>
+<div class="mt-sm flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-[10px] font-bold text-success uppercase">Verified</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Item -->
+<div class="p-md rounded-xl border border-hairline bg-surface-container-low hover:border-outline-variant transition-colors group opacity-60">
+<div class="flex items-start gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="font-label-md text-primary truncate">Mark Fletcher</p>
+<span class="text-[10px] text-on-surface-variant whitespace-nowrap">1h ago</span>
+</div>
+<p class="text-caption text-on-surface-variant">Clocked Out • Break</p>
+</div>
+</div>
+</div>
+</div>
+<div class="p-md border-t border-hairline bg-surface-container-lowest">
+<button class="w-full py-sm border border-hairline rounded-lg text-button font-button text-primary hover:bg-surface-container-low transition-colors">
+                        View Full History
+                    </button>
+</div>
+</aside>
+</main>
+</div>
+<!-- Mobile Navigation (Bottom) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-canvas border-t border-hairline grid grid-cols-4 h-16 px-md">
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">DASH</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code</span>
+<span class="text-[10px] font-bold border-b-2 border-primary">LIVE QR</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-[10px] font-bold">STAFF</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold">MENU</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction: Timer countdown
+        let timeLeft = 522; // 08:42 in seconds
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `Expires in ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer').textContent = display;
+            if (timeLeft > 0) timeLeft--;
+            else timeLeft = 600; // Reset every 10 mins
+        }
+        setInterval(updateTimer, 1000);
+
+        // Micro-interaction: Regenerate QR
+        function regenerateQR() {
+            const qrImg = document.querySelector('img[data-alt*="QR code"]');
+            qrImg.style.opacity = '0.3';
+            qrImg.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=SmartShift-Auth-${Math.floor(Math.random() * 1000000)}`;
+                qrImg.style.opacity = '1';
+                qrImg.style.transform = 'scale(1)';
+                timeLeft = 600; // Reset timer
+            }, 500);
+        }
+
+        // Toggle Fullscreen (Visual Simulation)
+        function toggleFullscreen() {
+            const main = document.querySelector('main');
+            if (!document.fullscreenElement) {
+                main.requestFullscreen?.() || main.webkitRequestFullscreen?.();
+            } else {
+                document.exitFullscreen?.();
+            }
+        }
+    </script>
+</body></html>

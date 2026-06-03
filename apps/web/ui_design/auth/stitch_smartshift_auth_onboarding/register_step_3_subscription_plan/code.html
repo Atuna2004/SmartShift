@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#ebe7e6",
+                        "tertiary-fixed": "#e6e1df",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-dim": "#ddd9d8",
+                        "on-surface": "#1c1b1b",
+                        "surface-container-highest": "#e5e2e1",
+                        "outline-variant": "#c4c7c7",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed-dim": "#cac6c3",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-dark": "#101010",
+                        "success": "#10b981",
+                        "surface-variant": "#e5e2e1",
+                        "primary-fixed": "#e5e2e1",
+                        "on-tertiary-container": "#868381",
+                        "outline": "#747878",
+                        "hairline": "#e5e7eb",
+                        "secondary-container": "#2170e4",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "surface-card": "#f5f5f5",
+                        "error": "#ef4444",
+                        "surface-tint": "#5f5e5e",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fdf8f8",
+                        "surface": "#fdf8f8",
+                        "tertiary-container": "#1d1b1a",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#fefcff",
+                        "canvas": "#ffffff",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "inverse-on-surface": "#f4f0ef",
+                        "on-background": "#1c1b1b",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f1edec",
+                        "tertiary": "#000000",
+                        "on-secondary-fixed-variant": "#004395",
+                        "inverse-surface": "#313030",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-surface-variant": "#444748",
+                        "surface-container-low": "#f7f3f2",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "on-primary-container": "#858383",
+                        "secondary-fixed": "#d8e2ff",
+                        "primary": "#000000",
+                        "background": "#fdf8f8",
+                        "primary-container": "#1c1b1b",
+                        "secondary": "#0058be",
+                        "inverse-primary": "#c8c6c5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "3xl": "64px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "button": ["Inter"],
+                        "display-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .step-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg py-md max-w-7xl mx-auto bg-canvas dark:bg-surface-dark border-b border-hairline dark:border-outline-variant">
+<div class="font-headline-sm text-headline-sm font-black text-on-surface dark:text-primary-fixed">SmartShift</div>
+<div class="hidden md:flex gap-lg items-center">
+<span class="font-label-md text-label-md text-on-surface-variant">Step 3 of 4</span>
+<div class="w-32 bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[75%] transition-all duration-500"></div>
+</div>
+</div>
+<button class="font-button text-button px-md py-sm border border-hairline rounded-lg hover:bg-surface-card transition-colors">Sign In</button>
+</header>
+<!-- Main Content -->
+<main class="flex-grow pt-32 pb-xl px-md max-w-5xl mx-auto w-full">
+<!-- Progress Header (Mobile Only) -->
+<div class="md:hidden mb-lg">
+<div class="flex justify-between items-end mb-xs">
+<h1 class="font-headline-sm text-headline-sm">Choose Plan</h1>
+<span class="font-caption text-caption text-on-surface-variant">Step 3 of 4</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[75%]"></div>
+</div>
+</div>
+<div class="text-center mb-2xl">
+<h1 class="font-display-md text-display-md mb-sm">Select Your Experience</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">Flexible plans designed to scale with your business. Manage shifts, automate scheduling, and empower your team.</p>
+</div>
+<!-- Plan Selection Container -->
+<div class="grid md:grid-cols-2 gap-lg mb-2xl">
+<!-- Basic Plan Card -->
+<div class="group cursor-pointer relative bg-surface-card p-xl rounded-xl border-2 border-transparent hover:border-outline-variant step-transition card-hover" id="plan-basic" onclick="selectPlan('basic')">
+<div class="flex justify-between items-start mb-lg">
+<div>
+<div class="font-label-md text-label-md text-secondary mb-xs">FOR INDIVIDUALS</div>
+<h2 class="font-headline-sm text-headline-sm">Basic Plan</h2>
+</div>
+<div class="opacity-0 step-transition text-primary" id="check-basic">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<div class="mb-xl">
+<span class="font-display-md text-display-md">$29</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/month</span>
+</div>
+<ul class="space-y-md mb-xl">
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Up to 10 staff members</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Basic automated scheduling</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Mobile app access for team</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Email support</span>
+</li>
+</ul>
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-active:opacity-100 rounded-xl transition-opacity pointer-events-none"></div>
+</div>
+<!-- Organization Plan Card -->
+<div class="group cursor-pointer relative bg-canvas p-xl rounded-xl border-2 border-hairline hover:border-primary step-transition card-hover shadow-sm" id="plan-org" onclick="selectPlan('org')">
+<div class="absolute -top-3 right-8 bg-primary text-on-primary px-md py-xs rounded-full font-label-md text-[10px] tracking-wider uppercase">Most Popular</div>
+<div class="flex justify-between items-start mb-lg">
+<div>
+<div class="font-label-md text-label-md text-secondary mb-xs">FOR TEAMS</div>
+<h2 class="font-headline-sm text-headline-sm">Organization Plan</h2>
+</div>
+<div class="opacity-0 step-transition text-primary" id="check-org">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<div class="mb-xl">
+<span class="font-display-md text-display-md">$89</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/month</span>
+</div>
+<ul class="space-y-md mb-xl">
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md font-bold">Unlimited staff members</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">AI-powered smart scheduling</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Advanced analytics dashboard</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Priority 24/7 support</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-success">check</span>
+<span class="font-body-md text-body-md">Custom integration API</span>
+</li>
+</ul>
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-active:opacity-100 rounded-xl transition-opacity pointer-events-none"></div>
+</div>
+</div>
+<!-- Sticky Footer for Action -->
+<div class="flex flex-col md:flex-row items-center justify-between gap-lg p-lg bg-surface-container-low rounded-xl border border-hairline">
+<div class="text-center md:text-left">
+<p class="font-label-md text-label-md text-on-surface-variant" id="selection-summary">Please select a plan to continue</p>
+<p class="font-caption text-caption">You can upgrade or downgrade at any time.</p>
+</div>
+<div class="flex gap-md w-full md:w-auto">
+<button class="flex-1 md:flex-none font-button text-button px-xl py-md border border-hairline rounded-lg hover:bg-surface-card transition-colors">Back</button>
+<button class="flex-1 md:flex-none font-button text-button px-3xl py-md bg-primary text-on-primary rounded-lg opacity-50 cursor-not-allowed transition-all active:scale-95" disabled="" id="finish-btn">Finish</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full px-lg py-xl flex flex-col md:flex-row justify-between items-center gap-md bg-canvas dark:bg-surface-dark border-t border-hairline dark:border-outline-variant mt-auto">
+<div class="font-label-md text-label-md font-bold text-on-surface">SmartShift</div>
+<div class="flex gap-lg">
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
+</div>
+<div class="font-caption text-caption text-on-surface-variant opacity-80">© 2024 SmartShift. All rights reserved.</div>
+</footer>
+<script>
+        let selectedPlanId = null;
+
+        function selectPlan(plan) {
+            selectedPlanId = plan;
+            
+            // Reset visual states
+            const cards = ['basic', 'org'];
+            cards.forEach(c => {
+                const cardEl = document.getElementById(`plan-${c}`);
+                const checkEl = document.getElementById(`check-${c}`);
+                
+                if (c === plan) {
+                    cardEl.classList.add('border-primary', 'shadow-lg');
+                    cardEl.classList.remove('border-transparent', 'border-hairline', 'bg-surface-card');
+                    cardEl.classList.add('bg-canvas');
+                    checkEl.classList.replace('opacity-0', 'opacity-100');
+                } else {
+                    cardEl.classList.remove('border-primary', 'shadow-lg');
+                    cardEl.classList.add('border-hairline');
+                    checkEl.classList.replace('opacity-100', 'opacity-0');
+                    if(c === 'basic') cardEl.classList.add('bg-surface-card');
+                }
+            });
+
+            // Update footer
+            const summary = document.getElementById('selection-summary');
+            const finishBtn = document.getElementById('finish-btn');
+            
+            summary.innerHTML = `Selected: <span class="text-primary font-bold">${plan === 'basic' ? 'Basic Plan' : 'Organization Plan'}</span>`;
+            finishBtn.disabled = false;
+            finishBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            finishBtn.classList.add('hover:bg-primary-container', 'shadow-md');
+        }
+    </script>
+</body></html>

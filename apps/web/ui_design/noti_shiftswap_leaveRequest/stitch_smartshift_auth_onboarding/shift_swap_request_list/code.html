@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#0058be",
+                        "canvas": "#ffffff",
+                        "primary": "#000000",
+                        "on-primary-fixed": "#1c1b1b",
+                        "tertiary-container": "#1d1b1a",
+                        "surface-dark": "#101010",
+                        "surface-dim": "#ddd9d8",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "on-background": "#1c1b1b",
+                        "success": "#10b981",
+                        "on-secondary-container": "#fefcff",
+                        "hairline": "#e5e7eb",
+                        "inverse-on-surface": "#f4f0ef",
+                        "primary-container": "#1c1b1b",
+                        "surface": "#fdf8f8",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "error": "#ef4444",
+                        "on-primary-container": "#858383",
+                        "surface-bright": "#fdf8f8",
+                        "surface-container-high": "#ebe7e6",
+                        "inverse-primary": "#c8c6c5",
+                        "surface-container": "#f1edec",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e6e1df",
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary-container": "#2170e4",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-container-low": "#f7f3f2",
+                        "outline": "#747878",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#868381",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e5e2e1",
+                        "on-surface-variant": "#444748",
+                        "surface-tint": "#5f5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "inverse-surface": "#313030",
+                        "surface-card": "#f5f5f5",
+                        "outline-variant": "#c4c7c7",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-primary": "#ffffff",
+                        "background": "#fdf8f8",
+                        "surface-variant": "#e5e2e1",
+                        "on-surface": "#1c1b1b",
+                        "tertiary": "#000000",
+                        "surface-container-highest": "#e5e2e1",
+                        "on-secondary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#cac6c3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "xs": "4px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "display-md": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-canvas text-on-surface">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-lg h-16 bg-canvas dark:bg-surface-dark border-b border-hairline dark:border-outline-variant">
+<div class="flex items-center gap-md">
+<div class="md:hidden">
+<span class="material-symbols-outlined text-primary cursor-pointer">menu</span>
+</div>
+<h1 class="font-display-md text-display-md font-bold text-primary dark:text-primary-fixed">SmartShift</h1>
+<div class="hidden md:flex ml-xl gap-lg">
+<nav class="flex gap-md font-body-md text-body-md">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Overview</a>
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary" href="#">Shift Swaps</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Team</a>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-surface-container-low border border-hairline rounded-lg pl-10 pr-4 py-2 text-label-md focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Global search..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a young business executive with a friendly expression. The lighting is bright and even, highlighting clear skin and sharp features. He is set against a clean, out-of-focus modern office background with soft neutral tones, embodying a high-end corporate SaaS aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj3i31_Px6aHaKn9NE88BYws8tYzNfCrqzkiuc_5aHjPhP-SOYwi_tzRtogaQoGLmvJvf3dUsbJCE3YAnTxlg12wIuT01orF0fsGs8Bks72uUzjzydMAjXXdTElVQedRu5JBeBIPQIzsKSS_KsiZbRn4N9a4IUTwAoOhIHQSrt2jZ-lAXGlCa_kLXnk5vmcQRdYHmL1QvnBUmtC0S8ZOr1C1IRy89VdkkIzntm8mBPZhvA6_vkEMeKX5HFBYiATxXz7Y_Z3UzSbxih"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full hidden md:flex flex-col py-md px-sm border-r border-hairline dark:border-outline-variant w-64 mt-16 bg-canvas z-30">
+<div class="flex items-center gap-md px-md mb-xl">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-canvas text-[20px]">bolt</span>
+</div>
+<div>
+<p class="font-headline-sm text-headline-sm font-black text-primary leading-none">SmartShift</p>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Enterprise Admin</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 custom-scrollbar overflow-y-auto px-xs">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">groups</span> Employees
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">store</span> Branches
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">layers</span> Shift Templates
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">calendar_month</span> Schedules
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">clock_loader_60</span> Attendance
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span> QR Check-in
+                </a>
+<a class="flex items-center gap-md px-md py-sm bg-surface-container text-primary font-bold transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">swap_horiz</span> Shift Swap
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">event_busy</span> Leave Requests
+                </a>
+<div class="pt-lg border-t border-hairline mt-lg opacity-40 px-md text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Insights</div>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">analytics</span> Reports
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">payments</span> Subscription
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+                </a>
+</nav>
+<div class="mt-auto px-md pt-md">
+<div class="p-md bg-surface-container rounded-xl flex flex-col gap-sm">
+<p class="font-label-md text-label-md text-primary">Need Help?</p>
+<p class="text-caption text-on-surface-variant">Check our documentation for advanced scheduling.</p>
+<button class="w-full py-xs bg-primary text-canvas text-caption font-bold rounded-lg mt-xs">Support</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-64 p-lg lg:p-2xl bg-canvas">
+<div class="max-w-6xl mx-auto space-y-xl">
+<!-- Header Area -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div>
+<h2 class="font-display-md text-display-md font-bold text-primary">Shift Swaps</h2>
+<p class="text-body-md font-body-md text-on-surface-variant">Manage and review employee shift exchange requests.</p>
+</div>
+<button class="flex items-center justify-center gap-sm px-xl py-md bg-primary text-canvas font-button text-button rounded-lg hover:opacity-90 transition-all scale-100 active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                        New Swap Request
+                    </button>
+</div>
+<!-- Control Bar -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-md items-center py-sm">
+<div class="lg:col-span-5 relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-canvas border border-hairline rounded-lg pl-xl pr-md py-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Search by employee name..." type="text"/>
+</div>
+<div class="lg:col-span-7 flex flex-wrap gap-sm items-center lg:justify-end">
+<span class="text-label-md text-on-surface-variant mr-sm">Status:</span>
+<button class="px-md py-sm bg-primary text-canvas rounded-full text-label-md font-bold transition-all">All</button>
+<button class="px-md py-sm bg-surface-container text-on-surface-variant rounded-full text-label-md font-bold hover:bg-surface-container-high transition-all">Pending</button>
+<button class="px-md py-sm bg-surface-container text-on-surface-variant rounded-full text-label-md font-bold hover:bg-surface-container-high transition-all">Approved</button>
+<button class="px-md py-sm bg-surface-container text-on-surface-variant rounded-full text-label-md font-bold hover:bg-surface-container-high transition-all">Rejected</button>
+<div class="h-6 w-px bg-hairline mx-sm"></div>
+<button class="flex items-center gap-sm px-md py-sm border border-hairline rounded-lg text-label-md hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+                            More Filters
+                        </button>
+</div>
+</div>
+<!-- Swap Requests Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+<!-- Card 1 -->
+<div class="group bg-surface-card rounded-xl border border-transparent hover:border-hairline hover:bg-canvas transition-all p-lg flex flex-col gap-md relative overflow-hidden">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="flex -space-x-3">
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A portrait of a smiling woman with glasses, representing a professional and approachable employee. She is in a clean, modern workspace with soft natural light. The aesthetic is bright and clear, adhering to a modern corporate UI style with a palette of whites, soft grays, and black accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJX1ZzN4LHsQqamu4qSEHKs6oNUr1ybTP6WoVX8d-Iyo_H_jX6iuMBmc_IA49agrxwPealokQqkcWQ0EtOu7lpMUMrSXc7H1nl4z_0aCx6IGyShqd3lUKGCxLRIqn9bpu3iEyEDUFgPQpmq_eomPICHCGZ45aX1jfbkKAKJxrfA7ftKi_4t2MMyoXke3xozxyFHaaeWEdJiB2-PAfRRASnX7hSZndFLKPTfj41XZkAERvzrNDQ_Mli06ECMJevlSprDJ1gI7Y0LTvM"/>
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A portrait of a male professional with a confident smile. He is set in a minimalist office environment with subtle technological elements in the background. The lighting is high-key and professional, matching a sleek SaaS design system with high contrast and clean white surfaces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXSg2oja6LofVP94_wcGhfcokaYJ10cgiTEhLzRG6a94FxJeaWd3SYb4jUaGgemDjL9AHLGefUdq7DScMDtlWXIALEEM3mByleAvXaOw6Jp6ZpMWJch2BSKp_zPfuBwdl8L81W557UHS0h8ZpN1X4UvSoQe6aTxhPZlFewoSQc24jYSY_lxCSuBkcDFCQELsoSbp2yRfMXcWJomtml9-2usfyNNjSXo5mFOYX0mUiGoRogTmwaVaTj7ShrwVZ0kqZbH3GaR19BqBgP"/>
+</div>
+<div>
+<p class="text-label-md font-bold">Sarah Chen <span class="text-on-surface-variant font-normal">to</span> Marcus Wright</p>
+<p class="text-caption text-on-surface-variant">Request ID: #SW-9021</p>
+</div>
+</div>
+<span class="px-sm py-1 bg-amber-100 text-amber-800 rounded-full text-caption font-bold">Pending Approval</span>
+</div>
+<div class="bg-canvas border border-hairline rounded-lg p-md grid grid-cols-2 gap-md">
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Original Shift</p>
+<p class="text-label-md">Oct 24, 08:00 - 16:00</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Role</p>
+<p class="text-label-md">Senior Barista</p>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Reason</p>
+<p class="text-body-md italic text-on-surface">"Family emergency requires me to travel out of town for the weekend..."</p>
+</div>
+<div class="flex gap-sm mt-md">
+<button class="flex-1 py-sm bg-primary text-canvas rounded-lg text-label-md font-bold hover:opacity-90 transition-all">Approve</button>
+<button class="flex-1 py-sm border border-hairline text-on-surface-variant rounded-lg text-label-md font-bold hover:bg-surface-container-low transition-all">Decline</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-card rounded-xl border border-transparent hover:border-hairline hover:bg-canvas transition-all p-lg flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="flex -space-x-3">
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="Close up portrait of a male worker in a professional setting. The image is bright with a focus on facial details and a friendly expression. The background is a blurred high-end office interior with white and light gray tones, consistent with a premium enterprise software look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzlUJMLyoM8OJi7kQqLzbzi2F5OhFmcW6aOxhPdkqTm2QP7yZBBwxNHiDp9fEhrx_qOsh2ZgEsrtwjhbOR6bwGC2tJZ46RV6i6d96NIrivsyxUDMLaDU9zAfGh6H0kBbFzN574UuLPJtq_ppT2_jpskXwsDncWBiGLNFQyQ6Lzx3LSqfiSr3IQ9xYARDDfiEhseg2OXMqLqL5b4eww2UDlMY_jYM0KeGLt7ttsv7gfdRsKYEvUCmL9khMaVrh5VWARmlNbPS-zWT1_"/>
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A portrait of a professional woman looking forward with a neutral, pleasant expression. She is positioned in a modern, brightly lit environment with clean lines and soft lighting. The colors are muted and professional, fitting a high-fidelity business dashboard aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiiiEKViKzKlrLPE6Fz5_JabPSXyGu_EvBryA2Z3b3uBlTV5omf0AhwXOICjOBK9BJIkiNp3FNqjc_GoanlalezcpL8zXiNR_kuDHLRo5CxuGB24GJJ6AIi0inEhI4pwlpVzrPgCzHrTKtWAV7Ty6bCenHVxa6JAbENxKJNZBdVkrK8tsJrB_FLmSdR4EX7OHKjNGhgEXCJqZ4P1esnwhTo3Dih8Ra29QxSGWnWnOt1K8ha0W07v7tnV5sIdMnOnWoQRd6PRQ2LxTm"/>
+</div>
+<div>
+<p class="text-label-md font-bold">Liam Johnson <span class="text-on-surface-variant font-normal">to</span> Elena Rodriguez</p>
+<p class="text-caption text-on-surface-variant">Request ID: #SW-8944</p>
+</div>
+</div>
+<span class="px-sm py-1 bg-green-100 text-green-800 rounded-full text-caption font-bold">Approved</span>
+</div>
+<div class="bg-canvas border border-hairline rounded-lg p-md grid grid-cols-2 gap-md">
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Original Shift</p>
+<p class="text-label-md">Oct 25, 14:00 - 22:00</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Role</p>
+<p class="text-label-md">Shift Manager</p>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Reason</p>
+<p class="text-body-md italic text-on-surface">"Scheduling conflict with university exam. Elena has agreed to cover..."</p>
+</div>
+<button class="w-full py-sm border border-hairline text-on-surface-variant rounded-lg text-label-md font-bold bg-surface-container-low cursor-not-allowed">View History</button>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-card rounded-xl border border-transparent hover:border-hairline hover:bg-canvas transition-all p-lg flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="flex -space-x-3">
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A portrait of a professional woman with an attentive look. The lighting is crisp and modern, set in a clean white space that echoes minimalist SaaS design principles. The image emphasizes clarity, professionalism, and high-quality digital experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAmGRlk3E4oyReacdhQic2wyjuQ9Y3RLP-DRBBXK_ZWqUT_dUgKCVWnVJ_DVIGjpuSNwQ-Lh_ULE4AnGle39DP42-IKtd6T73yue7VkBcXkprVqixJEMV2K7C1AadF-Ar-SXe9aA4BdWDRP1wBrezjtHBG2KFdzjdjin9GJ3fZcXG5B6eDDUAbJe36TBpFmRJBcAXBVVM0t93cYJ0yfSgx9AdFvBFFLo0yRw_kmfdVPTugmN152rnXozkPQKEJalThr5NVrJHrUXYp"/>
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A portrait of a middle-aged man with a confident and kind expression. He is depicted in a professional studio setting with clean, soft-box lighting. The overall visual style is sleek and corporate, with a focus on high contrast and a neutral color palette that integrates seamlessly with a modern dashboard UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdDidjkUJYK_9Nra_yADj6HnG3UTJriFgQCpRnh85X1BeM5FyZ9EsJaZgmcdMtJmsZyFyqbH_v5zTG_10Pcfz1XD5mdeXXF6VdvfV9F08I9jVIQJD4vriD7FUxswOmhQQtLYEGVB9RDQ_sI6t7yeJTCfsItE1w1CcA5V1M56O2d0jjFWUkjw1JLa5TfgBHSglAN-wru1u_uj5DrsK5DKtxpcOlN4RPrvSe6Hvwf9_gZrnmxeu1YHhSrfJcLD0XoNzXEEdzaMSG63PN"/>
+</div>
+<div>
+<p class="text-label-md font-bold">Maya Patel <span class="text-on-surface-variant font-normal">to</span> David Wilson</p>
+<p class="text-caption text-on-surface-variant">Request ID: #SW-8812</p>
+</div>
+</div>
+<span class="px-sm py-1 bg-red-100 text-red-800 rounded-full text-caption font-bold">Rejected</span>
+</div>
+<div class="bg-canvas border border-hairline rounded-lg p-md grid grid-cols-2 gap-md">
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Original Shift</p>
+<p class="text-label-md">Oct 26, 06:00 - 14:00</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Role</p>
+<p class="text-label-md">Kitchen Staff</p>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Reason</p>
+<p class="text-body-md italic text-on-surface">"Personal appointment that cannot be rescheduled."</p>
+</div>
+<div class="p-sm bg-red-50 border border-red-100 rounded-lg">
+<p class="text-caption text-red-700"><strong>Note:</strong> David is already reaching maximum overtime for this pay period.</p>
+</div>
+</div>
+<!-- Card 4 (Pending) -->
+<div class="group bg-surface-card rounded-xl border border-transparent hover:border-hairline hover:bg-canvas transition-all p-lg flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="flex -space-x-3">
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A portrait of a male employee with a focus on transparency and honesty. The setting is a minimalist, modern office corridor with glass and white walls. The lighting is diffused and professional, reinforcing the premium utility brand identity of the software." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA28t2gwqoteSFGtAt3q0rVOeRJL_1Vqh0ZId3tBcw26PYwdUCf-4RbG9lKvh5P37aex4XmThASpyrdAS7gTAN9pmZyx8ATfZyjK8gwQ14W_0sAQhT3iXuWPRKW69fd341Z9p2xy69FUGm-bjTJnRRUTWMJALjSxiChtw0zuWm_YXrZHC3UkkLV1akjq0KKlj_hTr6jzbWIsofGFRGpH3nKmg26OiVpLlIwQEmLANBYLVeO4jbkGnuFwQGfXOAfeZaXHNCYCD5y6LOG"/>
+<img alt="Employee avatar" class="w-10 h-10 rounded-full border-2 border-canvas object-cover" data-alt="A professional woman with a welcoming smile, representing a collaborative team member. She is set against a clean, white, and gray office environment. The style is modern Corporate SaaS, utilizing high contrast and a minimalist aesthetic for a professional look and feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABtRvic7vTWpPmwT9k_TDZ_G26GoJ6ZL8V6foOLcLKndKgKsYpVIMFqIPr2Llm-seRwNpdl2NMJwXZMK3XxsH0bpOmTaLud4oYCsiK6yBAAyuGC-HXXdw0zlZQ6ufu9sBM-67WoV3KpYemSBDtDJwVjgDh40ogREcdXON_84ecpq5vIMFPEycK2UiyYqBzBRJ9iw41V6R6Z_lhutfpbfWxk-u39ai_hVmXSSzkBsJYvmr0Eo7v2e0T88QRi_uP46E3BFs1HHLPQbvo"/>
+</div>
+<div>
+<p class="text-label-md font-bold">Tom Harris <span class="text-on-surface-variant font-normal">to</span> Sarah Chen</p>
+<p class="text-caption text-on-surface-variant">Request ID: #SW-9105</p>
+</div>
+</div>
+<span class="px-sm py-1 bg-amber-100 text-amber-800 rounded-full text-caption font-bold">Pending Approval</span>
+</div>
+<div class="bg-canvas border border-hairline rounded-lg p-md grid grid-cols-2 gap-md">
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Original Shift</p>
+<p class="text-label-md">Oct 28, 16:00 - 00:00</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Role</p>
+<p class="text-label-md">Floor Staff</p>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Reason</p>
+<p class="text-body-md italic text-on-surface">"Swapping for Sarah's morning shift on Monday to balance my schedule."</p>
+</div>
+<div class="flex gap-sm mt-md">
+<button class="flex-1 py-sm bg-primary text-canvas rounded-lg text-label-md font-bold hover:opacity-90 transition-all">Approve</button>
+<button class="flex-1 py-sm border border-hairline text-on-surface-variant rounded-lg text-label-md font-bold hover:bg-surface-container-low transition-all">Decline</button>
+</div>
+</div>
+</div>
+<!-- Pagination/Load More -->
+<div class="flex flex-col items-center gap-md py-xl border-t border-hairline">
+<p class="text-caption text-on-surface-variant">Showing 4 of 24 requests</p>
+<button class="px-xl py-md border border-hairline rounded-lg text-label-md font-bold hover:bg-surface-container-low transition-all">Load More Requests</button>
+</div>
+</div>
+</main>
+</div>
+<!-- Micro-interaction JS -->
+<script>
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.classList.add('shadow-md');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.classList.remove('shadow-md');
+            });
+        });
+
+        // Filter toggling simulation
+        const filterButtons = document.querySelectorAll('.lg\\:justify-end button');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(btn.innerText === 'More Filters') return;
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-primary', 'text-canvas');
+                    b.classList.add('bg-surface-container', 'text-on-surface-variant');
+                });
+                btn.classList.add('bg-primary', 'text-canvas');
+                btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

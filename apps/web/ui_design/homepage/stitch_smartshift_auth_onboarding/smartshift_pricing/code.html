@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift Pricing | Simple, Transparent Plans</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#1d1b1a",
+                    "primary-container": "#1c1b1b",
+                    "surface-container-high": "#ebe7e6",
+                    "surface": "#fdf8f8",
+                    "on-tertiary-fixed-variant": "#484645",
+                    "error": "#ef4444",
+                    "primary": "#000000",
+                    "on-primary-fixed": "#1c1b1b",
+                    "inverse-surface": "#313030",
+                    "surface-dark": "#101010",
+                    "on-tertiary-fixed": "#1d1b1a",
+                    "surface-dim": "#ddd9d8",
+                    "tertiary": "#000000",
+                    "background": "#fdf8f8",
+                    "on-surface-variant": "#444748",
+                    "surface-bright": "#fdf8f8",
+                    "on-tertiary": "#ffffff",
+                    "canvas": "#ffffff",
+                    "on-primary-fixed-variant": "#474646",
+                    "tertiary-fixed-dim": "#cac6c3",
+                    "on-secondary-fixed-variant": "#004395",
+                    "surface-container-highest": "#e5e2e1",
+                    "inverse-on-surface": "#f4f0ef",
+                    "outline-variant": "#c4c7c7",
+                    "inverse-primary": "#c8c6c5",
+                    "surface-tint": "#5f5e5e",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "surface-container-low": "#f7f3f2",
+                    "surface-variant": "#e5e2e1",
+                    "on-secondary-fixed": "#001a42",
+                    "primary-fixed": "#e5e2e1",
+                    "tertiary-fixed": "#e6e1df",
+                    "outline": "#747878",
+                    "surface-container": "#f1edec",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-secondary-container": "#fefcff",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#2170e4",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-background": "#1c1b1b",
+                    "on-primary-container": "#858383",
+                    "surface-card": "#f5f5f5",
+                    "primary-fixed-dim": "#c8c6c5",
+                    "error-container": "#ffdad6",
+                    "hairline": "#e5e7eb",
+                    "on-surface": "#1c1b1b",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#0058be",
+                    "success": "#10b981",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#868381"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "3xl": "64px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "2xl": "48px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "button": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "caption": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "display-md": ["Inter"]
+            },
+            "fontSize": {
+                    "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                    "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                    "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .plan-toggle-active {
+            @apply bg-canvas shadow-sm;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-hairline dark:border-on-surface-variant/20 fixed top-0 w-full z-50">
+<div class="flex justify-between items-center h-16 px-6 lg:px-12 max-w-7xl mx-auto">
+<div class="text-headline-sm font-headline-sm font-black text-primary dark:text-surface">SmartShift</div>
+<nav class="hidden md:flex items-center gap-xl">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-surface transition-colors font-button text-button" href="#">Product</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-surface transition-colors font-button text-button" href="#">Features</a>
+<a class="text-primary dark:text-surface font-bold border-b-2 border-primary dark:border-surface pb-1 font-button text-button" href="#">Pricing</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-surface transition-colors font-button text-button" href="#">Resources</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="text-on-surface-variant hover:text-primary font-button text-button transition-colors px-md py-sm">Log In</button>
+<button class="bg-primary text-on-primary font-button text-button px-lg py-sm rounded-lg active:scale-95 transition-transform">Get Started</button>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-2xl px-6">
+<!-- Hero Section -->
+<section class="max-w-4xl mx-auto text-center mb-2xl">
+<h1 class="font-display-lg text-display-lg mb-md">Simple, transparent pricing</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-xl">
+                Scale your service business with tools designed for precision. No hidden fees, no complexity.
+            </p>
+<!-- Pricing Toggle -->
+<div class="flex justify-center items-center gap-md">
+<span class="font-label-md text-label-md" id="monthly-label">Monthly</span>
+<div class="bg-surface-container p-xs rounded-full flex cursor-pointer w-48 relative" id="pricing-toggle-container">
+<div class="absolute bg-canvas shadow-sm h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full transition-all duration-300 left-1" id="toggle-indicator"></div>
+<button class="flex-1 py-xs z-10 font-button text-button text-center" onclick="setBilling('monthly')">Monthly</button>
+<button class="flex-1 py-xs z-10 font-button text-button text-center" onclick="setBilling('yearly')">Yearly</button>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant" id="yearly-label">Yearly</span>
+<span class="bg-secondary-container text-on-secondary-container font-caption text-caption px-sm py-[2px] rounded-full">Save 20%</span>
+</div>
+</div>
+</section>
+<!-- Pricing Cards -->
+<section class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-lg mb-3xl">
+<!-- Basic Plan -->
+<div class="bg-surface-card border border-hairline rounded-xl p-xl flex flex-col hover:border-outline-variant transition-all duration-300">
+<div class="mb-xl">
+<h3 class="font-headline-sm text-headline-sm mb-xs">Basic Plan</h3>
+<p class="text-on-surface-variant font-body-md mb-xl">Ideal for small teams and solo practitioners.</p>
+<div class="flex items-baseline gap-xs">
+<span class="font-display-md text-display-md">$</span>
+<span class="font-display-md text-display-md" id="basic-price">49</span>
+<span class="text-on-surface-variant font-label-md">/mo</span>
+</div>
+</div>
+<div class="space-y-md mb-2xl flex-grow">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Up to 10 staff members</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Real-time QR Code Clock-in</span>
+</div>
+<div class="flex items-center gap-md opacity-50">
+<span class="material-symbols-outlined" data-icon="cancel">cancel</span>
+<span class="font-body-md line-through">Auto-scheduling AI</span>
+</div>
+<div class="flex items-center gap-md opacity-50">
+<span class="material-symbols-outlined" data-icon="cancel">cancel</span>
+<span class="font-body-md line-through">Advanced Multi-branch support</span>
+</div>
+</div>
+<button class="w-full border border-primary text-primary py-md rounded-lg font-button text-button hover:bg-primary/5 transition-colors">Choose Basic</button>
+</div>
+<!-- Organization Plan (Featured) -->
+<div class="bg-surface-dark text-on-tertiary rounded-xl p-xl flex flex-col relative overflow-hidden ring-4 ring-primary-container/20">
+<div class="absolute top-md right-md">
+<span class="bg-secondary-container text-on-secondary-container px-md py-xs rounded-full font-label-md text-[12px] tracking-wider uppercase">Most Popular</span>
+</div>
+<div class="mb-xl">
+<h3 class="font-headline-sm text-headline-sm mb-xs">Organization Plan</h3>
+<p class="text-on-tertiary-container font-body-md mb-xl">Full-scale optimization for large operations.</p>
+<div class="flex items-baseline gap-xs">
+<span class="font-display-md text-display-md">$</span>
+<span class="font-display-md text-display-md" id="org-price">129</span>
+<span class="text-on-tertiary-container font-label-md">/mo</span>
+</div>
+</div>
+<div class="space-y-md mb-2xl flex-grow">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Unlimited staff &amp; users</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Auto-scheduling AI &amp; Forecasting</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Advanced PowerBI Reports</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Multi-branch / Franchise support</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-success" data-icon="check_circle">check_circle</span>
+<span class="font-body-md">Dedicated Success Manager</span>
+</div>
+</div>
+<button class="w-full bg-on-tertiary text-primary py-md rounded-lg font-button text-button hover:opacity-90 transition-opacity">Contact Sales</button>
+</div>
+</section>
+<!-- Comparison Table -->
+<section class="max-w-6xl mx-auto mb-3xl overflow-x-auto">
+<h2 class="font-headline-sm text-headline-sm mb-xl text-center">Feature Comparison</h2>
+<table class="w-full border-collapse">
+<thead>
+<tr class="border-b border-hairline">
+<th class="py-md px-lg text-left font-label-md text-label-md text-on-surface-variant">Feature</th>
+<th class="py-md px-lg text-center font-label-md text-label-md">Basic</th>
+<th class="py-md px-lg text-center font-label-md text-label-md">Organization</th>
+</tr>
+</thead>
+<tbody class="font-body-md">
+<tr class="border-b border-hairline/50">
+<td class="py-md px-lg">QR Code Clock-in</td>
+<td class="py-md px-lg text-center"><span class="material-symbols-outlined text-success" data-icon="check">check</span></td>
+<td class="py-md px-lg text-center"><span class="material-symbols-outlined text-success" data-icon="check">check</span></td>
+</tr>
+<tr class="border-b border-hairline/50">
+<td class="py-md px-lg">Auto-scheduling</td>
+<td class="py-md px-lg text-center text-on-surface-variant">—</td>
+<td class="py-md px-lg text-center"><span class="material-symbols-outlined text-success" data-icon="check">check</span></td>
+</tr>
+<tr class="border-b border-hairline/50">
+<td class="py-md px-lg">Advanced Reports</td>
+<td class="py-md px-lg text-center text-on-surface-variant">Simple Only</td>
+<td class="py-md px-lg text-center"><span class="material-symbols-outlined text-success" data-icon="check">check</span></td>
+</tr>
+<tr class="border-b border-hairline/50">
+<td class="py-md px-lg">Multi-branch support</td>
+<td class="py-md px-lg text-center text-on-surface-variant">—</td>
+<td class="py-md px-lg text-center"><span class="material-symbols-outlined text-success" data-icon="check">check</span></td>
+</tr>
+<tr class="border-b border-hairline/50">
+<td class="py-md px-lg">API Access</td>
+<td class="py-md px-lg text-center text-on-surface-variant">Limited</td>
+<td class="py-md px-lg text-center"><span class="material-symbols-outlined text-success" data-icon="check">check</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<!-- FAQ Accordion -->
+<section class="max-w-3xl mx-auto mb-3xl">
+<h2 class="font-headline-sm text-headline-sm mb-xl text-center">Frequently Asked Questions</h2>
+<div class="space-y-md">
+<details class="group bg-surface-card rounded-xl border border-hairline open:ring-1 open:ring-primary/10">
+<summary class="flex justify-between items-center p-md cursor-pointer list-none">
+<span class="font-label-md text-label-md">Can I change my plan later?</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-md pt-0 text-on-surface-variant font-body-md">
+                        Yes, you can upgrade or downgrade your plan at any time from your account settings. Changes are applied immediately and prorated.
+                    </div>
+</details>
+<details class="group bg-surface-card rounded-xl border border-hairline open:ring-1 open:ring-primary/10">
+<summary class="flex justify-between items-center p-md cursor-pointer list-none">
+<span class="font-label-md text-label-md">Is there a free trial available?</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-md pt-0 text-on-surface-variant font-body-md">
+                        Absolutely. You can start with a 14-day full-feature trial of the Organization plan. No credit card required.
+                    </div>
+</details>
+<details class="group bg-surface-card rounded-xl border border-hairline open:ring-1 open:ring-primary/10">
+<summary class="flex justify-between items-center p-md cursor-pointer list-none">
+<span class="font-label-md text-label-md">What kind of support do you offer?</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-md pt-0 text-on-surface-variant font-body-md">
+                        All users get access to our 24/7 help center and email support. Organization plans include priority phone support and a dedicated manager.
+                    </div>
+</details>
+</div>
+</section>
+<!-- Contact CTA -->
+<section class="max-w-4xl mx-auto text-center bg-primary-container p-2xl rounded-2xl">
+<h2 class="font-display-md text-display-md text-on-primary-container mb-md">Still have questions?</h2>
+<p class="font-body-lg text-body-lg text-on-primary-container/80 mb-xl">Our team is ready to help you find the perfect fit for your specific business needs.</p>
+<div class="flex flex-col md:flex-row gap-md justify-center">
+<button class="bg-primary text-on-primary font-button text-button px-2xl py-md rounded-lg active:scale-95 transition-transform">Not sure? Contact Sales</button>
+<button class="border border-outline text-on-primary font-button text-button px-2xl py-md rounded-lg active:scale-95 transition-transform hover:bg-white/5">View Case Studies</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-dark dark:bg-surface-dark text-surface dark:text-surface">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-lg py-xl px-6 lg:px-12 max-w-7xl mx-auto">
+<div class="space-y-md">
+<div class="text-headline-sm font-headline-sm font-black text-surface">SmartShift</div>
+<p class="text-surface-dim font-body-md">Precision scheduling and workforce management for the modern service industry.</p>
+</div>
+<div>
+<h4 class="font-label-md text-label-md mb-md">Product</h4>
+<ul class="space-y-sm">
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Features</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Pricing</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Integrations</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-md text-label-md mb-md">Company</h4>
+<ul class="space-y-sm">
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">About Us</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Careers</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Blog</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-md text-label-md mb-md">Legal</h4>
+<ul class="space-y-sm">
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Privacy Policy</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Terms of Service</a></li>
+<li><a class="text-surface-dim hover:text-surface transition-colors font-body-md" href="#">Security</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-white/10 py-md px-6 lg:px-12 max-w-7xl mx-auto flex justify-between items-center text-surface-dim font-caption">
+<span>© 2024 SmartShift. All rights reserved.</span>
+<div class="flex gap-md">
+<a class="hover:text-surface transition-colors" href="#"><span class="material-symbols-outlined" data-icon="language">language</span></a>
+<a class="hover:text-surface transition-colors" href="#"><span class="material-symbols-outlined" data-icon="public">public</span></a>
+</div>
+</div>
+</footer>
+<script>
+        function setBilling(mode) {
+            const toggleIndicator = document.getElementById('toggle-indicator');
+            const basicPrice = document.getElementById('basic-price');
+            const orgPrice = document.getElementById('org-price');
+            
+            if (mode === 'monthly') {
+                toggleIndicator.style.left = '4px';
+                basicPrice.innerText = '49';
+                orgPrice.innerText = '129';
+            } else {
+                toggleIndicator.style.left = '50%';
+                basicPrice.innerText = '39';
+                orgPrice.innerText = '99';
+            }
+        }
+    </script>
+</body></html>

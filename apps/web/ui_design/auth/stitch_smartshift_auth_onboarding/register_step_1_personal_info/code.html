@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartShift - Join Our Workforce</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#ebe7e6",
+                        "tertiary-fixed": "#e6e1df",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-dim": "#ddd9d8",
+                        "on-surface": "#1c1b1b",
+                        "surface-container-highest": "#e5e2e1",
+                        "outline-variant": "#c4c7c7",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed-dim": "#cac6c3",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-dark": "#101010",
+                        "success": "#10b981",
+                        "surface-variant": "#e5e2e1",
+                        "primary-fixed": "#e5e2e1",
+                        "on-tertiary-container": "#868381",
+                        "outline": "#747878",
+                        "hairline": "#e5e7eb",
+                        "secondary-container": "#2170e4",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "surface-card": "#f5f5f5",
+                        "error": "#ef4444",
+                        "surface-tint": "#5f5e5e",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fdf8f8",
+                        "surface": "#fdf8f8",
+                        "tertiary-container": "#1d1b1a",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#fefcff",
+                        "canvas": "#ffffff",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "inverse-on-surface": "#f4f0ef",
+                        "on-background": "#1c1b1b",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f1edec",
+                        "tertiary": "#000000",
+                        "on-secondary-fixed-variant": "#004395",
+                        "inverse-surface": "#313030",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-surface-variant": "#444748",
+                        "surface-container-low": "#f7f3f2",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "on-primary-container": "#858383",
+                        "secondary-fixed": "#d8e2ff",
+                        "primary": "#000000",
+                        "background": "#fdf8f8",
+                        "primary-container": "#1c1b1b",
+                        "secondary": "#0058be",
+                        "inverse-primary": "#c8c6c5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "3xl": "64px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "button": ["Inter"],
+                        "display-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .strength-meter-bar {
+            transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .canvas-bg {
+            background-color: #ffffff;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface antialiased">
+<!-- Header Navigation (Simplified for Transactional Page) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg py-md max-w-7xl mx-auto bg-canvas border-b border-hairline">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-headline-sm" data-icon="token" style="font-variation-settings: 'FILL' 1;">token</span>
+<span class="font-headline-sm text-headline-sm font-black text-on-surface">SmartShift</span>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<span class="font-label-md text-label-md text-on-surface-variant">Already have an account?</span>
+<button class="font-button text-button border border-hairline px-md py-xs rounded-lg hover:bg-surface-container transition-colors">Sign In</button>
+</div>
+</header>
+<main class="min-h-screen flex flex-col md:flex-row pt-[72px]">
+<!-- Left Side: Branding & Visuals -->
+<section class="w-full md:w-5/12 bg-surface-container relative overflow-hidden flex flex-col justify-center p-lg md:p-3xl">
+<div class="absolute inset-0 z-0 opacity-10">
+<img class="w-full h-full object-cover" data-alt="A clean, professional bird's eye view of a modern co-working space with neatly organized desks, minimalist black and white furniture, and a focused atmosphere. The scene is bathed in natural daylight, emphasizing a high-productivity workforce environment. The aesthetic is monochromatic and sophisticated, representing the precision and reliability of the SmartShift brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB921j7c2Vg-2pJLRIFNjySlooAx2W1UeO8WtIxWjhQ2L764ZBEUjhnH1C-1jpoX4mEYgQUVTe9plT6NVGtFVVABzW680DZCuIcR0NboNwG0mPyG99b6GJd1KCBk3U9Rp-tfuxyr5A_EnS_khpJ-emupFT5OWD2DdZ3zsoNqvK0w19MqZJyegVeggf_UdfoPpLQd6UPa6FlsEHxncYcaXd5XJUDlGp3uzzAXJg8LzL6bKXDfJ9N8x6BJkGEWi1myTMGkkLDxgbDQGks"/>
+</div>
+<div class="relative z-10 space-y-md max-w-md">
+<span class="px-md py-xs bg-primary text-on-primary font-label-md text-caption rounded-full uppercase tracking-widest">Growth Engine</span>
+<h1 class="font-display-lg text-display-lg text-on-surface leading-tight">
+                    Join SmartShift to streamline your workforce.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                    Experience the next generation of staff scheduling, real-time analytics, and automated compliance.
+                </p>
+<div class="pt-xl grid grid-cols-2 gap-md">
+<div class="p-md bg-canvas rounded-xl border border-hairline">
+<span class="material-symbols-outlined text-secondary text-headline-sm mb-xs" data-icon="bolt">bolt</span>
+<p class="font-label-md text-label-md block">99.9% Uptime</p>
+</div>
+<div class="p-md bg-canvas rounded-xl border border-hairline">
+<span class="material-symbols-outlined text-secondary text-headline-sm mb-xs" data-icon="shield_check">shield</span>
+<p class="font-label-md text-label-md block">Enterprise Security</p>
+</div>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="absolute -bottom-16 -left-16 w-64 h-64 bg-primary opacity-5 rounded-full blur-3xl"></div>
+</section>
+<!-- Right Side: Registration Form -->
+<section class="w-full md:w-7/12 bg-canvas flex items-center justify-center p-lg md:p-3xl">
+<div class="w-full max-w-lg">
+<!-- Progress Indicator -->
+<div class="mb-2xl">
+<div class="flex justify-between items-end mb-sm">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Onboarding</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Step 1 of 4: Personal Information</h2>
+</div>
+<span class="font-label-md text-label-md text-primary">25% Complete</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/4 rounded-full"></div>
+</div>
+</div>
+<!-- Form -->
+<form class="space-y-lg" id="registrationForm">
+<!-- Full Name -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface" for="fullName">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant text-body-md" data-icon="person">person</span>
+<input class="w-full pl-xl pr-md py-md bg-canvas border border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-body-md text-body-md" id="fullName" name="fullName" placeholder="Jane Cooper" required="" type="text"/>
+</div>
+</div>
+<!-- Email Address -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant text-body-md" data-icon="mail">mail</span>
+<input class="w-full pl-xl pr-md py-md bg-canvas border border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-body-md text-body-md" id="email" name="email" placeholder="jane@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Phone Number -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface" for="phone">Phone Number</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant text-body-md" data-icon="call">call</span>
+<input class="w-full pl-xl pr-md py-md bg-canvas border border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-body-md text-body-md" id="phone" name="phone" placeholder="+1 (555) 000-0000" required="" type="tel"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface" for="password">Create Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant text-body-md" data-icon="lock">lock</span>
+<input class="w-full pl-xl pr-md py-md bg-canvas border border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-body-md text-body-md" id="password" name="password" oninput="updateStrength(this.value)" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+<!-- Password Strength Meter -->
+<div class="pt-xs">
+<div class="flex gap-xs h-1">
+<div class="flex-1 rounded-full bg-surface-container strength-meter-bar" id="strength-1"></div>
+<div class="flex-1 rounded-full bg-surface-container strength-meter-bar" id="strength-2"></div>
+<div class="flex-1 rounded-full bg-surface-container strength-meter-bar" id="strength-3"></div>
+<div class="flex-1 rounded-full bg-surface-container strength-meter-bar" id="strength-4"></div>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-xs" id="strength-text">Use 8 or more characters with a mix of letters, numbers &amp; symbols.</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-md flex flex-col gap-md">
+<button class="w-full py-md px-lg bg-primary text-on-primary font-button text-button rounded-lg hover:bg-opacity-90 active:scale-[0.98] transition-all flex justify-center items-center gap-sm" type="submit">
+                            Next Step
+                            <span class="material-symbols-outlined text-body-md" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<p class="font-caption text-caption text-center text-on-surface-variant">
+                            By continuing, you agree to our <a class="text-primary underline" href="#">Terms of Service</a> and <a class="text-primary underline" href="#">Privacy Policy</a>.
+                        </p>
+</div>
+</form>
+</div>
+</section>
+</main>
+<!-- Footer (Simplified for Transactional Page) -->
+<footer class="w-full px-lg py-xl flex flex-col md:flex-row justify-between items-center gap-md bg-canvas border-t border-hairline">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-label-md" data-icon="token" style="font-variation-settings: 'FILL' 1;">token</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">SmartShift</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">© 2024 SmartShift. All rights reserved.</p>
+<div class="flex gap-lg">
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="#">Terms</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</footer>
+<script>
+        function updateStrength(value) {
+            const bars = [
+                document.getElementById('strength-1'),
+                document.getElementById('strength-2'),
+                document.getElementById('strength-3'),
+                document.getElementById('strength-4')
+            ];
+            const text = document.getElementById('strength-text');
+            
+            let strength = 0;
+            if (value.length >= 8) strength++;
+            if (/[A-Z]/.test(value)) strength++;
+            if (/[0-9]/.test(value)) strength++;
+            if (/[^A-Za-z0-9]/.test(value)) strength++;
+
+            const colors = ['bg-error', 'bg-orange-500', 'bg-yellow-500', 'bg-success'];
+            const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+
+            bars.forEach((bar, index) => {
+                bar.className = 'flex-1 rounded-full strength-meter-bar ' + (index < strength ? colors[strength-1] : 'bg-surface-container');
+            });
+
+            if (value.length > 0) {
+                text.innerText = 'Password strength: ' + labels[strength-1];
+                text.className = 'font-caption text-caption mt-xs ' + (strength > 2 ? 'text-success' : (strength === 1 ? 'text-error' : 'text-on-surface-variant'));
+            } else {
+                text.innerText = 'Use 8 or more characters with a mix of letters, numbers & symbols.';
+                text.className = 'font-caption text-caption text-on-surface-variant mt-xs';
+            }
+        }
+
+        // Simple form handling simulation
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span> Processing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                alert('Moving to Step 2: Company Details');
+                btn.innerHTML = 'Next Step <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>';
+                btn.disabled = false;
+            }, 1500);
+        });
+    </script>
+</body></html>

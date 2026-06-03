@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#858383",
+                      "inverse-on-surface": "#f4f0ef",
+                      "primary-container": "#1c1b1b",
+                      "error": "#ef4444",
+                      "on-error-container": "#93000a",
+                      "surface-container": "#f1edec",
+                      "surface": "#fdf8f8",
+                      "surface-bright": "#fdf8f8",
+                      "on-tertiary-fixed": "#1d1b1a",
+                      "on-primary": "#ffffff",
+                      "secondary-container": "#2170e4",
+                      "on-primary-fixed": "#1c1b1b",
+                      "success": "#10b981",
+                      "surface-dark": "#101010",
+                      "inverse-primary": "#c8c6c5",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-secondary-fixed-variant": "#004395",
+                      "tertiary-container": "#1d1b1a",
+                      "on-surface": "#1c1b1b",
+                      "surface-container-highest": "#e5e2e1",
+                      "surface-container-low": "#f7f3f2",
+                      "outline-variant": "#c4c7c7",
+                      "surface-card": "#f5f5f5",
+                      "primary": "#000000",
+                      "canvas": "#ffffff",
+                      "on-secondary-fixed": "#001a42",
+                      "on-background": "#1c1b1b",
+                      "tertiary-fixed-dim": "#cac6c3",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "on-primary-fixed-variant": "#474646",
+                      "surface-variant": "#e5e2e1",
+                      "surface-tint": "#5f5e5e",
+                      "on-tertiary-container": "#868381",
+                      "secondary": "#0058be",
+                      "tertiary": "#000000",
+                      "hairline": "#e5e7eb",
+                      "on-surface-variant": "#444748",
+                      "on-secondary-container": "#fefcff",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#c8c6c5",
+                      "primary-fixed": "#e5e2e1",
+                      "inverse-surface": "#313030",
+                      "tertiary-fixed": "#e6e1df",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "outline": "#747878",
+                      "error-container": "#ffdad6",
+                      "background": "#fdf8f8",
+                      "surface-dim": "#ddd9d8",
+                      "on-tertiary-fixed-variant": "#484645",
+                      "surface-container-high": "#ebe7e6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "sm": "8px",
+                      "base": "4px",
+                      "3xl": "64px",
+                      "xs": "4px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "2xl": "48px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Inter"],
+                      "display-md": ["Inter"],
+                      "button": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "caption": ["Inter"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                      "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}],
+                      "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg py-md max-w-7xl mx-auto bg-canvas dark:bg-surface-dark border-b border-hairline dark:border-outline-variant transition-all duration-200 ease-in-out">
+<div class="font-headline-sm text-headline-sm font-black text-on-surface dark:text-primary-fixed">SmartShift</div>
+<div class="hidden md:flex gap-lg items-center">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Dashboard</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Schedules</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Team</a>
+</div>
+<button class="bg-primary text-on-primary px-md py-sm rounded-lg font-button text-button hover:opacity-90 transition-all">Sign In</button>
+</header>
+<main class="min-h-screen pt-3xl pb-3xl flex items-center justify-center px-md">
+<div class="max-w-[480px] w-full text-center flex flex-col items-center">
+<!-- Success Animation / Icon -->
+<div class="relative mb-xl">
+<div class="absolute inset-0 bg-success/10 rounded-full scale-150 animate-ping opacity-20"></div>
+<div class="relative w-24 h-24 bg-success flex items-center justify-center rounded-full shadow-lg">
+<span class="material-symbols-outlined text-on-primary !text-[48px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Heading & Body -->
+<h1 class="font-display-md text-display-md mb-sm">Payment Successful</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-2xl">Your Professional Plan has been successfully renewed. Your workspace is now updated with all premium features.</p>
+<!-- Receipt Summary Card -->
+<div class="w-full bg-surface-card rounded-xl border border-hairline p-lg text-left mb-2xl">
+<div class="flex justify-between items-center mb-md border-b border-hairline pb-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Receipt Summary</span>
+<span class="bg-success/10 text-success px-sm py-xs rounded-full font-caption text-caption font-bold">PAID</span>
+</div>
+<div class="space-y-md">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Amount Charged</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">$249.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Transaction ID</span>
+<span class="font-label-md text-label-md text-on-surface">TXN-88294-SSHIFT</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Next Billing Date</span>
+<span class="font-label-md text-label-md text-on-surface">January 12, 2025</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Payment Method</span>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined !text-[18px]">credit_card</span>
+<span class="font-label-md text-label-md text-on-surface">•••• 4242</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="w-full flex flex-col gap-md">
+<button class="w-full bg-primary text-on-primary py-md rounded-lg font-button text-button hover:bg-on-surface-variant transition-colors shadow-sm">
+                    Back to Dashboard
+                </button>
+<button class="w-full bg-transparent border border-hairline py-md rounded-lg font-button text-button text-on-surface hover:bg-surface-container transition-colors">
+                    Download PDF Receipt
+                </button>
+</div>
+<!-- Support Link -->
+<p class="mt-xl font-caption text-caption text-on-surface-variant">
+                Questions? <a class="text-secondary font-bold hover:underline" href="#">Contact Support</a>
+</p>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full px-lg py-xl flex flex-col md:flex-row justify-between items-center gap-md bg-canvas border-t border-hairline dark:border-outline-variant">
+<div class="font-label-md text-label-md font-bold text-on-surface">SmartShift</div>
+<div class="flex gap-lg">
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-colors" href="#">Terms</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-colors" href="#">Privacy</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-primary underline transition-colors" href="#">Support</a>
+</div>
+<div class="font-caption text-caption text-on-surface-variant">© 2024 SmartShift. All rights reserved.</div>
+</footer>
+<script>
+        // Simple confetti-like effect or micro-interaction
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.querySelector('button');
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'scale(0.98)';
+            });
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

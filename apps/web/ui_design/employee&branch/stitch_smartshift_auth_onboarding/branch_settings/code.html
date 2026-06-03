@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Branch Settings | SmartShift</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#cac6c3",
+                        "outline": "#747878",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "outline-variant": "#c4c7c7",
+                        "on-primary-container": "#858383",
+                        "on-surface-variant": "#444748",
+                        "on-secondary": "#ffffff",
+                        "canvas": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#868381",
+                        "success": "#10b981",
+                        "surface-card": "#f5f5f5",
+                        "primary-fixed": "#e5e2e1",
+                        "on-secondary-fixed-variant": "#004395",
+                        "primary": "#000000",
+                        "background": "#fdf8f8",
+                        "surface-container": "#f1edec",
+                        "hairline": "#e5e7eb",
+                        "inverse-primary": "#c8c6c5",
+                        "surface-tint": "#5f5e5e",
+                        "surface-dim": "#ddd9d8",
+                        "inverse-surface": "#313030",
+                        "tertiary-fixed": "#e6e1df",
+                        "tertiary": "#000000",
+                        "surface-container-high": "#ebe7e6",
+                        "surface-dark": "#101010",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "inverse-on-surface": "#f4f0ef",
+                        "tertiary-container": "#1d1b1a",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-container": "#1c1b1b",
+                        "surface-variant": "#e5e2e1",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#001a42",
+                        "secondary": "#0058be",
+                        "error": "#ef4444",
+                        "on-surface": "#1c1b1b",
+                        "surface-bright": "#fdf8f8",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d8e2ff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f7f3f2",
+                        "on-secondary-container": "#fefcff",
+                        "on-background": "#1c1b1b",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-primary-fixed-variant": "#474646",
+                        "secondary-container": "#2170e4",
+                        "on-tertiary-fixed": "#1d1b1a",
+                        "surface": "#fdf8f8",
+                        "secondary-fixed-dim": "#adc6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "2xl": "48px",
+                        "3xl": "64px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "button": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+                        "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom Toggle Style */
+        .toggle-checkbox:checked { right: 0; border-color: #000000; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #000000; }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface antialiased">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-md px-sm border-r border-hairline dark:border-outline-variant w-64 z-50 bg-canvas">
+<div class="px-md mb-xl">
+<h1 class="font-headline-sm text-headline-sm font-black text-primary">SmartShift</h1>
+<p class="text-on-surface-variant font-label-md text-caption">Enterprise Admin</p>
+</div>
+<nav class="flex-1 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">groups</span> Employees
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">store</span> Branches
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">layers</span> Shift Templates
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">calendar_month</span> Schedules
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">clock_loader_60</span> Attendance
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span> QR Check-in
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">swap_horiz</span> Shift Swap
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">event_busy</span> Leave Requests
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">notifications</span> Notifications
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">analytics</span> Reports
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">payments</span> Subscription
+            </a>
+<a class="flex items-center gap-sm px-md py-sm bg-surface-container text-primary font-bold rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+</nav>
+</aside>
+<!-- Top Navigation -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-lg h-16 bg-canvas border-b border-hairline ml-0 md:pl-72">
+<div class="flex items-center gap-md">
+<span class="font-body-md text-body-md font-bold text-primary">Settings</span>
+<span class="text-on-surface-variant">/</span>
+<span class="text-on-surface-variant font-body-md text-body-md">Branch Configuration</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-base hover:bg-surface-container rounded-full transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLqKHjy11z4DDennTgt3uFx5mdBU989ufWf7h-4dZNL2Zae450uIXxvh1nf_pmS3anjIFahext1A8NKpuCwHmAYLxGe69i2PD6yrgUS6cOXHO0yJJzzQfl5FTBC1QJxGlLa1ivzWWuJRG3P9fuPH1bOVkeyIN0Qs2Mc80Wlw6NN4FztxTU7fpdXcbdgPN42T-BodaJIQ03-oHPrlKeDnYPdnrWXDYlqq4AkZ1yY6eXvxDg8G89WHRwxeQGoicZbTvu439Nf0eFsZvw"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-0 md:ml-64 p-lg min-h-screen bg-canvas">
+<div class="max-w-3xl mx-auto py-xl">
+<header class="mb-2xl">
+<h2 class="font-display-md text-display-md font-bold text-primary mb-sm">Branch Configuration</h2>
+<p class="text-on-surface-variant font-body-md text-body-md">Manage your branch details, QR check-in preferences, and attendance policies.</p>
+</header>
+<div class="space-y-xl">
+<!-- Branch Info Section -->
+<section class="p-xl bg-surface-card rounded-xl border border-hairline">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary">store</span>
+<h3 class="font-headline-sm text-headline-sm">Branch Information</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-xs">Branch Name</label>
+<input class="w-full h-12 px-md bg-canvas border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter branch name" type="text" value="Downtown Hub"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-xs">Business Type</label>
+<select class="w-full h-12 px-md bg-canvas border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+<option>Retail &amp; Sales</option>
+<option>Hospitality</option>
+<option>Healthcare</option>
+<option selected="">Logistics &amp; Warehouse</option>
+</select>
+</div>
+<div class="col-span-1 md:col-span-2 space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-xs">Physical Address</label>
+<input class="w-full h-12 px-md bg-canvas border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter full address" type="text" value="782 Industrial Pkwy, Suite 400, Chicago, IL"/>
+</div>
+</div>
+</section>
+<!-- QR Settings Section -->
+<section class="p-xl bg-surface-card rounded-xl border border-hairline">
+<div class="flex justify-between items-start mb-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">qr_code_2</span>
+<h3 class="font-headline-sm text-headline-sm">QR Check-in</h3>
+</div>
+<div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer right-6 transition-all duration-300" id="qr-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-outline-variant cursor-pointer transition-all duration-300" for="qr-toggle"></label>
+</div>
+</div>
+<div class="flex flex-col md:flex-row gap-xl items-center">
+<div class="flex-1">
+<p class="text-on-surface-variant font-body-md text-body-md mb-md">
+                                Enabling QR Check-in allows employees to clock in by scanning a unique code at the branch location. This ensures physical presence.
+                            </p>
+<button class="flex items-center gap-sm px-lg py-sm border border-hairline bg-canvas text-primary rounded-lg font-button text-button hover:bg-surface-container transition-all active:scale-95">
+<span class="material-symbols-outlined text-md">download</span>
+                                Download Branch QR Code
+                            </button>
+</div>
+<div class="w-40 h-40 bg-white p-sm rounded-xl border border-hairline flex items-center justify-center relative group">
+<div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl">zoom_in</span>
+</div>
+<img alt="Branch QR Code" class="w-full h-full grayscale" data-alt="A minimalist black and white QR code displayed on a clean white surface within a professional UI card. The lighting is bright and modern, emphasizing the stark contrast of the data matrix against the pristine background. The aesthetic is high-tech and functional, fitting a sophisticated SaaS platform for business management." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxM0F8ZnWagkNoJtJZn1iL7kuNvQalGXdEqf46BqIqjYJfTHwIw2QiMFtPriQoB-kj1VTjzD8t9kCC8U6RCngOEuEdexsLZW71B020cL8Pcr4KNN02L_do1ZLyAMkTX5ZHg-1b_ALF5NjFrrYOkCiC-5h0JpPv3PpdkfaXBxg5HlRC6KnGq3L9i_cPzCsdUpW5DoO8MPyqsfvaB0FFry8UO0M6t-y_Wdh9ZSA-pFTrw5T0ZQXhqfuEIpnJ3_-otwjRLxg7-yi2amGi"/>
+</div>
+</div>
+</section>
+<!-- Late Threshold Section -->
+<section class="p-xl bg-surface-card rounded-xl border border-hairline">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary">timer</span>
+<h3 class="font-headline-sm text-headline-sm">Attendance Policy</h3>
+</div>
+<div class="flex flex-col md:flex-row gap-xl items-end">
+<div class="flex-1 space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-xs">Late Grace Period (Minutes)</label>
+<p class="text-caption text-on-surface-variant mb-sm">The number of minutes an employee can be late before they are flagged in the system.</p>
+<div class="relative max-w-[200px]">
+<input class="w-full h-12 px-md bg-canvas border-hairline rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" max="60" min="0" type="number" value="15"/>
+<span class="absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant font-label-md">min</span>
+</div>
+</div>
+<div class="flex items-center gap-sm p-md bg-surface-container-low rounded-lg border border-hairline flex-1">
+<span class="material-symbols-outlined text-secondary">info</span>
+<p class="text-caption text-on-surface-variant">Recommended: 10-15 minutes for most service-based businesses to account for transit variance.</p>
+</div>
+</div>
+</section>
+<!-- Action Footer -->
+<footer class="pt-xl flex flex-col sm:flex-row gap-md justify-end items-center border-t border-hairline mt-2xl">
+<button class="w-full sm:w-auto px-2xl py-md text-on-surface-variant font-button text-button hover:bg-surface-container transition-all rounded-lg">
+                        Discard Changes
+                    </button>
+<button class="w-full sm:w-auto px-3xl py-md bg-primary text-on-primary font-button text-button rounded-lg hover:opacity-90 active:scale-95 transition-all shadow-sm">
+                        Save Changes
+                    </button>
+</footer>
+</div>
+</div>
+</main>
+<!-- Visual Polish: Background Grid -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-[0.03]" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 32px 32px;"></div>
+<script>
+        // Micro-interaction for the toggle
+        const toggle = document.getElementById('qr-toggle');
+        toggle.addEventListener('change', function() {
+            const label = this.nextElementSibling;
+            if (this.checked) {
+                this.classList.replace('right-6', 'right-0');
+            } else {
+                this.classList.replace('right-0', 'right-6');
+            }
+        });
+
+        // Hover animation for cards
+        document.querySelectorAll('section').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'transform 0.2s ease-out';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

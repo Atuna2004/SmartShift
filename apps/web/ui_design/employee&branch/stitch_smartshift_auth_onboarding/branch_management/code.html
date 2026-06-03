@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e5e7eb;
+      border-radius: 10px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed-dim": "#cac6c3",
+            "outline": "#747878",
+            "primary-fixed-dim": "#c8c6c5",
+            "outline-variant": "#c4c7c7",
+            "on-primary-container": "#858383",
+            "on-surface-variant": "#444748",
+            "on-secondary": "#ffffff",
+            "canvas": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#868381",
+            "success": "#10b981",
+            "surface-card": "#f5f5f5",
+            "primary-fixed": "#e5e2e1",
+            "on-secondary-fixed-variant": "#004395",
+            "primary": "#000000",
+            "background": "#fdf8f8",
+            "surface-container": "#f1edec",
+            "hairline": "#e5e7eb",
+            "inverse-primary": "#c8c6c5",
+            "surface-tint": "#5f5e5e",
+            "surface-dim": "#ddd9d8",
+            "inverse-surface": "#313030",
+            "tertiary-fixed": "#e6e1df",
+            "tertiary": "#000000",
+            "surface-container-high": "#ebe7e6",
+            "surface-dark": "#101010",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#484645",
+            "inverse-on-surface": "#f4f0ef",
+            "tertiary-container": "#1d1b1a",
+            "surface-container-highest": "#e5e2e1",
+            "primary-container": "#1c1b1b",
+            "surface-variant": "#e5e2e1",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed": "#001a42",
+            "secondary": "#0058be",
+            "error": "#ef4444",
+            "on-surface": "#1c1b1b",
+            "surface-bright": "#fdf8f8",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed": "#d8e2ff",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#f7f3f2",
+            "on-secondary-container": "#fefcff",
+            "on-background": "#1c1b1b",
+            "on-primary-fixed": "#1c1b1b",
+            "on-primary-fixed-variant": "#474646",
+            "secondary-container": "#2170e4",
+            "on-tertiary-fixed": "#1d1b1a",
+            "surface": "#fdf8f8",
+            "secondary-fixed-dim": "#adc6ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "lg": "24px",
+            "2xl": "48px",
+            "3xl": "64px",
+            "xs": "4px",
+            "xl": "32px",
+            "base": "4px",
+            "sm": "8px",
+            "md": "16px"
+          },
+          "fontFamily": {
+            "display-md": ["Inter"],
+            "caption": ["Inter"],
+            "button": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "display-md": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+            "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "400"}],
+            "button": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "600"}],
+            "body-lg": ["18px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+            "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "600"}],
+            "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+            "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-canvas text-on-surface">
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-md px-sm border-r border-hairline bg-canvas w-64 z-50">
+<div class="flex items-center gap-sm px-sm mb-xl">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">store</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-black text-primary leading-none">SmartShift</h1>
+<p class="font-caption text-caption text-on-surface-variant">Enterprise Admin</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-xs custom-scrollbar overflow-y-auto">
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">groups</span> Employees
+      </a>
+<!-- Active Tab: Branches -->
+<a class="flex items-center gap-sm px-sm py-2 bg-surface-container text-primary font-bold rounded-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">store</span> Branches
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">layers</span> Shift Templates
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span> Schedules
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">clock_loader_60</span> Attendance
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span> QR Check-in
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">swap_horiz</span> Shift Swap
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">event_busy</span> Leave Requests
+      </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">notifications</span> Notifications
+      </a>
+<div class="mt-md pt-md border-t border-hairline">
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span> Reports
+        </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span> Subscription
+        </a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+        </a>
+</div>
+</nav>
+</aside>
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-canvas border-b border-hairline z-40 flex items-center justify-between px-lg">
+<div class="flex items-center gap-md flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-body-md">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-hairline rounded-lg text-body-md focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" placeholder="Search branches..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex flex-col items-end mr-sm">
+<span class="font-label-md text-label-md text-primary">Main St. Downtown</span>
+<span class="font-caption text-caption text-on-surface-variant">Branch Switcher</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border border-hairline">
+<img alt="User profile photo" data-alt="A professional headshot of a modern enterprise administrator with a neutral expression, set against a blurred minimalist office background. The lighting is soft and corporate, following a clean, light-mode aesthetic with high-key whites and subtle gray shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIZByo28gkLq5yvh-XaOFm3iuDk9CSDNChkyPRj5dltKGRgSwVF4IPBCpElZ6wotOnY_T0MfKyyK8ZTQe53pq-4RqVLaL_qfumwgIVGakVXLaarVVEMbWVVlw85vtiVubyrNSKw2T6cQoWdJGTOxX9hoMdc2IHQAMgcarxURwYOX2_98g5W-Hdy2J12YOWYxuDbjulk1JZryZuH3sDYjN7Mbw4rlRdPB-199M3bDjJOSShvTgjQmt71jBP6H72C1QFUYGPzv7AYFPq"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 pt-16 min-h-screen bg-canvas p-lg">
+<div class="max-w-7xl mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-md">
+<div>
+<h2 class="font-display-md text-display-md font-bold text-primary tracking-tight">Branches</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage and monitor operations across all your locations.</p>
+</div>
+<div class="flex items-center gap-sm">
+<button class="flex items-center gap-xs px-md py-2 border border-hairline rounded-lg font-button text-button hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+            Filters
+          </button>
+<button class="flex items-center gap-xs px-md py-2 bg-primary text-on-primary rounded-lg font-button text-button hover:opacity-90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+            Add Branch
+          </button>
+</div>
+</div>
+<!-- Quick Stats / Bento Grid Highlight -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md mb-xl">
+<div class="bg-surface-card p-md rounded-xl border border-hairline flex flex-col justify-between">
+<div class="flex justify-between items-start mb-sm">
+<div class="w-10 h-10 bg-canvas rounded-lg flex items-center justify-center border border-hairline">
+<span class="material-symbols-outlined text-primary">store</span>
+</div>
+<span class="text-success font-label-md text-caption flex items-center">+2 this mo</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Total Branches</p>
+<h3 class="font-display-md text-headline-sm font-black">24</h3>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline flex flex-col justify-between">
+<div class="flex justify-between items-start mb-sm">
+<div class="w-10 h-10 bg-canvas rounded-lg flex items-center justify-center border border-hairline">
+<span class="material-symbols-outlined text-primary">groups</span>
+</div>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Total Employees</p>
+<h3 class="font-display-md text-headline-sm font-black">412</h3>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline flex flex-col justify-between">
+<div class="flex justify-between items-start mb-sm">
+<div class="w-10 h-10 bg-canvas rounded-lg flex items-center justify-center border border-hairline">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+<span class="bg-success/10 text-success px-2 py-0.5 rounded-full text-[10px] font-bold">OPTIMAL</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Avg. Attendance</p>
+<h3 class="font-display-md text-headline-sm font-black">94.2%</h3>
+</div>
+</div>
+<div class="bg-surface-card p-md rounded-xl border border-hairline flex flex-col justify-between">
+<div class="flex justify-between items-start mb-sm">
+<div class="w-10 h-10 bg-canvas rounded-lg flex items-center justify-center border border-hairline">
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Operating Costs</p>
+<h3 class="font-display-md text-headline-sm font-black">$284k<span class="text-caption font-normal text-on-surface-variant">/mo</span></h3>
+</div>
+</div>
+</div>
+<!-- Branch Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+<!-- Branch Card 1 -->
+<div class="group bg-canvas border border-hairline rounded-xl hover:border-primary transition-all duration-300 overflow-hidden flex flex-col">
+<div class="relative h-32 bg-surface-container overflow-hidden">
+<img alt="Branch exterior" class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-alt="A modern storefront in a bustling urban district at golden hour. The architecture is clean with large glass windows reflecting a minimalist interior. The lighting is warm and natural, creating a premium professional feel with deep shadows and bright highlights in a high-contrast black and white style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB91eGT71w3cE0MMjyUztefC1iVNXPHCAVUVWr1lamQsFCDUoQucRA5WVnaCDespI9peUQM6N1xyoEwgJbRQ323o05HvUrCsmvZgbP5pimBA44Oa3mG0F_vl0x7-MoU1ct9-SwJwOxbeE9mDcOS2rU_lPe2_GIU3MngfkjlbPexJ9XASAg21kgoywyFGNnp7LPIQmBoFJo_FD6RFIjhvLv-g761vpY5kbafmsHsUWmUSo_bOeYSgkwshrLKQDzt4Art8J5bsN3sc1rs"/>
+<div class="absolute top-md left-md">
+<span class="px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded uppercase tracking-tighter">FLAGSHIP</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md bg-gradient-to-t from-canvas to-transparent"></div>
+</div>
+<div class="p-lg pt-0 flex-1">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h4 class="font-headline-sm text-label-md font-bold text-primary">Main St. Downtown</h4>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-caption font-caption">742 Main St, New York, NY</span>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-md py-md border-y border-hairline">
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Manager</p>
+<div class="flex items-center gap-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Manager photo" data-alt="Close-up portrait of a professional manager with a friendly and authoritative demeanor. The setting is a minimalist office with clean lines and soft lighting, maintaining a consistent professional light-mode aesthetic with a monochrome-focused color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZxLSvKSqeNb1EwWAf9uASdYinmrOIFK1h02PZ7vNAX-PbDNGud_j-kXaLd3X8zWNoABdSiWKpVqihHeANH2xMOofdYSqY4gHN0eIZ0IErTKjzkzIfeHuZ1n_t45XmFyuRUvF4uH4_mJaNOs1cnpQbC3MhwVrMqP_6yqSsldswdmDshe9xpf_603SHL0AY7Iud7GglC6uqkuoC9-5oueBexztmblIHvBGRzyx85AFpfHtMSzmNrBp9M_hQUaC_0sbiRSHnCteKo9TH"/>
+</div>
+<span class="text-caption font-label-md">Alex Rivera</span>
+</div>
+</div>
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Staff Count</p>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">groups</span>
+<span class="text-caption font-label-md">86 Employees</span>
+</div>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden">
+<img alt="staff 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABDa3ovBBLAcC4v4VCtz7BL9-8Hln80AkhtmxxihCOuwvBipX4txyxZhKROCWR0nua-SzOkZ1_rP99S0cMl2YZ5FmDahTcANkKDuVvH8EI-1mYNn4io566q7SAv0EPY3kvpr_CXZZ672g2cQqnjDRaZdn-UozZjXslpPbJmTKmUjMHQ6Zk0JWhaPLkN8v9B0DXXYsqlR89F6Kq21bpED4D0hH98pGCIeJgSWtND2tpXAGUiloXZGajji6FuGVdLD_J_2DuzB0bTgYm"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden">
+<img alt="staff 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2-KsoFbbpS8wV8MUPO0k01AvzMr1siSh1yO7E_gIQwZ6gWYKVvKNeLlAD3vJ2c3h3trPQuIJMrlAjQbeh1NktRVmNBQKXrfa1YRiww49U7OXiiIfOkA0rMCCyS4tPtIP0UD7a67SJnKls4PkP9ne6Ph9L848p2_NRCazmHhqHZ9d-it0WwHl4P7ncK8mAk2JXXAzXXzFRrL05dwVy__yAgmoJUa0visMgEs4yuK2Rrv6BGxTXGI4TWgSyIkmOkAriOgJ41HOp98gX"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden flex items-center justify-center text-[8px] font-bold text-on-surface-variant bg-surface-container-high">
+                    +83
+                  </div>
+</div>
+</div>
+<button class="font-button text-button text-secondary hover:underline transition-all flex items-center gap-xs">
+                View Details <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Branch Card 2 -->
+<div class="group bg-canvas border border-hairline rounded-xl hover:border-primary transition-all duration-300 overflow-hidden flex flex-col">
+<div class="relative h-32 bg-surface-container overflow-hidden">
+<img alt="Branch interior" class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-alt="A clean, industrial-style retail interior with high ceilings and exposed pipes. The space is organized with minimalist shelving and bright track lighting. The color palette is strictly neutral with whites, grays, and blacks, creating a sophisticated and professional atmosphere typical of a high-end corporate tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQFht8xIXIRL2o2QvW6mmnZW-FMJYRBiurTSM8faQmA5aIt_tzEEXlA8neH7eQP-V1z2ACVLPJaSeRwl6GtKBZXQ4oui7Inh39mZvXCSe68WsFAXs-RSU-nBzmZvSGbacAuCl7G-CKq-nKZ8jBNPRr2jSWTYxl9jXxwPs396SfttvmarDbZOJBxFPORn2aVDrccsEI3jsB4Iymoqy_7STq6yiX_bbhyB_F5-aUu8UbzqyXYlEXnopEbbvs0xgr9iKJ0hmCg-R33ywj"/>
+<div class="absolute bottom-0 left-0 w-full p-md bg-gradient-to-t from-canvas to-transparent"></div>
+</div>
+<div class="p-lg pt-0 flex-1">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h4 class="font-headline-sm text-label-md font-bold text-primary">Eastside Retail Hub</h4>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-caption font-caption">2200 East Pkwy, Brooklyn, NY</span>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-md py-md border-y border-hairline">
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Manager</p>
+<div class="flex items-center gap-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Manager photo" data-alt="A portrait of an experienced operations manager in a high-key, professional studio setting. The lighting is crisp and clear, highlighting a confident expression. The aesthetic is modern and minimalist, utilizing a clean white background with subtle gray accents to match the corporate design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcrEOSq5NB1XBPMBWcS-U6bV_hcTglvaytrRtAa1OPiwrlOj0WFYvHUYSod4BYMlA00wVTXjJ5yKfT48PR-sS7iQfTfiotI1OMRhtaPnXUVL5WPQlIHYLWdOY2kd1I47hmNpzq5NCvQYsSW8wLvd2GyW5lurqZVdqDW0VbXIDJGau0Budxt1ZO8cLvc315KFxTBc8_sUAo9BfLfFo4muotWAI6QDT2yBfa9uQDDR3g7T8gRaxxrw3V0PQTzVeW_wvyMAl3Bz_8dbQE"/>
+</div>
+<span class="text-caption font-label-md">Marcus Chen</span>
+</div>
+</div>
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Staff Count</p>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">groups</span>
+<span class="text-caption font-label-md">42 Employees</span>
+</div>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden">
+<img alt="staff 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8A5n0C-E3EX2MjQa-6Ilxae-o9BG1AhbI7LIYmvxgj1VHDUh8jUDWcWLW5wvHQEOTH8XNoov7tvR5wyKTRJAA1F5BmFm1gNI75AEI1hwVEgkiByxErKlR9g1Nvn8yskvS5AtHzL7GxOspMDsQqxcXaaI9td3A3Flj-V-toP5ZPJnKFrmpv5Zk_MkuDXtBMI8WHTKOVe1sfrAiSHhMbpRDURiIhbX50MgBfvzGmKFRYN4lNtIMNk1oLm5xvuuXam88DtFVd6RSld-m"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden flex items-center justify-center text-[8px] font-bold text-on-surface-variant bg-surface-container-high">
+                    +41
+                  </div>
+</div>
+</div>
+<button class="font-button text-button text-secondary hover:underline transition-all flex items-center gap-xs">
+                View Details <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Branch Card 3 -->
+<div class="group bg-canvas border border-hairline rounded-xl hover:border-primary transition-all duration-300 overflow-hidden flex flex-col">
+<div class="relative h-32 bg-surface-container overflow-hidden">
+<img alt="Branch interior" class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-alt="A professional medical-style office interior with sleek white desks and high-end ergonomic furniture. The lighting is cool and sterile yet welcoming, creating a sense of reliability and cleanliness. The image follows a high-key light mode style with dominant whites and sharp black silhouettes for a premium tech-forward aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfr-pKeV4u4T-63MXiTMDY5BtrJ7wdnjzzfEAfHyZI-HsxTiJWNeZgGEhem-jsOEGhlcX1L9DrCMT2qg1DcL5BfwH1-YN9a17xXxARq_lLKDECMpVpQLqA984PY4bpqK1QjocPQOV38YiPPGSNgcHFdgCKludKkfEs5xTf_l9EaMAC1svF-29NZ8-H9sym6-P6cC_Vo_jWG5ugeCpozF-2uGt3DgidPEF0MHvsVNHAyyMrl1Udx-v_B9b2CptafZUg0Jjnc0gWhh8t"/>
+<div class="absolute top-md right-md">
+<span class="px-2 py-1 bg-error/10 text-error text-[10px] font-bold rounded uppercase tracking-tighter">UNDERSTAFFED</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-md bg-gradient-to-t from-canvas to-transparent"></div>
+</div>
+<div class="p-lg pt-0 flex-1">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h4 class="font-headline-sm text-label-md font-bold text-primary">Upper West Medical</h4>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-caption font-caption">102 W 86th St, New York, NY</span>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-md py-md border-y border-hairline">
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Manager</p>
+<div class="flex items-center gap-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Manager photo" data-alt="Portrait of a medical administrator in a bright, modern clinical environment. The lighting is professional and soft, emphasizing a trustworthy and organized personality. The scene is rendered in high-key white with deep black accents, adhering to a minimalist corporate design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpCXRT-77hgEmthu8wNoFTRZy-SFaMYCsWqbEy0ByaJk_PhJsi6V0sfOaa5Dd-yHFQ5O4kLUobXqMT-Va1uJJngP3_HxgC5Pcn1QLmK2IY3DRKxDkUg3aRdwN2rsQhXLK3Iugsz0ofes6aPprKeUlBoaly_2LXl_o7GNr8BYz15i5JDZCdeEzYxb8Ehsw5uFUR9nredp9i1uDA6uZYnhsnLcDvRh1OxIoORTg_eZoremTqNtHwKdKcio9RJzogMqvzCltQdb4Xfy6B"/>
+</div>
+<span class="text-caption font-label-md">Sarah Jenkins</span>
+</div>
+</div>
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Staff Count</p>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-error">groups</span>
+<span class="text-caption font-label-md text-error">12 Employees</span>
+</div>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden">
+<img alt="staff 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRrb3c0dXg_qMYdm1Ku_U8yrlR6YkOX3ZJ74B4PkKTXpCCl_jXHbDIsvPuo3cfaix_4acCQQ-tR_o8phwlYPCXwEYZEZSTj71dmq_iXjntdkeS9Fd3HTSU9AAlvRsOfiZeW_Jmg5MkbRIGeLcFRAXsAVh6fSlWfJDWwFVHAEMQMgnlpPmA2Nb3IKwDlhoGtQMKHItIhK1U36JEeivEqM5sGBB7vj3IWaA-dYSpARawLiq0Vw8-PAGNRUiNdfViZDxB8zJwJXmqrsXV"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden flex items-center justify-center text-[8px] font-bold text-on-surface-variant bg-surface-container-high">
+                    +11
+                  </div>
+</div>
+</div>
+<button class="font-button text-button text-secondary hover:underline transition-all flex items-center gap-xs">
+                View Details <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Branch Card 4 -->
+<div class="group bg-canvas border border-hairline rounded-xl hover:border-primary transition-all duration-300 overflow-hidden flex flex-col">
+<div class="relative h-32 bg-surface-container overflow-hidden">
+<img alt="Branch interior" class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-alt="A modern warehouse or fulfillment center with clean white flooring and high-tech sorting equipment. The lighting is bright and industrial, creating a clear and efficient atmosphere. The aesthetic is strictly professional and tech-driven, using a light-mode palette of whites, blacks, and subtle silver grays." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOFcffqZjgEL63j4xlJ-FD3fgrAOLZHKGCsSROEPxPcO9o7iiQuk8iWwi_2s9_uzvOh-nVjkcr56C1wBUg8T86iBf-2Prmip3m7X7JZdN_teESrSrzbr1UMTmoAyYe8KhGB7roEf3iygNNqQNvlFgc7wTmO7cBfV3_xYEPlLCSbBspeFrzzINOkAt6oxzHHS6lar365ST2wvcCmApg3tO-dUL6axuCbDtYDjjBJK7xBM6eTpEHwvk2nU8pVxYNwpsIinmsQbfHjmfF"/>
+<div class="absolute bottom-0 left-0 w-full p-md bg-gradient-to-t from-canvas to-transparent"></div>
+</div>
+<div class="p-lg pt-0 flex-1">
+<div class="flex justify-between items-start mb-md">
+<div>
+<h4 class="font-headline-sm text-label-md font-bold text-primary">Airport Logistics North</h4>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-caption font-caption">10 Terminal Dr, Queens, NY</span>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-md py-md border-y border-hairline">
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Manager</p>
+<div class="flex items-center gap-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Manager photo" data-alt="Portrait of a logistics coordinator in a high-key professional setting. The look is sharp and focused, with lighting that emphasizes precision and reliability. The scene is clean and minimalist, using a white-canvas philosophy with stark black accents to create a modern corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3PRZfXBy1qmD-t-j97wnWliASze1o7NKDLi8pEkxdkJwkBYpVqKC-IYDYeGIpA-pE9w6Rf00zlhmy_5Al3xHBH-ObxjHGpSwrZrQwa2vCpAHUFfVUz3hoTgqWtrrWWyZaGRimBILyJZ7Iz_ajdv5qR0HGynktwMc0WTeytboiWvHk0VLtVLZ0IjA01AwnlYrMERtK0ZAGBoJ3wyVweIHY9ufH-njt5H27xsoRp1KPm9IdIA9awDPqZOLswxFRAXfLhOvhxy-Vc_XV"/>
+</div>
+<span class="text-caption font-label-md">David Miller</span>
+</div>
+</div>
+<div>
+<p class="text-caption text-on-surface-variant font-caption mb-1 uppercase tracking-wider">Staff Count</p>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">groups</span>
+<span class="text-caption font-label-md">156 Employees</span>
+</div>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden">
+<img alt="staff 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6gTm_Capj7J1a3i0XO__d_6G94cnxyeWfk21jd09tlfn5Ir0gxlzD6ZPs_1K0n_eUlhPNAcwy-K0mLw5hK06BUpTQAjq6IUC6osfzVaCtavTqOw51n-C5kCS9afMJiJv7Zkk80FB3uYlSE1_JJIXk0AnGf6p1WFNbcOVIQuD5ZHaI2VJOyVySrBwZgR8krTQl-lYsrFOYX0mPYrqfuJpHznK-WcgxePuG5Gz0-ErUwV1bD0TvxDktdEhB9cXMLPx8iB-JOLifKaIT"/>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-canvas bg-surface-container overflow-hidden flex items-center justify-center text-[8px] font-bold text-on-surface-variant bg-surface-container-high">
+                    +155
+                  </div>
+</div>
+</div>
+<button class="font-button text-button text-secondary hover:underline transition-all flex items-center gap-xs">
+                View Details <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add Branch Placeholder Card -->
+<button class="group bg-surface-container-low border-2 border-dashed border-hairline rounded-xl hover:border-primary hover:bg-surface-container transition-all duration-300 flex flex-col items-center justify-center p-xl gap-md h-full min-h-[300px]">
+<div class="w-16 h-16 rounded-full bg-canvas border border-hairline flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-display-md text-on-surface-variant group-hover:text-primary">add_circle</span>
+</div>
+<div class="text-center">
+<p class="font-label-md text-label-md text-primary">Register New Branch</p>
+<p class="font-caption text-caption text-on-surface-variant">Expand your business network</p>
+</div>
+</button>
+</div>
+<!-- Pagination -->
+<div class="mt-2xl flex flex-col md:flex-row items-center justify-between border-t border-hairline pt-lg gap-md">
+<p class="font-caption text-caption text-on-surface-variant">Showing 1 to 4 of 24 branches</p>
+<div class="flex items-center gap-xs">
+<button class="w-10 h-10 flex items-center justify-center border border-hairline rounded-lg hover:bg-surface-container-low disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center bg-primary text-on-primary rounded-lg font-button text-button">1</button>
+<button class="w-10 h-10 flex items-center justify-center border border-hairline rounded-lg hover:bg-surface-container-low font-button text-button">2</button>
+<button class="w-10 h-10 flex items-center justify-center border border-hairline rounded-lg hover:bg-surface-container-low font-button text-button">3</button>
+<span class="px-2 text-on-surface-variant">...</span>
+<button class="w-10 h-10 flex items-center justify-center border border-hairline rounded-lg hover:bg-surface-container-low font-button text-button">6</button>
+<button class="w-10 h-10 flex items-center justify-center border border-hairline rounded-lg hover:bg-surface-container-low">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<script>
+    // Micro-interactions for the cards
+    document.querySelectorAll('.group').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        // Vanilla micro-interaction logic if needed
+      });
+    });
+  </script>
+</body></html>

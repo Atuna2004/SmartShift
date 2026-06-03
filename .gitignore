@@ -1,5 +1,62 @@
-/*
-!/.gitignore
-!/fixnow-app/
-!/fixnow-backend/
-!/PROJECT_OVERVIEW.md
+# dependencies
+node_modules/
+
+# build
+dist/
+build/
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# coverage
+coverage/
+
+# cache
+.cache/
+.tmp/
+temp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# uploads
+uploads/
+public/uploads/
+
+# testing
+jest.config.js
+.nyc_output/
+
+# package manager
+yarn.lock
+pnpm-lock.yaml
+
+# misc
+*.zip
+*.tar
+*.gz
