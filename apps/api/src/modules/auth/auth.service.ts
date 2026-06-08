@@ -9,6 +9,10 @@ import {
 } from "../../common/utils/jwt.js";
 import { BranchModel } from "../branch/branch.model.js";
 import { OrganizationModel } from "../organization/organization.model.js";
+import {
+  SubscriptionModel,
+  SubscriptionPlanModel,
+} from "../subscription/subscription.model.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import type {
@@ -49,6 +53,57 @@ const toPublicUser = async (user: IUser) => {
   };
 };
 
+const TRIAL_DAYS = 14;
+const TRIAL_PLAN_CODE = "trial_14d";
+
+const addDays = (date: Date, days: number) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const ensureTrialPlan = async () => {
+  await SubscriptionPlanModel.updateOne(
+    { code: TRIAL_PLAN_CODE, deletedAt: { $exists: false } },
+    {
+      $set: {
+        name: "Dùng thử 14 ngày",
+        code: TRIAL_PLAN_CODE,
+        description: "Dùng thử đầy đủ tính năng SmartShift trong 14 ngày.",
+        priceMonthly: 0,
+        currency: "VND",
+        limits: {
+          maxBranches: 999999,
+          maxEmployees: 999999,
+          maxManagers: 999999,
+          maxShiftTemplates: 999999,
+          maxAssignedShiftsPerMonth: 999999,
+        },
+        features: {
+          qrCheckIn: true,
+          gpsValidation: true,
+          attendanceReports: true,
+          shiftSwap: true,
+          payroll: true,
+        },
+        status: "active",
+      },
+    },
+    { upsert: true }
+  );
+
+  const plan = await SubscriptionPlanModel.findOne({
+    code: TRIAL_PLAN_CODE,
+    deletedAt: { $exists: false },
+  });
+
+  if (!plan) {
+    throw new AppError(500, "Cannot initialize trial plan");
+  }
+
+  return plan;
+};
+
 const hashToken = (token: string) => {
   return crypto.createHash("sha256").update(token).digest("hex");
 };
@@ -87,6 +142,10 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
   }
 
   const hashedPassword = await hashPassword(payload.password);
+  const shouldCreateTrial = Boolean(payload.organization && !payload.subscription);
+  const trialPlan = shouldCreateTrial ? await ensureTrialPlan() : null;
+  const trialStartedAt = shouldCreateTrial ? new Date() : null;
+  const trialExpiredAt = trialStartedAt ? addDays(trialStartedAt, TRIAL_DAYS) : null;
 
   const userPayload = {
     fullName: payload.fullName,
@@ -128,6 +187,15 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
 
       if (payload.subscription) {
         organizationPayload.subscription = payload.subscription;
+      } else if (trialPlan && trialStartedAt && trialExpiredAt) {
+        organizationPayload.subscription = {
+          plan: "free",
+          status: "trialing",
+          startedAt: trialStartedAt,
+          expiredAt: trialExpiredAt,
+          maxBranches: trialPlan.limits.maxBranches,
+          maxEmployees: trialPlan.limits.maxEmployees,
+        };
       }
 
       const organization = await OrganizationModel.create(organizationPayload);
@@ -158,12 +226,35 @@ const registerOwner = async (payload: RegisterOwnerInput) => {
         user.branchId = branch._id as Types.ObjectId;
       }
 
+      if (trialPlan && trialStartedAt && trialExpiredAt) {
+        const subscription = await SubscriptionModel.create({
+          organizationId,
+          ownerId: userId,
+          planId: trialPlan._id,
+          planCode: trialPlan.code,
+          planName: trialPlan.name,
+          priceMonthly: trialPlan.priceMonthly,
+          currency: trialPlan.currency,
+          limits: trialPlan.limits,
+          features: trialPlan.features,
+          startDate: trialStartedAt,
+          endDate: trialExpiredAt,
+          status: "active",
+          autoRenew: false,
+          createdBy: userId,
+        });
+
+        organization.subscriptionId = subscription._id as Types.ObjectId;
+        await organization.save();
+      }
+
       await user.save();
     }
   } catch (error) {
     await Promise.allSettled([
       BranchModel.deleteMany({ ownerId: user._id }),
       OrganizationModel.deleteMany({ ownerId: user._id }),
+      SubscriptionModel.deleteMany({ ownerId: user._id }),
       UserModel.findByIdAndDelete(user._id),
     ]);
 

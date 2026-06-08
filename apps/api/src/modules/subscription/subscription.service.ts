@@ -148,6 +148,12 @@ const getCurrentSubscriptionForOrganization = async (
   return subscription;
 };
 
+const assertActiveOrganizationSubscription = async (
+  organizationId: Types.ObjectId
+) => {
+  await getCurrentSubscriptionForOrganization(organizationId);
+};
+
 const toPublicPlan = (plan: ISubscriptionPlan) => ({
   id: getDocumentId(plan).toString(),
   name: plan.name,
@@ -635,4 +641,5 @@ export const SubscriptionService = {
   checkSubscriptionLimits,
   assertCanCreateBranch,
   assertCanCreateEmployee,
+  assertActiveOrganizationSubscription,
 };

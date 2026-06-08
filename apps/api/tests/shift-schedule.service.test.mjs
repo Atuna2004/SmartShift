@@ -6,6 +6,7 @@ import { ScheduleModel } from "../dist/modules/schedule/schedule.model.js";
 import { ScheduleService } from "../dist/modules/schedule/schedule.service.js";
 import { ShiftTemplateModel } from "../dist/modules/shift/shift-template.model.js";
 import { ShiftService } from "../dist/modules/shift/shift.service.js";
+import { SubscriptionModel } from "../dist/modules/subscription/subscription.model.js";
 import { UserModel } from "../dist/modules/user/user.model.js";
 
 const organizationId = new Types.ObjectId("64c000000000000000000001");
@@ -15,6 +16,9 @@ const staffId = new Types.ObjectId("64a000000000000000000003");
 const branchId = new Types.ObjectId("64b000000000000000000001");
 const shiftTemplateId = new Types.ObjectId("64d000000000000000000001");
 const assignedShiftId = new Types.ObjectId("64e000000000000000000001");
+
+const futureWorkDate = new Date("2026-07-25T00:00:00.000Z");
+const futureNextWorkDate = new Date("2026-07-26T00:00:00.000Z");
 
 const originals = [];
 
@@ -108,6 +112,14 @@ const createAssignedShiftDoc = (overrides = {}) => ({
   ...overrides,
 });
 
+const stubActiveSubscription = () => {
+  stub(SubscriptionModel, "findOne", () => ({
+    async sort() {
+      return { _id: new Types.ObjectId(), organizationId, status: "active" };
+    },
+  }));
+};
+
 test("Create Shift Template: manager can create template in assigned branch", async () => {
   const manager = createUserDoc({ _id: managerId, role: "manager", branchId });
   const branch = createBranchDoc();
@@ -115,6 +127,7 @@ test("Create Shift Template: manager can create template in assigned branch", as
 
   stub(UserModel, "findById", async () => manager);
   stub(BranchModel, "findById", async () => branch);
+  stubActiveSubscription();
   stub(ShiftTemplateModel, "findOne", async () => null);
   stub(ShiftTemplateModel, "create", async (payload) => {
     createdPayload = payload;
@@ -166,6 +179,7 @@ test("Create Assigned Shift: manager can assign staff using template times", asy
   stub(UserModel, "findById", async () => findByIdQueue.shift() ?? null);
   stub(BranchModel, "findById", async () => branch);
   stub(ShiftTemplateModel, "findById", async () => shiftTemplate);
+  stubActiveSubscription();
   stub(ScheduleModel, "find", async () => []);
   stub(ScheduleModel, "create", async (payload) => {
     createdPayload = payload;
@@ -176,7 +190,7 @@ test("Create Assigned Shift: manager can assign staff using template times", asy
     branchId: branchId.toString(),
     employeeId: staffId.toString(),
     shiftTemplateId: shiftTemplateId.toString(),
-    workDate: new Date("2026-05-25T10:00:00.000Z"),
+    workDate: futureWorkDate,
   });
 
   assert.equal(result.id, assignedShiftId.toString());
@@ -196,7 +210,7 @@ test("Create Assigned Shift: allows same employee on non-overlapping day and ove
     endTime: "04:00",
   });
   const existingMorningShift = createAssignedShiftDoc({
-    workDate: new Date("2026-05-25T00:00:00.000Z"),
+    workDate: futureWorkDate,
     shiftStartTime: "08:00",
     shiftEndTime: "16:00",
   });
@@ -205,6 +219,7 @@ test("Create Assigned Shift: allows same employee on non-overlapping day and ove
   stub(UserModel, "findById", async () => findByIdQueue.shift() ?? null);
   stub(BranchModel, "findById", async () => branch);
   stub(ShiftTemplateModel, "findById", async () => nightTemplate);
+  stubActiveSubscription();
   stub(ScheduleModel, "find", async () => [existingMorningShift]);
   stub(ScheduleModel, "create", async (payload) =>
     createAssignedShiftDoc({ _id: assignedShiftId, ...payload })
@@ -214,7 +229,7 @@ test("Create Assigned Shift: allows same employee on non-overlapping day and ove
     branchId: branchId.toString(),
     employeeId: staffId.toString(),
     shiftTemplateId: shiftTemplateId.toString(),
-    workDate: new Date("2026-05-25T00:00:00.000Z"),
+    workDate: futureWorkDate,
   });
 
   assert.equal(result.shiftStartTime, "20:00");
@@ -231,7 +246,7 @@ test("Create Assigned Shift: rejects overlapping overnight shift into next day",
     endTime: "06:00",
   });
   const existingNightShift = createAssignedShiftDoc({
-    workDate: new Date("2026-05-25T00:00:00.000Z"),
+    workDate: futureWorkDate,
     shiftStartTime: "20:00",
     shiftEndTime: "04:00",
   });
@@ -240,6 +255,7 @@ test("Create Assigned Shift: rejects overlapping overnight shift into next day",
   stub(UserModel, "findById", async () => findByIdQueue.shift() ?? null);
   stub(BranchModel, "findById", async () => branch);
   stub(ShiftTemplateModel, "findById", async () => earlyTemplate);
+  stubActiveSubscription();
   stub(ScheduleModel, "find", async () => [existingNightShift]);
 
   await assert.rejects(
@@ -248,7 +264,7 @@ test("Create Assigned Shift: rejects overlapping overnight shift into next day",
         branchId: branchId.toString(),
         employeeId: staffId.toString(),
         shiftTemplateId: shiftTemplateId.toString(),
-        workDate: new Date("2026-05-26T00:00:00.000Z"),
+        workDate: futureNextWorkDate,
       }),
     { statusCode: 409 }
   );
@@ -260,6 +276,7 @@ test("View My Schedule: filters by authenticated user and date range", async () 
   let capturedFilter;
 
   stub(UserModel, "findById", async () => staff);
+  stub(BranchModel, "find", async () => [createBranchDoc()]);
   stub(ScheduleModel, "find", (filter) => {
     capturedFilter = filter;
     return {
@@ -270,8 +287,8 @@ test("View My Schedule: filters by authenticated user and date range", async () 
   });
 
   const result = await ScheduleService.getMySchedule(actorPayload(staff), {
-    from: new Date("2026-05-25T00:00:00.000Z"),
-    to: new Date("2026-05-31T00:00:00.000Z"),
+    from: futureWorkDate,
+    to: new Date("2026-07-31T00:00:00.000Z"),
   });
 
   assert.equal(result.data.length, 1);

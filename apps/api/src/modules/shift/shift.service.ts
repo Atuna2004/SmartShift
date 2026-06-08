@@ -3,6 +3,7 @@ import { AppError } from "../../common/errors/AppError.js";
 import type { AuthTokenPayload } from "../../common/utils/jwt.js";
 import { BranchModel } from "../branch/branch.model.js";
 import type { IBranch } from "../branch/branch.model.js";
+import { SubscriptionService } from "../subscription/subscription.service.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import { ShiftTemplateModel } from "./shift-template.model.js";
@@ -139,6 +140,7 @@ const createShiftTemplate = async (
   const actor = await ensureActor(actorPayload);
   const branch = await getBranchForActor(actor, payload.branchId);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(branch.organizationId);
   await assertUniqueCode(getDocumentId(branch), payload.code);
 
   const shiftTemplate = await ShiftTemplateModel.create({
@@ -231,6 +233,9 @@ const updateShiftTemplate = async (
   const actor = await ensureActor(actorPayload);
   const shiftTemplate = await getShiftTemplateForActor(actor, shiftTemplateId);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(
+    shiftTemplate.organizationId
+  );
   await assertUniqueCode(
     shiftTemplate.branchId,
     payload.code,
@@ -262,6 +267,9 @@ const disableShiftTemplate = async (
   const actor = await ensureActor(actorPayload);
   const shiftTemplate = await getShiftTemplateForActor(actor, shiftTemplateId);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(
+    shiftTemplate.organizationId
+  );
   shiftTemplate.status = "disabled";
   shiftTemplate.set("deletedAt", undefined);
   shiftTemplate.updatedBy = getDocumentId(actor);
@@ -277,6 +285,9 @@ const enableShiftTemplate = async (
   const actor = await ensureActor(actorPayload);
   const shiftTemplate = await getShiftTemplateForActor(actor, shiftTemplateId);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(
+    shiftTemplate.organizationId
+  );
   shiftTemplate.status = "active";
   shiftTemplate.set("deletedAt", undefined);
   shiftTemplate.updatedBy = getDocumentId(actor);
