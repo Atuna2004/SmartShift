@@ -14,6 +14,7 @@ export type NotificationType =
 
 export type Notification = {
   id: string;
+  userId: string;
   title: string;
   message: string;
   type: NotificationType;
@@ -43,4 +44,19 @@ export type NotificationListQuery = {
   isRead?: boolean;
   type?: NotificationType;
   includeArchived?: boolean;
+};
+
+export type CreateNotificationRequest = {
+  userIds?: string[];
+  branchId?: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  relatedId?: string;
+  relatedModel?: string;
+};
+
+export type CreateNotificationResponse = {
+  total: number;
+  data: Notification[];
 };

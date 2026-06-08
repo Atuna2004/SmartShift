@@ -26,6 +26,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { branchApi } from "@/features/employeeBranch/branch.api";
 import { paymentApi } from "@/features/payment/payment.api";
 import type { Payment, PaymentStatus } from "@/features/payment/payment.types";
 import { reportApi } from "@/features/reportSubscription/report.api";
@@ -37,12 +38,20 @@ import { useAuthStore } from "@/store";
 
 export const ReportsPage = () => {
   const [activeDetail, setActiveDetail] = useState<"employee-hours" | "late-statistics" | "branch-summary" | null>(null);
+  const [activeTab, setActiveTab] = useState<"overview" | "employees" | "branches" | "exceptions" | "payroll">("overview");
   const today = new Date();
-  const from = toDateInputValue(addDays(today, -29));
-  const to = toDateInputValue(today);
+  const [rangePreset, setRangePreset] = useState<"7d" | "30d" | "month" | "lastMonth" | "quarter" | "custom">("30d");
+  const [customFrom, setCustomFrom] = useState(toDateInputValue(addDays(today, -29)));
+  const [customTo, setCustomTo] = useState(toDateInputValue(today));
+  const [branchId, setBranchId] = useState("");
+  const range = resolveReportRange(rangePreset, customFrom, customTo);
+  const branchesQuery = useQuery({
+    queryKey: ["branches", "report-filter"],
+    queryFn: () => branchApi.list({ limit: 100, status: "active" }),
+  });
   const reportQuery = useQuery({
-    queryKey: ["reports", "owner-summary", { from, to }],
-    queryFn: () => reportApi.ownerSummary({ from, to }),
+    queryKey: ["reports", "owner-summary", { branchId, from: range.from, to: range.to }],
+    queryFn: () => reportApi.ownerSummary({ from: range.from, to: range.to, ...(branchId ? { branchId } : {}) }),
   });
   const summary = reportQuery.data;
   const trend = summary?.attendanceTrend ?? [];
@@ -52,7 +61,15 @@ export const ReportsPage = () => {
   const employeeHours = summary?.employeeHours ?? [];
   const maxEmployeeHours = Math.max(1, ...employeeHours.map((item) => item.hours));
   const branchSummary = summary?.branchSummary ?? [];
-  const reports = summary?.recentReports ?? [];
+  const exceptions = summary?.exceptions ?? [];
+  const employeeDetails = summary?.employeeDetails ?? [];
+  const tabs: Array<{ label: string; value: typeof activeTab }> = [
+    { label: "Tổng quan", value: "overview" },
+    { label: "Nhân viên", value: "employees" },
+    { label: "Chi nhánh", value: "branches" },
+    { label: "Ngoại lệ", value: "exceptions" },
+    { label: "Lương ước tính", value: "payroll" },
+  ];
 
   return (
     <ReportShell title="Báo cáo & phân tích" search="Tìm báo cáo, chi nhánh...">
@@ -60,20 +77,58 @@ export const ReportsPage = () => {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <h1 className="text-4xl font-semibold tracking-tight text-black">Báo cáo & phân tích</h1>
-            <p className="text-base text-[#444748]">Dữ liệu vận hành trong 30 ngày gần nhất.</p>
+            <p className="text-base text-[#444748]">Theo dõi vận hành theo khoảng ngày, chi nhánh, nhân viên và các ngoại lệ cần xử lý.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 text-sm font-semibold hover:bg-[#f7f3f2]" type="button"><CalendarDays className="h-4 w-4" />30 ngày gần nhất</button>
-            <Link className="inline-flex h-10 items-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white hover:opacity-90" to="/dashboard/reports/export"><Download className="h-4 w-4" />Xuất tóm tắt</Link>
+            <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white hover:opacity-90" onClick={() => exportReportCsv(summary)} type="button"><Download className="h-4 w-4" />Xuất CSV</button>
           </div>
         </div>
+        <section className="rounded-xl border border-[#e5e7eb] bg-white p-4">
+          <div className="grid gap-3 md:grid-cols-5">
+            <label className="space-y-1">
+              <span className="text-xs font-bold uppercase text-[#444748]">Khoảng thời gian</span>
+              <select className="h-10 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm font-semibold" onChange={(event) => setRangePreset(event.target.value as typeof rangePreset)} value={rangePreset}>
+                <option value="7d">7 ngày gần nhất</option>
+                <option value="30d">30 ngày gần nhất</option>
+                <option value="month">Tháng này</option>
+                <option value="lastMonth">Tháng trước</option>
+                <option value="quarter">Quý này</option>
+                <option value="custom">Tùy chỉnh</option>
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-bold uppercase text-[#444748]">Từ ngày</span>
+              <input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm font-semibold disabled:bg-[#f5f5f5]" disabled={rangePreset !== "custom"} onChange={(event) => setCustomFrom(event.target.value)} type="date" value={range.from} />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-bold uppercase text-[#444748]">Đến ngày</span>
+              <input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm font-semibold disabled:bg-[#f5f5f5]" disabled={rangePreset !== "custom"} onChange={(event) => setCustomTo(event.target.value)} type="date" value={range.to} />
+            </label>
+            <label className="space-y-1 md:col-span-2">
+              <span className="text-xs font-bold uppercase text-[#444748]">Chi nhánh</span>
+              <select className="h-10 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm font-semibold" onChange={(event) => setBranchId(event.target.value)} value={branchId}>
+                <option value="">Tất cả chi nhánh</option>
+                {(branchesQuery.data?.data ?? []).map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+              </select>
+            </label>
+          </div>
+        </section>
         {reportQuery.isError ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(reportQuery.error, "Không thể tải báo cáo.")}</p> : null}
         <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <ReportKpi icon={<CheckCircle2 />} label="Tỷ lệ có mặt" loading={reportQuery.isLoading} trend={`${summary?.kpis.attendanceCount ?? 0} lượt`} value={summary ? `${summary.kpis.averageAttendanceRate}%` : "--"} />
           <ReportKpi icon={<Timer />} label="Tổng giờ làm" loading={reportQuery.isLoading} trend="Tổng giờ" value={summary ? formatNumber(summary.kpis.totalWorkHours) : "--"} />
-          <ReportKpi icon={<AlertTriangle />} label="Tỷ lệ đi muộn" loading={reportQuery.isLoading} trend={`${summary?.kpis.activeEmployees ?? 0} nhân viên`} trendTone="danger" value={summary ? `${summary.kpis.lateRate}%` : "--"} />
-          <ReportKpi icon={<Store />} label="Chi nhánh hoạt động" loading={reportQuery.isLoading} trend="Đang hoạt động" value={summary ? String(summary.kpis.activeBranches) : "--"} />
+          <ReportKpi icon={<AlertTriangle />} label="Ngoại lệ" loading={reportQuery.isLoading} trend={`${summary?.kpis.missingCheckoutCount ?? 0} thiếu checkout`} trendTone="danger" value={summary ? String(exceptions.length) : "--"} />
+          <ReportKpi icon={<CreditCard />} label="Lương ước tính" loading={reportQuery.isLoading} trend={`${summary?.kpis.overtimeHours ?? 0}h tăng ca`} value={summary ? formatCurrency(summary.kpis.payrollEstimate, "VND") : "--"} />
         </section>
+        <nav className="flex gap-2 overflow-x-auto rounded-xl border border-[#e5e7eb] bg-white p-2">
+          {tabs.map((tab) => (
+            <button className={activeTab === tab.value ? "shrink-0 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white" : "shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2]"} key={tab.value} onClick={() => setActiveTab(tab.value)} type="button">
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+        {activeTab === "overview" ? (
+          <>
         <section className="rounded-xl border border-[#e5e7eb] bg-white p-6">
           <div className="mb-8 flex items-center justify-between">
             <div>
@@ -91,18 +146,12 @@ export const ReportsPage = () => {
           <ReportCard onViewFull={() => setActiveDetail("late-statistics")} title="Thống kê đi muộn"><div className="flex items-center justify-center rounded-lg border border-[#e5e7eb] bg-white p-6"><div className="relative flex h-24 w-24 items-center justify-center rounded-full border-8 border-[#f1edec]"><div className="absolute inset-[-8px] rounded-full border-8 border-black border-b-transparent border-r-transparent" style={{ transform: `rotate(${Math.min(360, (summary?.kpis.lateRate ?? 0) * 3.6)}deg)` }} /><b>{summary ? `${summary.kpis.lateRate}%` : "--"}</b></div></div></ReportCard>
           <ReportCard onViewFull={() => setActiveDetail("branch-summary")} title="Tóm tắt chi nhánh"><div className="space-y-4 rounded-lg border border-[#e5e7eb] bg-white p-4">{branchSummary.length === 0 ? <p className="text-sm font-semibold text-[#444748]">Chưa có dữ liệu chi nhánh.</p> : branchSummary.map((row) => <div className="flex justify-between gap-3 text-xs font-bold" key={row.branchId}><span className="truncate text-[#444748]">{row.branchName}</span><span>{formatNumber(row.workHours)}h</span></div>)}</div></ReportCard>
         </section>
-        <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
-          <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-4">
-            <h2 className="text-2xl font-semibold tracking-tight text-black">Báo cáo gần đây</h2>
-            <button className="text-sm font-bold hover:underline" type="button">Xem lịch sử</button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] text-left">
-              <thead className="border-b border-[#e5e7eb] bg-[#f5f5f5] text-xs font-bold uppercase tracking-wider text-[#444748]"><tr><th className="px-6 py-4">Tên báo cáo</th><th className="px-6 py-4">Ngày tạo</th><th className="px-6 py-4">Trạng thái</th><th className="px-6 py-4">Dung lượng</th><th className="px-6 py-4 text-right">Thao tác</th></tr></thead>
-              <tbody className="divide-y divide-[#e5e7eb]">{reports.length === 0 ? <tr><td className="px-6 py-4 text-sm font-semibold text-[#444748]" colSpan={5}>Chưa có báo cáo gần đây.</td></tr> : reports.map((report) => <ReportRow report={report} key={report.id} />)}</tbody>
-            </table>
-          </div>
-        </section>
+          </>
+        ) : null}
+        {activeTab === "employees" ? <EmployeeReportTable rows={employeeDetails} /> : null}
+        {activeTab === "branches" ? <BranchPerformanceTable rows={branchSummary} /> : null}
+        {activeTab === "exceptions" ? <ExceptionTable rows={exceptions} /> : null}
+        {activeTab === "payroll" ? <PayrollEstimateTable rows={employeeDetails} total={summary?.kpis.payrollEstimate ?? 0} /> : null}
         {activeDetail ? <ReportDetailModal detail={activeDetail} onClose={() => setActiveDetail(null)} summary={summary} /> : null}
       </main>
     </ReportShell>
@@ -366,10 +415,135 @@ const BranchSummaryDetail = ({ rows }: { rows: ReportSummary["branchSummary"] })
   </div>
 );
 
+const EmployeeReportTable = ({ rows }: { rows: ReportSummary["employeeDetails"] }) => (
+  <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+    <TableHeader title="Báo cáo nhân viên" subtitle={`${rows.length} nhân viên có dữ liệu trong kỳ`} />
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[920px] text-left">
+        <thead className="bg-[#f5f5f5] text-xs font-bold uppercase text-[#444748]"><tr><th className="px-4 py-3">Nhân viên</th><th className="px-4 py-3 text-right">Lượt công</th><th className="px-4 py-3 text-right">Giờ làm</th><th className="px-4 py-3 text-right">Tăng ca</th><th className="px-4 py-3 text-right">Đi muộn</th><th className="px-4 py-3 text-right">Vắng</th><th className="px-4 py-3 text-right">Thiếu checkout</th></tr></thead>
+        <tbody className="divide-y divide-[#e5e7eb]">{rows.length === 0 ? <EmptyTableRow colSpan={7} label="Chưa có dữ liệu nhân viên." /> : rows.map((row) => <tr className="hover:bg-[#f7f3f2]" key={row.employeeId}><td className="px-4 py-3 font-semibold">{row.employeeName}</td><td className="px-4 py-3 text-right">{row.attendanceCount}</td><td className="px-4 py-3 text-right font-bold">{formatNumber(row.workHours)}h</td><td className="px-4 py-3 text-right">{formatNumber(row.overtimeHours)}h</td><td className="px-4 py-3 text-right text-[#ef4444]">{row.lateCount}</td><td className="px-4 py-3 text-right">{row.absentCount}</td><td className="px-4 py-3 text-right">{row.missingCheckoutCount}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+);
+
+const BranchPerformanceTable = ({ rows }: { rows: ReportSummary["branchSummary"] }) => (
+  <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+    <TableHeader title="Hiệu suất chi nhánh" subtitle={`${rows.length} chi nhánh có dữ liệu trong kỳ`} />
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[980px] text-left">
+        <thead className="bg-[#f5f5f5] text-xs font-bold uppercase text-[#444748]"><tr><th className="px-4 py-3">Chi nhánh</th><th className="px-4 py-3 text-right">Nhân viên</th><th className="px-4 py-3 text-right">Lượt công</th><th className="px-4 py-3 text-right">Giờ làm</th><th className="px-4 py-3 text-right">Tăng ca</th><th className="px-4 py-3 text-right">Tỷ lệ muộn</th><th className="px-4 py-3 text-right">Tỷ lệ vắng</th><th className="px-4 py-3 text-right">Thiếu checkout</th></tr></thead>
+        <tbody className="divide-y divide-[#e5e7eb]">{rows.length === 0 ? <EmptyTableRow colSpan={8} label="Chưa có dữ liệu chi nhánh." /> : rows.map((row) => <tr className="hover:bg-[#f7f3f2]" key={row.branchId}><td className="px-4 py-3 font-semibold">{row.branchName}</td><td className="px-4 py-3 text-right">{row.employeeCount}</td><td className="px-4 py-3 text-right">{row.attendanceCount}</td><td className="px-4 py-3 text-right font-bold">{formatNumber(row.workHours)}h</td><td className="px-4 py-3 text-right">{formatNumber(row.overtimeHours)}h</td><td className="px-4 py-3 text-right">{row.lateRate}%</td><td className="px-4 py-3 text-right">{row.absentRate}%</td><td className="px-4 py-3 text-right">{row.missingCheckoutCount}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+);
+
+const ExceptionTable = ({ rows }: { rows: ReportSummary["exceptions"] }) => (
+  <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+    <TableHeader title="Ngoại lệ cần xử lý" subtitle={`${rows.length} bản ghi gần nhất`} />
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[860px] text-left">
+        <thead className="bg-[#f5f5f5] text-xs font-bold uppercase text-[#444748]"><tr><th className="px-4 py-3">Ngày</th><th className="px-4 py-3">Loại</th><th className="px-4 py-3">Nhân viên</th><th className="px-4 py-3">Chi nhánh</th><th className="px-4 py-3">Ghi chú</th></tr></thead>
+        <tbody className="divide-y divide-[#e5e7eb]">{rows.length === 0 ? <EmptyTableRow colSpan={5} label="Không có ngoại lệ trong kỳ." /> : rows.map((row) => <tr className="hover:bg-[#f7f3f2]" key={row.id}><td className="px-4 py-3">{formatDate(row.date)}</td><td className="px-4 py-3"><ExceptionBadge type={row.type} /></td><td className="px-4 py-3 font-semibold">{row.employeeName}</td><td className="px-4 py-3 text-[#444748]">{row.branchName}</td><td className="px-4 py-3 text-[#444748]">{row.note ?? "--"}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+);
+
+const PayrollEstimateTable = ({ rows, total }: { rows: ReportSummary["employeeDetails"]; total: number }) => (
+  <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+    <TableHeader title="Lương ước tính" subtitle={`Tổng ước tính: ${formatCurrency(total, "VND")}`} />
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[760px] text-left">
+        <thead className="bg-[#f5f5f5] text-xs font-bold uppercase text-[#444748]"><tr><th className="px-4 py-3">Nhân viên</th><th className="px-4 py-3 text-right">Giờ làm</th><th className="px-4 py-3 text-right">Tăng ca</th><th className="px-4 py-3 text-right">Ước tính</th></tr></thead>
+        <tbody className="divide-y divide-[#e5e7eb]">{rows.length === 0 ? <EmptyTableRow colSpan={4} label="Chưa có dữ liệu lương ước tính." /> : rows.map((row) => <tr className="hover:bg-[#f7f3f2]" key={row.employeeId}><td className="px-4 py-3 font-semibold">{row.employeeName}</td><td className="px-4 py-3 text-right">{formatNumber(row.workHours)}h</td><td className="px-4 py-3 text-right">{formatNumber(row.overtimeHours)}h</td><td className="px-4 py-3 text-right font-bold">{formatCurrency(row.payrollEstimate, "VND")}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+);
+
+const TableHeader = ({ subtitle, title }: { subtitle: string; title: string }) => (
+  <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-4"><h2 className="text-2xl font-semibold tracking-tight text-black">{title}</h2><span className="text-sm font-semibold text-[#444748]">{subtitle}</span></div>
+);
+
+const EmptyTableRow = ({ colSpan, label }: { colSpan: number; label: string }) => <tr><td className="px-4 py-5 text-sm font-semibold text-[#444748]" colSpan={colSpan}>{label}</td></tr>;
+
+const ExceptionBadge = ({ type }: { type: ReportSummary["exceptions"][number]["type"] }) => {
+  const label = type === "absent" ? "Vắng" : type === "missing_checkout" ? "Thiếu checkout" : type === "manual_pending" ? "Chờ chỉnh công" : "Đi muộn";
+  const className = type === "absent" ? "bg-[#ffdad6] text-[#93000a]" : type === "missing_checkout" ? "bg-[#fff4cc] text-[#7a5900]" : "bg-[#f1edec] text-[#444748]";
+  return <span className={`rounded-full px-3 py-1 text-xs font-bold ${className}`}>{label}</span>;
+};
+
 const ReportRow = ({ report }: { report: ReportSummary["recentReports"][number] }) => {
   const Icon = report.name.endsWith(".xlsx") ? Table2 : FileText;
   const isCompleted = report.status === "completed";
   return <tr className="hover:bg-[#f7f3f2]"><td className="px-6 py-4"><div className="flex items-center gap-2"><Icon className="h-5 w-5 text-[#444748]" /><span className="font-semibold">{report.name}</span></div></td><td className="px-6 py-4 text-[#444748]">{formatDateTime(report.generatedAt)}</td><td className="px-6 py-4"><span className={isCompleted ? "rounded-full bg-[#10b981]/10 px-3 py-1 text-xs font-black uppercase text-[#10b981]" : "rounded-full bg-[#f1edec] px-3 py-1 text-xs font-black uppercase text-[#444748]"}>{isCompleted ? "Hoàn tất" : "Đang xử lý"}</span></td><td className="px-6 py-4 text-[#444748]">{report.size}</td><td className="px-6 py-4 text-right"><button className={isCompleted ? "rounded-lg p-2 hover:bg-[#f1edec]" : "cursor-not-allowed rounded-lg p-2 opacity-30"} type="button"><Download className="h-5 w-5" /></button></td></tr>;
+};
+
+const resolveReportRange = (preset: "7d" | "30d" | "month" | "lastMonth" | "quarter" | "custom", customFrom: string, customTo: string) => {
+  const today = new Date();
+
+  if (preset === "custom") {
+    return { from: customFrom, to: customTo };
+  }
+
+  if (preset === "7d") {
+    return { from: toDateInputValue(addDays(today, -6)), to: toDateInputValue(today) };
+  }
+
+  if (preset === "month") {
+    return { from: toDateInputValue(new Date(today.getFullYear(), today.getMonth(), 1)), to: toDateInputValue(today) };
+  }
+
+  if (preset === "lastMonth") {
+    const from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const to = new Date(today.getFullYear(), today.getMonth(), 0);
+    return { from: toDateInputValue(from), to: toDateInputValue(to) };
+  }
+
+  if (preset === "quarter") {
+    const quarterStartMonth = Math.floor(today.getMonth() / 3) * 3;
+    return { from: toDateInputValue(new Date(today.getFullYear(), quarterStartMonth, 1)), to: toDateInputValue(today) };
+  }
+
+  return { from: toDateInputValue(addDays(today, -29)), to: toDateInputValue(today) };
+};
+
+const exportReportCsv = (summary?: ReportSummary) => {
+  if (!summary) return;
+
+  const rows = [
+    ["Section", "Name", "Attendance", "Hours", "Late", "Absent", "Missing checkout", "Payroll estimate"],
+    ...summary.employeeDetails.map((row) => [
+      "Employee",
+      row.employeeName,
+      row.attendanceCount,
+      row.workHours,
+      row.lateCount,
+      row.absentCount,
+      row.missingCheckoutCount,
+      row.payrollEstimate,
+    ]),
+    ...summary.branchSummary.map((row) => [
+      "Branch",
+      row.branchName,
+      row.attendanceCount,
+      row.workHours,
+      row.lateRate,
+      row.absentCount,
+      row.missingCheckoutCount,
+      "",
+    ]),
+  ];
+  const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, "\"\"")}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `smartshift-report-${summary.range.from.slice(0, 10)}-${summary.range.to.slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 const addDays = (date: Date, days: number) => {

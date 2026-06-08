@@ -40,6 +40,12 @@ const ensureOwnerOrAdmin = async (actor: AuthTokenPayload) => {
   return user;
 };
 
+const assertAdmin = (actor: IUser) => {
+  if (actor.role !== "admin") {
+    throw new AppError(403, "Only admins can manage organization system status or subscription limits");
+  }
+};
+
 const assertOrganizationAccess = (actor: IUser, organization: IOrganization) => {
   if (actor.role === "admin") {
     return;
@@ -218,6 +224,7 @@ const configureSubscriptionInfo = async (
   organizationId?: string
 ) => {
   const actor = await ensureOwnerOrAdmin(actorPayload);
+  assertAdmin(actor);
   const organization = await resolveOrganization(actor, organizationId);
 
   organization.subscription = {
@@ -236,6 +243,7 @@ const setOrganizationStatus = async (
   status: "active" | "disabled"
 ) => {
   const actor = await ensureOwnerOrAdmin(actorPayload);
+  assertAdmin(actor);
   const organization = await resolveOrganization(actor, organizationId);
   const now = new Date();
 

@@ -206,20 +206,20 @@ test("Create Subscription Payment: creates pending subscription and payment", as
   assert.deepEqual(createdSubscriptionPayload.status, "pending");
 });
 
-test("Mark Payment Paid: activates pending subscription", async () => {
-  const owner = createUserDoc();
+test("Mark Payment Paid: admin activates pending subscription", async () => {
+  const admin = createUserDoc({ role: "admin", organizationId: undefined });
   const organization = createOrganizationDoc();
   const payment = createPaymentDoc();
   const subscription = createSubscriptionDoc();
 
-  stub(UserModel, "findById", async () => owner);
+  stub(UserModel, "findById", async () => admin);
   stub(OrganizationModel, "findById", async () => organization);
   stub(PaymentModel, "findById", async () => payment);
   stub(SubscriptionModel, "findById", async () => subscription);
   stub(SubscriptionModel, "updateMany", async () => ({ modifiedCount: 1 }));
 
   const result = await PaymentService.markPaymentPaid(
-    actorPayload(owner),
+    actorPayload(admin),
     paymentId.toString(),
     { transactionCode: "BANK-001" }
   );
@@ -228,6 +228,24 @@ test("Mark Payment Paid: activates pending subscription", async () => {
   assert.equal(result.transactionCode, "BANK-001");
   assert.equal(subscription.status, "active");
   assert.equal(subscription.saved, true);
+});
+
+test("Mark Payment Paid: owner cannot manually activate subscription payment", async () => {
+  const owner = createUserDoc();
+  const organization = createOrganizationDoc();
+  const payment = createPaymentDoc();
+
+  stub(UserModel, "findById", async () => owner);
+  stub(OrganizationModel, "findById", async () => organization);
+  stub(PaymentModel, "findById", async () => payment);
+
+  await assert.rejects(
+    () =>
+      PaymentService.markPaymentPaid(actorPayload(owner), paymentId.toString(), {
+        transactionCode: "BANK-001",
+      }),
+    { statusCode: 403 }
+  );
 });
 
 test("Calculate Payroll: uses attendance hours, overtime and late deductions", async () => {

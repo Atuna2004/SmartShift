@@ -4,6 +4,7 @@ import type { AuthTokenPayload } from "../../common/utils/jwt.js";
 import { BranchModel } from "../branch/branch.model.js";
 import type { IBranch } from "../branch/branch.model.js";
 import { ShiftTemplateModel } from "../shift/shift-template.model.js";
+import { SubscriptionService } from "../subscription/subscription.service.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import { ScheduleModel } from "./schedule.model.js";
@@ -285,6 +286,7 @@ const createAssignedShift = async (
 
   assertNotPastWorkDate(workDate);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(branch.organizationId);
   await assertNoOverlappingAssignedShift(
     getDocumentId(employee),
     workDate,
@@ -350,6 +352,7 @@ const updateAssignedShift = async (
 
   assertNotPastWorkDate(workDate);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(branch.organizationId);
   if (payload.shiftStartTime !== undefined) {
     shiftStartTime = payload.shiftStartTime;
   }
@@ -395,6 +398,9 @@ const deleteAssignedShift = async (
 
   const assignedShift = await getAssignedShiftForActor(actor, assignedShiftId);
 
+  await SubscriptionService.assertActiveOrganizationSubscription(
+    assignedShift.organizationId
+  );
   assignedShift.status = "cancelled";
   assignedShift.deletedAt = new Date();
   assignedShift.updatedBy = getDocumentId(actor);

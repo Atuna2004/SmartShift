@@ -128,18 +128,18 @@ const createSubscriptionDoc = (overrides = {}) => ({
   ...overrides,
 });
 
-test("Create Subscription Plan: owner can create active plan", async () => {
-  const owner = createUserDoc();
+test("Create Subscription Plan: admin can create active plan", async () => {
+  const admin = createUserDoc({ role: "admin", organizationId: undefined });
   let createdPayload;
 
-  stub(UserModel, "findById", async () => owner);
+  stub(UserModel, "findById", async () => admin);
   stub(SubscriptionPlanModel, "findOne", async () => null);
   stub(SubscriptionPlanModel, "create", async (payload) => {
     createdPayload = payload;
     return createPlanDoc({ _id: planId, ...payload });
   });
 
-  const result = await SubscriptionService.createSubscriptionPlan(actorPayload(owner), {
+  const result = await SubscriptionService.createSubscriptionPlan(actorPayload(admin), {
     name: "Basic",
     code: "basic",
     priceMonthly: 199000,
@@ -161,13 +161,39 @@ test("Create Subscription Plan: owner can create active plan", async () => {
 
   assert.equal(result.id, planId.toString());
   assert.equal(result.status, "active");
-  assert.equal(createdPayload.createdBy.toString(), ownerId.toString());
+  assert.equal(createdPayload.createdBy.toString(), admin._id.toString());
 });
 
-test("Create Subscription Plan: staff cannot manage plans", async () => {
+test("Create Subscription Plan: owner and staff cannot manage plans", async () => {
+  const owner = createUserDoc();
   const staff = createUserDoc({ _id: staffId, role: "staff" });
 
-  stub(UserModel, "findById", async () => staff);
+  stub(UserModel, "findById", async () => owner);
+
+  await assert.rejects(
+    () =>
+      SubscriptionService.createSubscriptionPlan(actorPayload(owner), {
+        name: "Pro",
+        code: "pro",
+        priceMonthly: 399000,
+        currency: "VND",
+        limits: {
+          maxBranches: 5,
+          maxEmployees: 100,
+          maxManagers: 10,
+        },
+        features: {
+          qrCheckIn: true,
+          gpsValidation: true,
+          attendanceReports: true,
+          shiftSwap: true,
+          payroll: true,
+        },
+      }),
+    { statusCode: 403 }
+  );
+
+  UserModel.findById = async () => staff;
 
   await assert.rejects(
     () =>
@@ -193,14 +219,14 @@ test("Create Subscription Plan: staff cannot manage plans", async () => {
   );
 });
 
-test("Subscribe Organization To Plan: owner creates active subscription", async () => {
-  const owner = createUserDoc();
+test("Subscribe Organization To Plan: admin creates active subscription", async () => {
+  const admin = createUserDoc({ role: "admin", organizationId: undefined });
   const organization = createOrganizationDoc();
   const plan = createPlanDoc();
   let updateManyFilter;
   let createdPayload;
 
-  stub(UserModel, "findById", async () => owner);
+  stub(UserModel, "findById", async () => admin);
   stub(OrganizationModel, "findById", async () => organization);
   stub(SubscriptionPlanModel, "findById", async () => plan);
   stub(SubscriptionModel, "updateMany", async (filter) => {
@@ -213,7 +239,7 @@ test("Subscribe Organization To Plan: owner creates active subscription", async 
   });
 
   const result = await SubscriptionService.subscribeOrganizationToPlan(
-    actorPayload(owner),
+    actorPayload(admin),
     organizationId.toString(),
     { planId: planId.toString(), autoRenew: true }
   );
@@ -227,8 +253,8 @@ test("Subscribe Organization To Plan: owner creates active subscription", async 
   assert.equal(organization.saved, true);
 });
 
-test("Change Subscription Plan: owner snapshots new active plan", async () => {
-  const owner = createUserDoc();
+test("Change Subscription Plan: admin snapshots new active plan", async () => {
+  const admin = createUserDoc({ role: "admin", organizationId: undefined });
   const organization = createOrganizationDoc();
   const proPlan = createPlanDoc({
     _id: proPlanId,
@@ -245,7 +271,7 @@ test("Change Subscription Plan: owner snapshots new active plan", async () => {
   });
   const subscription = createSubscriptionDoc();
 
-  stub(UserModel, "findById", async () => owner);
+  stub(UserModel, "findById", async () => admin);
   stub(OrganizationModel, "findById", async () => organization);
   stub(SubscriptionPlanModel, "findById", async () => proPlan);
   stub(SubscriptionModel, "findOne", () => ({
@@ -254,7 +280,7 @@ test("Change Subscription Plan: owner snapshots new active plan", async () => {
     },
   }));
 
-  const result = await SubscriptionService.changeSubscriptionPlan(actorPayload(owner), {
+  const result = await SubscriptionService.changeSubscriptionPlan(actorPayload(admin), {
     organizationId: organizationId.toString(),
     planId: proPlanId.toString(),
   });
@@ -265,14 +291,14 @@ test("Change Subscription Plan: owner snapshots new active plan", async () => {
   assert.equal(subscription.saved, true);
 });
 
-test("Renew Subscription: extends from current end date", async () => {
-  const owner = createUserDoc();
+test("Renew Subscription: admin extends from current end date", async () => {
+  const admin = createUserDoc({ role: "admin", organizationId: undefined });
   const organization = createOrganizationDoc();
   const subscription = createSubscriptionDoc({
-    endDate: new Date("2026-06-01T00:00:00.000Z"),
+    endDate: new Date("2026-07-01T00:00:00.000Z"),
   });
 
-  stub(UserModel, "findById", async () => owner);
+  stub(UserModel, "findById", async () => admin);
   stub(OrganizationModel, "findById", async () => organization);
   stub(SubscriptionModel, "findOne", () => ({
     async sort() {
@@ -280,13 +306,13 @@ test("Renew Subscription: extends from current end date", async () => {
     },
   }));
 
-  const result = await SubscriptionService.renewSubscription(actorPayload(owner), {
+  const result = await SubscriptionService.renewSubscription(actorPayload(admin), {
     organizationId: organizationId.toString(),
     months: 2,
     autoRenew: true,
   });
 
-  assert.equal(result.endDate.toISOString(), "2026-08-01T00:00:00.000Z");
+  assert.equal(result.endDate.toISOString(), "2026-09-01T00:00:00.000Z");
   assert.equal(result.autoRenew, true);
   assert.equal(subscription.saved, true);
 });

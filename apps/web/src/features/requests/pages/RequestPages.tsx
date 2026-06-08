@@ -1,4 +1,5 @@
 ﻿import {
+  Archive,
   AlertTriangle,
   BarChart3,
   Bell,
@@ -14,8 +15,10 @@
   Plus,
   Repeat,
   Search,
+  Send,
   Stethoscope,
   UserRound,
+  Users,
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -37,6 +40,35 @@ import { useAuthStore } from "@/store";
 
 type ShiftSwapAction = "accept" | "rejectReceiver" | "approve" | "rejectManager" | "cancel";
 type StaffShiftSwapView = "needs_response" | "pending_manager" | "my_requests" | "history";
+type NotificationTab = "all" | "unread" | "requests" | "alerts" | "schedule" | "system";
+type NotificationRecipientMode = "all_staff" | "branch" | "employees";
+
+const notificationTemplates: Array<{ label: string; type: NotificationType; title: string; message: string }> = [
+  {
+    label: "Lịch làm mới",
+    type: "schedule_published",
+    title: "Lịch làm việc mới đã được công bố",
+    message: "Vui lòng kiểm tra lịch làm việc mới và phản hồi sớm nếu có vướng mắc.",
+  },
+  {
+    label: "Nhắc chấm công",
+    type: "checkin_reminder",
+    title: "Nhắc chấm công đúng giờ",
+    message: "Mọi người lưu ý chấm công khi bắt đầu và kết thúc ca để dữ liệu công được ghi nhận chính xác.",
+  },
+  {
+    label: "Họp nhân viên",
+    type: "system",
+    title: "Thông báo họp nhân viên",
+    message: "Quán sẽ có buổi họp nhân viên. Vui lòng sắp xếp thời gian tham gia đầy đủ.",
+  },
+  {
+    label: "Cảnh báo vận hành",
+    type: "attendance_warning",
+    title: "Cần lưu ý về vận hành ca",
+    message: "Vui lòng kiểm tra lại phân công ca và tuân thủ quy định vận hành trong ngày.",
+  },
+];
 
 export const ShiftSwapPage = () => {
   const queryClient = useQueryClient();
@@ -277,7 +309,7 @@ export const LeaveRequestsPage = () => {
     queryKey: ["employees", { leaveRequests: true, branchId: filters.branchId }],
     queryFn: () =>
       employeeApi.list({
-        limit: 500,
+        limit: 100,
         status: "active",
         ...(filters.branchId ? { branchId: filters.branchId } : {}),
       }),
@@ -526,17 +558,37 @@ export const LeaveRequestsPage = () => {
 
 export const NotificationsPage = () => {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<"all" | "unread" | "requests" | "alerts">("all");
+  const user = useAuthStore((state) => state.user);
+  const canSendNotifications = user?.role === "owner" || user?.role === "manager";
+  const [tab, setTab] = useState<NotificationTab>("all");
+  const [recipientMode, setRecipientMode] = useState<NotificationRecipientMode>("all_staff");
+  const [branchId, setBranchId] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [type, setType] = useState<NotificationType>("system");
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
   const query = useMemo<NotificationListQuery>(() => ({
     page: 1,
     limit: 50,
     ...(tab === "unread" ? { isRead: false } : {}),
     ...(tab === "requests" ? { type: "shift_swap_requested" as NotificationType } : {}),
     ...(tab === "alerts" ? { type: "attendance_warning" as NotificationType } : {}),
+    ...(tab === "schedule" ? { type: "schedule_published" as NotificationType } : {}),
+    ...(tab === "system" ? { type: "system" as NotificationType } : {}),
   }), [tab]);
   const notificationsQuery = useQuery({
     queryKey: ["notifications", query],
     queryFn: () => notificationApi.list(query),
+  });
+  const branchesQuery = useQuery({
+    queryKey: ["branches", { notificationCompose: true }],
+    queryFn: () => branchApi.list({ limit: 100, status: "active" }),
+    enabled: canSendNotifications,
+  });
+  const employeesQuery = useQuery({
+    queryKey: ["employees", { notificationCompose: true }],
+    queryFn: () => employeeApi.list({ limit: 100 }),
+    enabled: canSendNotifications,
   });
   const markAllMutation = useMutation({
     mutationFn: () => notificationApi.markAllAsRead(),
@@ -546,13 +598,157 @@ export const NotificationsPage = () => {
     mutationFn: (notificationId: string) => notificationApi.markAsRead(notificationId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
+  const markUnreadMutation = useMutation({
+    mutationFn: (notificationId: string) => notificationApi.markAsUnread(notificationId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+  const archiveMutation = useMutation({
+    mutationFn: (notificationId: string) => notificationApi.archive(notificationId),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+  const createMutation = useMutation({
+    mutationFn: () => {
+      const staffIds = (employeesQuery.data?.data ?? [])
+        .filter((employee) => employee.role !== "owner" && employee.role !== "admin" && employee.status === "active")
+        .map((employee) => employee.id);
+      const userIds = recipientMode === "all_staff" ? staffIds : selectedUserIds;
+
+      return notificationApi.create({
+        title: title.trim(),
+        message: message.trim(),
+        type,
+        ...(recipientMode === "branch" ? { branchId } : { userIds }),
+      });
+    },
+    onSuccess: () => {
+      setTitle("");
+      setMessage("");
+      setSelectedUserIds([]);
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
   const visible = notificationsQuery.data?.data ?? [];
+  const employees = (employeesQuery.data?.data ?? []).filter((employee) => employee.role !== "owner" && employee.role !== "admin");
+  const activeEmployeeCount = employees.filter((employee) => employee.status === "active").length;
+  const selectedActiveRecipientCount =
+    recipientMode === "branch"
+      ? 0
+      : recipientMode === "all_staff"
+        ? activeEmployeeCount
+        : employees.filter((employee) => selectedUserIds.includes(employee.id) && employee.status === "active").length;
+  const canSubmit =
+    canSendNotifications &&
+    title.trim().length >= 3 &&
+    message.trim().length >= 3 &&
+    (recipientMode === "branch" ? Boolean(branchId) : selectedActiveRecipientCount > 0);
+  const anyError =
+    notificationsQuery.error ??
+    markAllMutation.error ??
+    markReadMutation.error ??
+    markUnreadMutation.error ??
+    archiveMutation.error ??
+    employeesQuery.error ??
+    branchesQuery.error ??
+    createMutation.error;
+
+  const applyTemplate = (template: (typeof notificationTemplates)[number]) => {
+    setType(template.type);
+    setTitle(template.title);
+    setMessage(template.message);
+  };
+
+  const toggleRecipient = (employeeId: string) => {
+    setSelectedUserIds((current) =>
+      current.includes(employeeId) ? current.filter((id) => id !== employeeId) : [...current, employeeId]
+    );
+  };
 
   return (
     <RequestShell title="Thông báo" search="Tìm thông báo...">
-      <main className="mx-auto max-w-5xl p-4 md:p-6">
+      <main className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
         <PageTitle title="Thông báo" description="Quản lý cảnh báo hệ thống, đổi ca, nghỉ phép và nhắc chấm công." action={<button className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold hover:bg-[#f7f3f2] disabled:opacity-50" disabled={markAllMutation.isPending} onClick={() => markAllMutation.mutate()} type="button">Đánh dấu tất cả đã đọc</button>} />
-        {(notificationsQuery.error || markAllMutation.error || markReadMutation.error) ? <p className="mb-4 rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(notificationsQuery.error ?? markAllMutation.error ?? markReadMutation.error, "Không thể tải thông báo.")}</p> : null}
+        {anyError ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(anyError, "Không thể xử lý thông báo.")}</p> : null}
+        {createMutation.isSuccess ? <p className="rounded-lg bg-[#10b981]/10 px-4 py-3 text-sm font-semibold text-[#10b981]">Đã gửi {createMutation.data.total} thông báo đến nhân viên.</p> : null}
+        {canSendNotifications ? (
+          <section className="grid gap-4 rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4 lg:grid-cols-12">
+            <div className="space-y-4 lg:col-span-5">
+              <div>
+                <p className="text-sm font-semibold text-black">Gửi thông báo cho nhân viên</p>
+                <p className="text-xs text-[#444748]">Chọn người nhận, dùng mẫu nhanh hoặc nhập nội dung riêng.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {notificationTemplates.map((template) => (
+                  <button className="rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-xs font-semibold text-[#444748] hover:border-black hover:text-black" key={template.label} onClick={() => applyTemplate(template)} type="button">
+                    {template.label}
+                  </button>
+                ))}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1">
+                  <span className="text-sm font-semibold text-black">Nhóm nhận</span>
+                  <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setRecipientMode(event.target.value as NotificationRecipientMode)} value={recipientMode}>
+                    <option value="all_staff">Tất cả nhân viên</option>
+                    <option value="branch">Theo chi nhánh</option>
+                    <option value="employees">Chọn từng nhân viên</option>
+                  </select>
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-sm font-semibold text-black">Loại thông báo</span>
+                  <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setType(event.target.value as NotificationType)} value={type}>
+                    <option value="system">Thông báo chung</option>
+                    <option value="schedule_published">Lịch làm</option>
+                    <option value="shift_changed">Đổi lịch/đổi ca</option>
+                    <option value="checkin_reminder">Nhắc check-in</option>
+                    <option value="checkout_reminder">Nhắc check-out</option>
+                    <option value="attendance_warning">Cảnh báo chấm công</option>
+                  </select>
+                </label>
+              </div>
+              {recipientMode === "branch" ? (
+                <label className="block space-y-1">
+                  <span className="text-sm font-semibold text-black">Chi nhánh</span>
+                  <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setBranchId(event.target.value)} value={branchId}>
+                    <option value="">Chọn chi nhánh...</option>
+                    {(branchesQuery.data?.data ?? []).map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+                  </select>
+                </label>
+              ) : null}
+              {recipientMode === "employees" ? (
+                <div className="max-h-52 space-y-2 overflow-auto rounded-lg border border-[#e5e7eb] bg-white p-3">
+                  {employees.length === 0 ? <p className="text-sm font-semibold text-[#444748]">Chưa có nhân viên trong phạm vi của bạn để gửi.</p> : null}
+                  {employees.map((employee) => (
+                    <label className={employee.status === "active" ? "flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm hover:bg-[#f7f3f2]" : "flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm opacity-60"} key={employee.id}>
+                      <span>
+                        <span className="block font-semibold text-black">{employee.fullName}</span>
+                        <span className="text-xs text-[#444748]">{employee.email} - {employee.status === "active" ? "Tài khoản hoạt động" : "Tài khoản ngừng hoạt động"}</span>
+                      </span>
+                      <input checked={selectedUserIds.includes(employee.id)} className="h-4 w-4" disabled={employee.status !== "active"} onChange={() => toggleRecipient(employee.id)} type="checkbox" />
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <div className="space-y-3 lg:col-span-7">
+              <label className="block space-y-1">
+                <span className="text-sm font-semibold text-black">Tiêu đề</span>
+                <input className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none focus:ring-1 focus:ring-black" onChange={(event) => setTitle(event.target.value)} placeholder="Nhập tiêu đề thông báo..." value={title} />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-sm font-semibold text-black">Nội dung</span>
+                <textarea className="min-h-32 w-full resize-none rounded-lg border border-[#e5e7eb] bg-white p-4 outline-none focus:ring-1 focus:ring-black" onChange={(event) => setMessage(event.target.value)} placeholder="Nhập nội dung cần gửi cho nhân viên..." value={message} />
+              </label>
+              <div className="flex flex-col justify-between gap-3 rounded-lg border border-[#e5e7eb] bg-white p-3 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#444748]">
+                  <Users className="h-4 w-4" />
+                  {recipientMode === "branch" ? "Gửi đến toàn bộ tài khoản hoạt động trong chi nhánh đã chọn" : `${selectedActiveRecipientCount} nhân viên có tài khoản hoạt động sẽ nhận thông báo`}
+                </div>
+                <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50" disabled={!canSubmit || createMutation.isPending} onClick={() => createMutation.mutate()} type="button">
+                  <Send className="h-4 w-4" />{createMutation.isPending ? "Đang gửi..." : "Gửi thông báo"}
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
         <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-sm">
           <div className="flex overflow-x-auto border-b border-[#e5e7eb] bg-[#f7f3f2] px-4">
             {[
@@ -560,8 +756,10 @@ export const NotificationsPage = () => {
               ["unread", `Chưa đọc${notificationsQuery.data ? ` (${notificationsQuery.data.meta.unreadCount})` : ""}`],
               ["requests", "Yêu cầu"],
               ["alerts", "Cảnh báo"],
+              ["schedule", "Lịch làm"],
+              ["system", "Hệ thống"],
             ].map(([value, label]) => (
-              <button className={tab === value ? "border-b-2 border-black px-6 py-4 text-sm font-semibold text-black" : "border-b-2 border-transparent px-6 py-4 text-sm font-semibold text-[#444748] hover:text-black"} key={value} onClick={() => setTab(value as typeof tab)}>
+              <button className={tab === value ? "border-b-2 border-black px-6 py-4 text-sm font-semibold text-black" : "border-b-2 border-transparent px-6 py-4 text-sm font-semibold text-[#444748] hover:text-black"} key={value} onClick={() => setTab(value as NotificationTab)} type="button">
                 {label}
               </button>
             ))}
@@ -572,16 +770,24 @@ export const NotificationsPage = () => {
             <div className="flex min-h-[520px] flex-col items-center justify-center p-12 text-center">
               <div className="mb-8 flex h-48 w-48 items-center justify-center rounded-full border border-[#e5e7eb] bg-[#f1edec]"><Bell className="h-16 w-16 text-black/20" /></div>
               <h2 className="mb-2 text-2xl font-semibold tracking-tight text-black">Không còn gì mới!</h2>
-              <p className="max-w-md text-base text-[#444748]">You have no unread notifications at the moment. Check back later for shift updates or system alerts.</p>
-              <button className="mt-6 rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white" onClick={() => setTab("all")}>Xem tất cả thông báo</button>
+              <p className="max-w-md text-base text-[#444748]">Hiện chưa có thông báo phù hợp bộ lọc. Khi có cập nhật lịch, đổi ca hoặc cảnh báo vận hành, thông báo sẽ xuất hiện ở đây.</p>
+              <button className="mt-6 rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white" onClick={() => setTab("all")} type="button">Xem tất cả thông báo</button>
             </div>
           ) : (
             <div className="divide-y divide-[#e5e7eb]">
-              {visible.map((item) => <NotificationItem item={item} key={item.id} onRead={() => markReadMutation.mutate(item.id)} pending={markReadMutation.isPending} />)}
+              {visible.map((item) => (
+                <NotificationItem
+                  item={item}
+                  key={item.id}
+                  onArchive={() => archiveMutation.mutate(item.id)}
+                  onRead={() => markReadMutation.mutate(item.id)}
+                  onUnread={() => markUnreadMutation.mutate(item.id)}
+                  pending={markReadMutation.isPending || markUnreadMutation.isPending || archiveMutation.isPending}
+                />
+              ))}
             </div>
           )}
         </section>
-        <p className="mt-8 text-center text-xs text-[#444748]">Cần hỗ trợ quản lý thông báo? <span className="font-semibold text-[#0058be]">Trung tâm hỗ trợ</span></p>
       </main>
     </RequestShell>
   );
@@ -870,7 +1076,19 @@ const LeaveRow = ({
   </tr>
 );
 
-const NotificationItem = ({ item, onRead, pending }: { item: Notification; onRead: () => void; pending: boolean }) => {
+const NotificationItem = ({
+  item,
+  onArchive,
+  onRead,
+  onUnread,
+  pending,
+}: {
+  item: Notification;
+  onArchive: () => void;
+  onRead: () => void;
+  onUnread: () => void;
+  pending: boolean;
+}) => {
   const isRequest = item.type.includes("requested") || item.type.includes("leave_");
   const isAlert = item.type === "attendance_warning" || item.type === "system";
   const icon = isRequest ? <Repeat /> : isAlert ? <AlertTriangle /> : <BarChart3 />;
@@ -886,7 +1104,16 @@ const NotificationItem = ({ item, onRead, pending }: { item: Notification; onRea
           <span className="shrink-0 text-xs text-[#444748]">{formatDateTime(item.createdAt)}</span>
         </div>
         <p className="mb-4 text-base text-[#444748]">{item.message}</p>
-        {!item.isRead ? <button className="rounded-lg border border-[#e5e7eb] px-4 py-1.5 text-sm font-semibold hover:bg-white disabled:opacity-50" disabled={pending} onClick={onRead} type="button">Đánh dấu đã đọc</button> : null}
+        <div className="flex flex-wrap gap-2">
+          {!item.isRead ? (
+            <button className="rounded-lg border border-[#e5e7eb] px-4 py-1.5 text-sm font-semibold hover:bg-white disabled:opacity-50" disabled={pending} onClick={onRead} type="button">Đánh dấu đã đọc</button>
+          ) : (
+            <button className="rounded-lg border border-[#e5e7eb] px-4 py-1.5 text-sm font-semibold hover:bg-white disabled:opacity-50" disabled={pending} onClick={onUnread} type="button">Đánh dấu chưa đọc</button>
+          )}
+          <button className="inline-flex items-center gap-2 rounded-lg border border-[#e5e7eb] px-4 py-1.5 text-sm font-semibold text-[#444748] hover:bg-white disabled:opacity-50" disabled={pending} onClick={onArchive} type="button">
+            <Archive className="h-4 w-4" />Lưu trữ
+          </button>
+        </div>
       </div>
       {!item.isRead ? <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#0058be]" /> : null}
     </div>
