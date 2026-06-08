@@ -169,21 +169,22 @@ test("Configure Organization Settings: owner updates defaults", async () => {
   assert.equal(result.settings.timezone, "Asia/Ho_Chi_Minh");
 });
 
-test("Configure Subscription Info: owner stores basic subscription metadata", async () => {
-  const owner = createUserDoc({ organizationId });
+test("Configure Subscription Info: admin stores basic subscription metadata", async () => {
+  const admin = createUserDoc({ role: "admin" });
   const organization = createOrganizationDoc();
 
-  stub(UserModel, "findById", async () => owner);
+  stub(UserModel, "findById", async () => admin);
   stub(OrganizationModel, "findById", async () => organization);
 
   const result = await OrganizationService.configureSubscriptionInfo(
-    actorPayload(owner),
+    actorPayload(admin),
     {
       plan: "pro",
       status: "active",
       maxBranches: 5,
       maxEmployees: 100,
-    }
+    },
+    organizationId.toString()
   );
 
   assert.equal(result.subscription.plan, "pro");
@@ -191,15 +192,34 @@ test("Configure Subscription Info: owner stores basic subscription metadata", as
   assert.equal(result.subscription.maxBranches, 5);
 });
 
-test("Disable and Enable Organization: owner toggles status", async () => {
+test("Configure Subscription Info: owner cannot change subscription metadata", async () => {
   const owner = createUserDoc({ organizationId });
   const organization = createOrganizationDoc();
 
   stub(UserModel, "findById", async () => owner);
   stub(OrganizationModel, "findById", async () => organization);
 
+  await assert.rejects(
+    () =>
+      OrganizationService.configureSubscriptionInfo(actorPayload(owner), {
+        plan: "pro",
+        status: "active",
+        maxBranches: 5,
+        maxEmployees: 100,
+      }),
+    { statusCode: 403 }
+  );
+});
+
+test("Disable and Enable Organization: admin toggles status", async () => {
+  const admin = createUserDoc({ role: "admin" });
+  const organization = createOrganizationDoc();
+
+  stub(UserModel, "findById", async () => admin);
+  stub(OrganizationModel, "findById", async () => organization);
+
   const disabled = await OrganizationService.disableOrganization(
-    actorPayload(owner),
+    actorPayload(admin),
     organizationId.toString()
   );
 
@@ -207,13 +227,26 @@ test("Disable and Enable Organization: owner toggles status", async () => {
   assert.ok(organization.disabledAt);
 
   const enabled = await OrganizationService.enableOrganization(
-    actorPayload(owner),
+    actorPayload(admin),
     organizationId.toString()
   );
 
   assert.equal(enabled.status, "active");
   assert.ok(organization.enabledAt);
   assert.equal(organization.disabledAt, undefined);
+});
+
+test("Disable Organization: owner cannot toggle tenant status", async () => {
+  const owner = createUserDoc({ organizationId });
+  const organization = createOrganizationDoc();
+
+  stub(UserModel, "findById", async () => owner);
+  stub(OrganizationModel, "findById", async () => organization);
+
+  await assert.rejects(
+    () => OrganizationService.disableOrganization(actorPayload(owner), organizationId.toString()),
+    { statusCode: 403 }
+  );
 });
 
 test("Organization Management: staff cannot manage organization", async () => {

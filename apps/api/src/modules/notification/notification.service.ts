@@ -131,6 +131,8 @@ const toPublicNotification = (notification: INotification) => ({
   message: notification.message,
   type: notification.type,
   isRead: notification.isRead,
+  createdAt: (notification as unknown as { createdAt?: Date }).createdAt,
+  updatedAt: (notification as unknown as { updatedAt?: Date }).updatedAt,
   ...(notification.organizationId
     ? { organizationId: notification.organizationId.toString() }
     : {}),

@@ -52,5 +52,3 @@ export type UpdateOrganizationProfileRequest = {
 };
 
 export type UpdateOrganizationSettingsRequest = Partial<Organization["settings"]>;
-
-export type UpdateOrganizationSubscriptionRequest = Partial<OrganizationSubscriptionInfo>;

@@ -1,4 +1,4 @@
-export type EmployeeRole = "owner" | "manager" | "staff";
+export type EmployeeRole = "admin" | "owner" | "manager" | "staff";
 export type EditableEmployeeRole = "manager" | "staff";
 export type EmployeeStatus = "active" | "inactive";
 export type EmployeeType = "full_time" | "part_time";

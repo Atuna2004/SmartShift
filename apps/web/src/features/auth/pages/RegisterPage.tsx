@@ -14,7 +14,9 @@ import {
 import { AuthShell } from "@/features/auth/components/AuthShell";
 import { cn } from "@/shared/utils/cn";
 import { getApiErrorMessage } from "@/shared/api";
+import { authApi } from "@/features/auth/auth.api";
 import { paymentApi } from "@/features/payment/payment.api";
+import { useAuthStore } from "@/store";
 
 const inputClass =
   "h-12 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-black";
@@ -28,6 +30,7 @@ const toOrganizationBusinessType = (value: string): "cafe" | "restaurant" | "ret
 };
 
 export const RegisterPage = () => {
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,7 +40,7 @@ export const RegisterPage = () => {
   const [branchAddress, setBranchAddress] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [employeeSize, setEmployeeSize] = useState("");
-  const [plan, setPlan] = useState<"basic" | "organization" | "">("");
+  const [plan, setPlan] = useState<"trial" | "basic" | "organization" | "">("trial");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -62,6 +65,31 @@ export const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
+      if (plan === "trial") {
+        const result = await authApi.registerOwner({
+          fullName,
+          email,
+          password,
+          ...(phone ? { phone } : {}),
+          organization: {
+            name: branchName,
+            businessType: toOrganizationBusinessType(businessType),
+            email,
+            ...(phone ? { phone } : {}),
+            ...(branchAddress ? { address: branchAddress } : {}),
+          },
+          branch: {
+            name: branchName,
+            ...(branchAddress ? { address: branchAddress } : {}),
+            ...(phone ? { phone } : {}),
+          },
+        });
+
+        setAuth(result);
+        window.location.assign("/dashboard");
+        return;
+      }
+
       const result = await paymentApi.createRegistrationCheckout({
         fullName,
         email,
@@ -212,6 +240,15 @@ export const RegisterPage = () => {
             </div>
             <div className="grid gap-4">
               <PlanCard
+                badge="14 ngày"
+                features={["Dùng thử đầy đủ tính năng", "Không cần thanh toán ngay", "Tạo chi nhánh và nhân viên để trải nghiệm", "Nâng cấp bất cứ lúc nào"]}
+                label="Bắt đầu nhanh"
+                name="Dùng thử miễn phí"
+                price="0đ"
+                selected={plan === "trial"}
+                onClick={() => setPlan("trial")}
+              />
+              <PlanCard
                 features={["Tối đa 10 nhân viên", "Lập lịch tự động cơ bản", "Truy cập ứng dụng di động cho đội ngũ", "Hỗ trợ qua email"]}
                 label="Dành cho cá nhân"
                 name="Gói cơ bản"
@@ -232,11 +269,11 @@ export const RegisterPage = () => {
             {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
             <div className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4">
               <p className="mb-4 text-sm font-semibold text-[#444748]">
-                {plan ? <>Đã chọn: <span className="text-black">{plan === "basic" ? "Gói cơ bản" : "Gói tổ chức"}</span></> : "Vui lòng chọn một gói để tiếp tục"}
+                {plan ? <>Đã chọn: <span className="text-black">{plan === "trial" ? "Dùng thử miễn phí 14 ngày" : plan === "basic" ? "Gói cơ bản" : "Gói tổ chức"}</span></> : "Vui lòng chọn một gói để tiếp tục"}
               </p>
               <StepActions
                 disabled={!plan || isSubmitting}
-                nextLabel={isSubmitting ? "Đang tạo tài khoản..." : "Hoàn tất"}
+                nextLabel={isSubmitting ? "Đang tạo tài khoản..." : plan === "trial" ? "Bắt đầu dùng thử" : "Thanh toán và hoàn tất"}
                 onBack={() => setStep(2)}
                 submit
               />

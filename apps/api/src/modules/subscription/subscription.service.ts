@@ -69,6 +69,12 @@ const assertOwnerOrAdmin = (actor: IUser) => {
   }
 };
 
+const assertAdmin = (actor: IUser) => {
+  if (actor.role !== "admin") {
+    throw new AppError(403, "Only admins can manage system subscription plans");
+  }
+};
+
 const resolveOrganizationId = (actor: IUser, organizationId?: string) => {
   if (organizationId) {
     return new Types.ObjectId(organizationId);
@@ -142,6 +148,12 @@ const getCurrentSubscriptionForOrganization = async (
   return subscription;
 };
 
+const assertActiveOrganizationSubscription = async (
+  organizationId: Types.ObjectId
+) => {
+  await getCurrentSubscriptionForOrganization(organizationId);
+};
+
 const toPublicPlan = (plan: ISubscriptionPlan) => ({
   id: getDocumentId(plan).toString(),
   name: plan.name,
@@ -191,7 +203,7 @@ const createSubscriptionPlan = async (
   payload: CreateSubscriptionPlanInput
 ) => {
   const actor = await ensureActor(actorPayload);
-  assertOwnerOrAdmin(actor);
+  assertAdmin(actor);
 
   const existingPlan = await SubscriptionPlanModel.findOne({
     code: payload.code,
@@ -223,7 +235,7 @@ const updateSubscriptionPlan = async (
   payload: UpdateSubscriptionPlanInput
 ) => {
   const actor = await ensureActor(actorPayload);
-  assertOwnerOrAdmin(actor);
+  assertAdmin(actor);
 
   const plan = await SubscriptionPlanModel.findById(planId);
 
@@ -269,7 +281,7 @@ const disableSubscriptionPlan = async (
   planId: string
 ) => {
   const actor = await ensureActor(actorPayload);
-  assertOwnerOrAdmin(actor);
+  assertAdmin(actor);
 
   const plan = await SubscriptionPlanModel.findById(planId);
 
@@ -347,7 +359,7 @@ const subscribeOrganizationToPlan = async (
   payload: SubscribeOrganizationInput
 ) => {
   const actor = await ensureActor(actorPayload);
-  assertOwnerOrAdmin(actor);
+  assertAdmin(actor);
 
   const organization = await getOrganizationForActor(actor, organizationId);
   const plan = await getActivePlan(payload.planId);
@@ -403,7 +415,7 @@ const changeSubscriptionPlan = async (
   payload: ChangeSubscriptionPlanInput
 ) => {
   const actor = await ensureActor(actorPayload);
-  assertOwnerOrAdmin(actor);
+  assertAdmin(actor);
 
   const organization = await getOrganizationForActor(actor, payload.organizationId);
   const plan = await getActivePlan(payload.planId);
@@ -445,7 +457,7 @@ const renewSubscription = async (
   payload: RenewSubscriptionInput
 ) => {
   const actor = await ensureActor(actorPayload);
-  assertOwnerOrAdmin(actor);
+  assertAdmin(actor);
 
   const organization = await getOrganizationForActor(actor, payload.organizationId);
   const subscription = await getCurrentSubscriptionForOrganization(
@@ -629,4 +641,5 @@ export const SubscriptionService = {
   checkSubscriptionLimits,
   assertCanCreateBranch,
   assertCanCreateEmployee,
+  assertActiveOrganizationSubscription,
 };

@@ -114,6 +114,12 @@ const ensureActor = async (actor: AuthTokenPayload) => {
   return user;
 };
 
+const assertAdmin = (actor: IUser) => {
+  if (actor.role !== "admin") {
+    throw new AppError(403, "Only admins can perform this payment operation");
+  }
+};
+
 const getOrganizationForOwner = async (owner: IUser, organizationId?: string) => {
   const resolvedOrganizationId = organizationId
     ? new Types.ObjectId(organizationId)
@@ -1241,14 +1247,11 @@ const markPaymentPaid = async (
     throw new AppError(400, "Giao dịch thanh toán chưa liên kết với doanh nghiệp");
   }
 
-  if (status === "refunded" && payment.purpose === "subscription") {
-    throw new AppError(
-      400,
-      "Không thể hoàn tiền trực tiếp cho thanh toán gói đăng ký"
-    );
-  }
-
   await getOrganizationForOwner(owner, payment.organizationId.toString());
+
+  if (payment.purpose === "subscription") {
+    assertAdmin(owner);
+  }
 
   const result = await markPaymentPaidByDocument(payment, getDocumentId(owner), payload);
 
@@ -1272,6 +1275,10 @@ const setPaymentStatus = async (
   }
 
   await getOrganizationForOwner(owner, payment.organizationId.toString());
+
+  if (status === "refunded") {
+    assertAdmin(owner);
+  }
 
   payment.paymentStatus = status;
   payment.updatedBy = getDocumentId(owner);

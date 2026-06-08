@@ -3,7 +3,6 @@ import type {
   OrganizationResponse,
   UpdateOrganizationProfileRequest,
   UpdateOrganizationSettingsRequest,
-  UpdateOrganizationSubscriptionRequest,
 } from "./organization.types";
 
 export const organizationApi = {
@@ -12,6 +11,4 @@ export const organizationApi = {
     api.patch<OrganizationResponse>("/organizations/me/profile", payload, organizationId ? { organizationId } : undefined),
   updateSettings: (payload: UpdateOrganizationSettingsRequest, organizationId?: string) =>
     api.patch<OrganizationResponse>("/organizations/me/settings", payload, organizationId ? { organizationId } : undefined),
-  updateSubscriptionInfo: (payload: UpdateOrganizationSubscriptionRequest, organizationId?: string) =>
-    api.patch<OrganizationResponse>("/organizations/me/subscription", payload, organizationId ? { organizationId } : undefined),
 };
