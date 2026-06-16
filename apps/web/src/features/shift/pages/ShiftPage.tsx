@@ -192,6 +192,7 @@ export const SchedulePage = () => {
   const [branchId, setBranchId] = useState("all");
   const [weekStart, setWeekStart] = useState(getWeekStartInputValue(new Date()));
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [localDrafts, setLocalDrafts] = useState<LocalDraftAssignedShift[]>(loadLocalDrafts);
   const [error, setError] = useState("");
 
@@ -429,13 +430,22 @@ export const SchedulePage = () => {
       title="Lịch làm việc"
     >
       <main className="min-h-screen bg-white">
-        <div className="sticky top-32 z-30 border-b border-[#e5e7eb] bg-white px-4 py-4 shadow-sm md:top-16 md:px-6 md:py-5">
-          <div className="mb-4 flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
+        <div className="sticky top-32 z-30 border-b border-[#e5e7eb] bg-white px-3 py-2 shadow-sm md:top-16 md:px-6 md:py-5">
+          <div className="mb-2 flex items-center justify-between gap-3 md:mb-4 xl:items-end">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-black">Lịch tuần</h1>
-              <p className="text-base text-[#444748]">{formatDateLabel(weekStart)} - {formatDateLabel(weekEnd)}</p>
+              <h1 className="text-lg font-semibold tracking-tight text-black md:text-2xl">Lịch tuần</h1>
+              <p className="text-xs text-[#444748] md:text-base">{formatDateLabel(weekStart)} - {formatDateLabel(weekEnd)}</p>
             </div>
-            <div className="flex w-full flex-wrap gap-2 xl:w-auto xl:justify-end">
+            <button
+              aria-expanded={isMobileFiltersOpen}
+              className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-[#e5e7eb] px-3 text-xs font-semibold text-[#444748] md:hidden"
+              onClick={() => setIsMobileFiltersOpen((current) => !current)}
+              type="button"
+            >
+              <Filter className="h-4 w-4" />
+              {"L\u1ecdc"}
+            </button>
+            <div className="hidden w-full flex-wrap gap-2 md:flex xl:w-auto xl:justify-end">
               <button
                 className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#e5e7eb] px-4 text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2] disabled:text-[#747878] disabled:opacity-60"
                 disabled={duplicatePreviousMutation.isPending}
@@ -478,7 +488,27 @@ export const SchedulePage = () => {
               </button>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              aria-label="Previous week"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e7eb] text-[#444748]"
+              onClick={goToPreviousWeek}
+              type="button"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <input className="h-9 min-w-0 flex-1 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold text-[#444748] outline-none" onChange={(event) => setWeekStart(event.target.value)} type="date" value={weekStart} />
+            <button
+              aria-label="Next week"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e7eb] text-[#444748]"
+              onClick={goToNextWeek}
+              type="button"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <p className="mt-1 text-[11px] font-semibold text-[#444748] md:hidden">{visibleEmployees.length} {"nh\u00e2n vi\u00ean"} - {schedules.length} ca</p>
+          <div className="hidden flex-wrap items-center gap-2 md:flex">
             <div className="overflow-hidden rounded-lg border border-[#e5e7eb]">
               <button className="bg-[#ebe7e6] px-4 py-2 text-sm font-semibold" type="button">Tuần</button>
               <Link className="border-l border-[#e5e7eb] px-4 py-2 text-sm font-semibold hover:bg-[#f7f3f2]" to="/dashboard/schedule/monthly">Tháng</Link>
@@ -512,7 +542,62 @@ export const SchedulePage = () => {
             </div>
             <span className="w-full text-xs italic text-[#444748] lg:ml-auto lg:w-auto">Đang hiển thị {visibleEmployees.length} nhân viên - {schedules.length} ca đã gán</span>
           </div>
-          {error ? <p className="mt-4 rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
+          {isMobileFiltersOpen ? (
+            <div className="mt-3 space-y-3 rounded-lg border border-[#e5e7eb] bg-[#fdf8f8] p-3 md:hidden">
+              <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-[#e5e7eb] bg-white text-center text-sm font-semibold">
+                <button className="bg-[#ebe7e6] px-3 py-2" type="button">{"Tu\u1ea7n"}</button>
+                <Link className="border-l border-[#e5e7eb] px-3 py-2" to="/dashboard/schedule/monthly">{"Th\u00e1ng"}</Link>
+                <Link className="border-l border-[#e5e7eb] px-3 py-2" to="/dashboard/schedule/daily">{"Ng\u00e0y"}</Link>
+              </div>
+              <select className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold text-[#444748]" onChange={(event) => setBranchId(event.target.value)} value={branchId}>
+                <option value="all">{"T\u1ea5t c\u1ea3 chi nh\u00e1nh"}</option>
+                {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] px-3 text-xs font-semibold text-[#444748] disabled:text-[#747878] disabled:opacity-60"
+                  disabled={duplicatePreviousMutation.isPending}
+                  onClick={() => duplicatePreviousMutation.mutate()}
+                  type="button"
+                >
+                  <Copy className="h-4 w-4" />
+                  {"Sao ch\u00e9p"}
+                </button>
+                <button
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] px-3 text-xs font-semibold text-[#444748] disabled:text-[#747878] disabled:opacity-60"
+                  disabled={bulkAutoAssignMutation.isPending || visibleEmployees.length === 0 || templates.length === 0}
+                  onClick={() => bulkAutoAssignMutation.mutate()}
+                  type="button"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {"T\u1ef1 g\u00e1n"}
+                </button>
+                <button
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#ef4444]/30 px-3 text-xs font-semibold text-[#ef4444] disabled:text-[#747878] disabled:opacity-60"
+                  disabled={localDrafts.length === 0}
+                  onClick={() => {
+                    if (window.confirm("B\u1ea1n c\u00f3 ch\u1eafc mu\u1ed1n x\u00f3a to\u00e0n b\u1ed9 b\u1ea3n nh\u00e1p \u0111ang hi\u1ec3n th\u1ecb kh\u00f4ng?")) {
+                      clearLocalDrafts();
+                    }
+                  }}
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                  {"X\u00f3a nh\u00e1p"}
+                </button>
+                <button
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-black px-3 text-xs font-semibold text-white disabled:opacity-50"
+                  disabled={publishMutation.isPending || draftCount === 0}
+                  onClick={() => publishMutation.mutate()}
+                  type="button"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  {"Xu\u1ea5t b\u1ea3n"}
+                </button>
+              </div>
+            </div>
+          ) : null}
+          {error ? <p className="mt-3 rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a] md:mt-4">{error}</p> : null}
         </div>
         {scheduleQuery.isLoading || employeesQuery.isLoading || templatesQuery.isLoading ? (
           <StatePanel title="Đang tải lịch tuần..." description="Đang lấy ca đã gán, nhân viên và mẫu từ API." />
