@@ -448,10 +448,10 @@ const ShellTopBar = ({
   title?: string;
 }) => (
   <div className="min-h-screen bg-white">
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
-      <div className="flex min-w-0 items-center gap-6">
-        {title ? <h2 className="shrink-0 text-2xl font-semibold tracking-tight text-black">{title}</h2> : null}
-        {breadcrumbs ? <div className="flex items-center gap-2 text-base"><b>{breadcrumbs[0]}</b><span className="text-[#444748]">/</span><span className="text-[#444748]">{breadcrumbs[1]}</span></div> : null}
+    <header className="sticky top-14 z-40 flex min-h-16 flex-col gap-3 border-b border-[#e5e7eb] bg-white px-4 py-3 shadow-sm md:top-0 md:h-16 md:flex-row md:items-center md:justify-between md:px-6 md:py-0">
+      <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
+        {title ? <h2 className="min-w-0 truncate text-xl font-semibold tracking-tight text-black md:shrink-0 md:text-2xl">{title}</h2> : null}
+        {breadcrumbs ? <div className="flex min-w-0 items-center gap-2 truncate text-sm md:text-base"><b className="truncate">{breadcrumbs[0]}</b><span className="text-[#444748]">/</span><span className="truncate text-[#444748]">{breadcrumbs[1]}</span></div> : null}
         {searchPlaceholder ? (
           <div className="relative hidden w-96 lg:block">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#444748]" />
@@ -464,9 +464,9 @@ const ShellTopBar = ({
           </div>
         ) : null}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex w-full items-center justify-between gap-3 md:w-auto md:justify-end md:gap-4">
         <button className="text-[#444748] hover:text-black"><Bell className="h-5 w-5" /></button>
-        {action ? <><span className="h-8 w-px bg-[#e5e7eb]" />{action}</> : null}
+        {action ? <><span className="hidden h-8 w-px bg-[#e5e7eb] md:block" />{action}</> : null}
       </div>
     </header>
     {children}
@@ -475,10 +475,10 @@ const ShellTopBar = ({
 
 const DetailFrame = ({ children, employeeName = "Nhân viên" }: { children: ReactNode; employeeName?: string }) => (
   <div className="min-h-screen bg-white">
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
-      <div className="flex items-center gap-4">
+    <header className="sticky top-14 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 shadow-sm md:top-0 md:px-6">
+      <div className="flex min-w-0 items-center gap-3 md:gap-4">
         <Link className="rounded-full p-2 hover:bg-[#f1edec]" to="/dashboard/employees"><ArrowLeft className="h-5 w-5" /></Link>
-        <div className="flex items-center gap-2 text-sm font-semibold"><span className="text-[#444748]">Nhân viên</span><span className="text-[#c4c7c7]">/</span><b>{employeeName}</b></div>
+        <div className="flex min-w-0 items-center gap-2 text-sm font-semibold"><span className="text-[#444748]">Nhân viên</span><span className="text-[#c4c7c7]">/</span><b className="truncate">{employeeName}</b></div>
       </div>
       <Bell className="h-5 w-5 text-[#444748]" />
     </header>
@@ -496,7 +496,7 @@ const BranchFrame = ({
   search?: string;
 }) => (
   <div className="min-h-screen bg-white">
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
+    <header className="sticky top-14 z-40 flex min-h-16 flex-col gap-3 border-b border-[#e5e7eb] bg-white px-4 py-3 shadow-sm md:top-0 md:h-16 md:flex-row md:items-center md:justify-between md:px-6 md:py-0">
       <div className="relative w-full max-w-xl">
         <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#747878]" />
         <input
@@ -506,7 +506,7 @@ const BranchFrame = ({
           value={search ?? ""}
         />
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex w-full items-center justify-end gap-4 md:w-auto">
         <div className="hidden text-right md:block"><p className="text-sm font-semibold">Trung tâm Main St.</p><p className="text-xs text-[#444748]">Chuyển chi nhánh</p></div>
         <Bell className="h-5 w-5 text-[#444748]" />
       </div>
@@ -672,8 +672,8 @@ const EmployeeStat = ({
 );
 
 const Modal = ({ children, closeTo, subtitle, title }: { children: ReactNode; closeTo: string; subtitle?: string; title: string }) => (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-    <div className="w-full max-w-lg overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-2xl">
+  <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 px-3 py-4 backdrop-blur-sm sm:items-center sm:px-4">
+    <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-2xl">
       <div className="border-b border-[#e5e7eb] p-6">
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-semibold tracking-tight text-black">{title}</h3>
@@ -681,14 +681,14 @@ const Modal = ({ children, closeTo, subtitle, title }: { children: ReactNode; cl
         </div>
         {subtitle ? <p className="mt-1 text-base text-[#444748]">{subtitle}</p> : null}
       </div>
-      {children}
+      <div className="min-h-0 overflow-y-auto">{children}</div>
     </div>
   </div>
 );
 
 const ModalFooter = ({ cancelTo, primary }: { cancelTo: string; primary: string }) => (
-  <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-    <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to={cancelTo}>Hủy</Link>
+  <div className="flex flex-col-reverse gap-3 border-t border-[#e5e7eb] bg-[#f7f3f2] p-4 sm:flex-row sm:justify-end sm:p-6">
+    <Link className="h-11 rounded-lg px-6 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-white hover:text-black" to={cancelTo}>Hủy</Link>
     <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90">{primary}</button>
   </div>
 );
@@ -772,8 +772,8 @@ const EmployeeCreateModal = () => {
           </div>
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
-        <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/employees">Hủy</Link>
+        <div className="flex flex-col-reverse gap-3 border-t border-[#e5e7eb] bg-[#f7f3f2] p-4 sm:flex-row sm:justify-end sm:p-6">
+          <Link className="h-11 rounded-lg px-6 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-white hover:text-black" to="/dashboard/employees">Hủy</Link>
           <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={createMutation.isPending} type="submit">
             {createMutation.isPending ? "Đang thêm..." : "Thêm nhân viên"}
           </button>
@@ -855,8 +855,8 @@ const BranchCreateModal = () => {
           />
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
-        <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-          <Link className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" to="/dashboard/branches">Hủy</Link>
+        <div className="flex flex-col-reverse gap-3 border-t border-[#e5e7eb] bg-[#f7f3f2] p-4 sm:flex-row sm:justify-end sm:p-6">
+          <Link className="h-11 rounded-lg px-6 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-white hover:text-black" to="/dashboard/branches">Hủy</Link>
           <button
             className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
             disabled={createMutation.isPending}
@@ -1057,8 +1057,8 @@ const EmployeeEditModal = ({
           </div>
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
-        <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
-          <button className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" onClick={onClose} type="button">Hủy</button>
+        <div className="flex flex-col-reverse gap-3 border-t border-[#e5e7eb] bg-[#f7f3f2] p-4 sm:flex-row sm:justify-end sm:p-6">
+          <button className="h-11 rounded-lg px-6 py-3 text-sm font-semibold text-[#444748] hover:bg-white hover:text-black" onClick={onClose} type="button">Hủy</button>
           <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={updateMutation.isPending} type="submit">
             {updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
           </button>

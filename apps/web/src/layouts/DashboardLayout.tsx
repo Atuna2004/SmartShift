@@ -141,7 +141,7 @@ export const DashboardLayout = () => {
 
       <div className="md:pl-64">
         {usesPageChrome ? (
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 md:hidden">
+          <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 shadow-sm md:hidden">
             <Button aria-label="Mở điều hướng" className="px-3" onClick={() => setIsMobileNavOpen(true)} variant="ghost">
               <Menu className="h-5 w-5" />
             </Button>
