@@ -179,6 +179,26 @@ const assertCreatePermission = async (actor: IUser, payload: CreateEmployeeInput
   return undefined;
 };
 
+const assertUniqueEmployeeCode = async (
+  organizationId: Types.ObjectId | undefined,
+  employeeCode: string | undefined,
+  excludeEmployeeId?: Types.ObjectId
+) => {
+  if (!organizationId || !employeeCode) {
+    return;
+  }
+
+  const existingEmployee = await UserModel.findOne({
+    organizationId,
+    employeeCode,
+    ...(excludeEmployeeId ? { _id: { $ne: excludeEmployeeId } } : {}),
+  });
+
+  if (existingEmployee) {
+    throw new AppError(409, "Employee code already exists in this organization");
+  }
+};
+
 const createEmployee = async (actorPayload: AuthTokenPayload, payload: CreateEmployeeInput) => {
   const actor = await ensureActor(actorPayload);
   const existingUser = await UserModel.findOne({ email: payload.email });
@@ -197,6 +217,8 @@ const createEmployee = async (actorPayload: AuthTokenPayload, payload: CreateEmp
   if (organizationId && ["manager", "staff"].includes(payload.role)) {
     await SubscriptionService.assertCanCreateEmployee(organizationId, payload.role);
   }
+
+  await assertUniqueEmployeeCode(organizationId, payload.employeeCode);
 
   const user = await UserModel.create({
     fullName: payload.fullName,
@@ -345,6 +367,18 @@ const updateEmployee = async (
   } else if (actor.role === "admin" && payload.branchId) {
     await assertAdminBranchAccess(payload.organizationId, payload.branchId);
   }
+
+  const nextOrganizationId =
+    payload.organizationId !== undefined
+      ? asObjectId(payload.organizationId)
+      : employee.organizationId;
+  const nextEmployeeCode =
+    payload.employeeCode !== undefined ? payload.employeeCode : employee.employeeCode;
+  await assertUniqueEmployeeCode(
+    nextOrganizationId,
+    nextEmployeeCode,
+    employee._id as Types.ObjectId
+  );
 
   if (payload.fullName !== undefined) employee.fullName = payload.fullName;
   if (payload.phone !== undefined) employee.phone = payload.phone;

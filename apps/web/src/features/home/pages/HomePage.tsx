@@ -37,8 +37,8 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen bg-[#fdf8f8] text-[#1c1b1b]">
       <header className="fixed left-0 top-0 z-50 w-full border-b border-[#e5e7eb] bg-[#fdf8f8]/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-12">
-          <Link className="text-2xl font-black tracking-tight text-black" to="/">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-12">
+          <Link className="shrink-0 text-xl font-black tracking-tight text-black sm:text-2xl" to="/">
             SmartShift
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
@@ -48,11 +48,11 @@ export const HomePage = () => {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-4">
-            <Link className="hidden text-sm font-semibold text-[#444748] transition hover:text-black sm:inline" to="/login">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+            <Link className="inline-flex h-9 items-center justify-center rounded-lg border border-[#e5e7eb] px-3 text-sm font-semibold text-[#444748] transition hover:text-black sm:h-auto sm:border-0 sm:px-0" to="/login">
               Đăng nhập
             </Link>
-            <Link className="rounded-lg bg-black px-5 py-2 text-sm font-semibold text-white transition hover:opacity-85" to="/register">
+            <Link className="inline-flex h-9 items-center justify-center rounded-lg bg-black px-3 text-sm font-semibold text-white transition hover:opacity-85 sm:px-5" to="/register">
               Bắt đầu ngay
             </Link>
           </div>

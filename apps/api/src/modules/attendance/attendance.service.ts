@@ -18,6 +18,7 @@ import type {
   CheckInInput,
   CheckOutInput,
   ManualCorrectionInput,
+  UndoMarkAbsentInput,
 } from "./attendance.validation.js";
 
 const getDocumentId = (document: { _id: unknown }) => document._id as Types.ObjectId;
@@ -207,6 +208,21 @@ const computeMetrics = (
   };
 };
 
+const assertCheckInWindow = (schedule: ISchedule, branch: IBranch, checkInTime: Date) => {
+  const scheduledStart = dateWithTime(schedule.workDate, schedule.shiftStartTime);
+  const allowEarlyMinutes = branch.settings?.allowEarlyCheckInMinutes ?? 0;
+  const earliestCheckIn = new Date(
+    scheduledStart.getTime() - allowEarlyMinutes * 60 * 1000
+  );
+
+  if (checkInTime < earliestCheckIn) {
+    throw new AppError(
+      400,
+      `Check-in is only allowed within ${allowEarlyMinutes} minutes before shift start`
+    );
+  }
+};
+
 const applyMetrics = (attendance: IAttendance, schedule: ISchedule) => {
   const metrics = computeMetrics(schedule, attendance.checkInTime, attendance.checkOutTime);
   attendance.attendanceStatus = metrics.attendanceStatus;
@@ -248,12 +264,16 @@ const checkIn = async (actorPayload: AuthTokenPayload, payload: CheckInInput) =>
   const schedule = await getScheduleForActor(actor, payload.scheduleId);
   const qrCode = await verifyQrForSchedule(actor, schedule, payload.qrToken);
   const attendance = await getOrCreateAttendance(schedule);
+  const branch = await getBranchForActor(actor, schedule.branchId);
+  const checkInTime = payload.checkInTime ?? new Date();
 
   if (attendance.checkInTime) {
     throw new AppError(409, "Attendance already checked in");
   }
 
-  attendance.checkInTime = payload.checkInTime ?? new Date();
+  assertCheckInWindow(schedule, branch, checkInTime);
+
+  attendance.checkInTime = checkInTime;
   attendance.qrCodeId = getDocumentId(qrCode);
   attendance.source = "qr";
   applyMetrics(attendance, schedule);
@@ -430,6 +450,41 @@ const autoMarkAbsent = async (
   };
 };
 
+const undoMarkAbsent = async (
+  actorPayload: AuthTokenPayload,
+  payload: UndoMarkAbsentInput
+) => {
+  const actor = await ensureActor(actorPayload);
+
+  if (actor.role === "staff") {
+    throw new AppError(403, "Staff cannot undo absent marks");
+  }
+
+  const schedule = await getScheduleForActor(actor, payload.scheduleId);
+  const attendance = await AttendanceModel.findOne({
+    scheduleId: getDocumentId(schedule),
+  });
+
+  if (schedule.status !== "absent" && attendance?.attendanceStatus !== "absent") {
+    throw new AppError(400, "Assigned shift is not marked absent");
+  }
+
+  if (attendance?.checkInTime || attendance?.checkOutTime) {
+    throw new AppError(400, "Cannot undo absent mark after attendance was recorded");
+  }
+
+  schedule.status = "scheduled";
+  if (attendance) {
+    await attendance.deleteOne();
+  }
+  await schedule.save();
+
+  return {
+    scheduleId: getDocumentId(schedule).toString(),
+    status: schedule.status,
+  };
+};
+
 const getAttendanceHistory = async (
   actorPayload: AuthTokenPayload,
   query: AttendanceHistoryQuery
@@ -572,6 +627,7 @@ export const AttendanceService = {
   requestManualCorrection,
   approveManualAttendance,
   autoMarkAbsent,
+  undoMarkAbsent,
   getAttendanceHistory,
   getAttendanceReminders,
   getLateWarnings,
