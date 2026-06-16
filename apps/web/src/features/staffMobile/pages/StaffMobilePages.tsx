@@ -163,23 +163,28 @@ export const StaffSchedulePage = () => {
   const [branchFilter, setBranchFilter] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [search, setSearch] = useState("");
-  const [range, setRange] = useState<"7" | "14" | "30">("14");
   const now = new Date();
   const today = toDateInputValue(now);
-  const monthStart = toDateInputValue(new Date(now.getFullYear(), now.getMonth(), 1));
-  const rangeEnd = toDateInputValue(addDays(now, Number(range)));
-  const nextWeekCutoff = toDateInputValue(addDays(now, 7));
+  const [selectedMonth, setSelectedMonth] = useState(toMonthInputValue(now));
+  const monthDate = new Date(`${selectedMonth}-01T00:00:00`);
+  const monthStart = toDateInputValue(new Date(monthDate.getFullYear(), monthDate.getMonth(), 1));
+  const monthEnd = toDateInputValue(new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0));
   const schedulesQuery = useQuery({
-    queryKey: ["schedules", "my", { staffSchedule: true, today, rangeEnd }],
-    queryFn: () => scheduleApi.my({ from: today, to: rangeEnd, published: true }),
+    queryKey: ["schedules", "my", { staffSchedule: true, monthStart, monthEnd }],
+    queryFn: () => scheduleApi.my({ from: monthStart, to: monthEnd, published: true }),
     enabled: Boolean(user?.id),
   });
   const attendanceQuery = useQuery({
-    queryKey: ["attendances", "my", { staffSchedule: true, monthStart, today }],
-    queryFn: () => attendanceApi.history({ from: monthStart, to: today, limit: 100 }),
+    queryKey: ["attendances", "my", { staffSchedule: true, monthStart, monthEnd }],
+    queryFn: () => attendanceApi.history({ from: monthStart, to: monthEnd, limit: 200 }),
     enabled: Boolean(user?.id),
   });
   const schedules = schedulesQuery.data?.data ?? [];
+  const attendanceRecords = attendanceQuery.data?.data ?? [];
+  const attendanceByScheduleId = useMemo(
+    () => new Map(attendanceRecords.map((record) => [record.scheduleId, record] as const)),
+    [attendanceRecords]
+  );
   const branchOptions = useMemo(() => {
     const branches = new Map<string, string>();
     for (const schedule of schedules) {
@@ -201,6 +206,7 @@ export const StaffSchedulePage = () => {
           schedule.shiftEndTime,
           getAssignedShiftBranchName(schedule),
           toAssignedShiftStatusLabel(schedule.status),
+          getAssignedShiftAttendanceLabel(schedule, attendanceByScheduleId.get(schedule.id), today),
         ]
           .join(" ")
           .toLowerCase()
@@ -208,7 +214,7 @@ export const StaffSchedulePage = () => {
 
       return matchesStatus && matchesBranch && matchesSearch;
     });
-  }, [branchFilter, schedules, search, statusFilter]);
+  }, [attendanceByScheduleId, branchFilter, schedules, search, statusFilter, today]);
   const dateOptions = useMemo(() => {
     const dates = new Map<string, AssignedShift>();
     for (const schedule of schedulesMatchingFilters) {
@@ -226,18 +232,24 @@ export const StaffSchedulePage = () => {
       ),
     [schedulesMatchingFilters, selectedDate]
   );
-  const attendanceRecords = attendanceQuery.data?.data ?? [];
   const totalHours = attendanceRecords.reduce((sum, record) => sum + getWorkedHours(record), 0);
-  const byWeek = useMemo(() => {
+  const checkedInCount = schedules.reduce((count, schedule) => count + (attendanceByScheduleId.get(schedule.id)?.checkInTime ? 1 : 0), 0);
+  const missingCheckInCount = schedules.reduce(
+    (count, schedule) =>
+      count + (isPastOrTodayAssignedShift(schedule, today) && !attendanceByScheduleId.get(schedule.id)?.checkInTime ? 1 : 0),
+    0
+  );
+  const byPeriod = useMemo(() => {
     const groups = new Map<string, AssignedShift[]>();
     for (const schedule of filteredSchedules) {
-      const key = schedule.workDate >= nextWeekCutoff ? "Tuần tới" : "Tuần này";
+      const scheduleDate = toDateInputValue(schedule.workDate);
+      const key = scheduleDate < today ? "Đã qua" : scheduleDate === today ? "Hôm nay" : "Sắp tới";
       const current = groups.get(key) ?? [];
       current.push(schedule);
       groups.set(key, current);
     }
     return groups;
-  }, [filteredSchedules, nextWeekCutoff]);
+  }, [filteredSchedules, today]);
 
   return (
     <StaffShell active="schedule">
@@ -252,12 +264,8 @@ export const StaffSchedulePage = () => {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#444748]" />
               <input className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setSearch(event.target.value)} placeholder="Tìm ca..." value={search} />
             </div>
-            <input className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold outline-none focus:ring-1 focus:ring-black" max={rangeEnd} min={today} onChange={(event) => setSelectedDate(event.target.value)} type="date" value={selectedDate} />
-            <select className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => setRange(event.target.value as typeof range)} value={range}>
-              <option value="7">7 ngày tới</option>
-              <option value="14">14 ngày tới</option>
-              <option value="30">30 ngày tới</option>
-            </select>
+            <input className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold outline-none focus:ring-1 focus:ring-black" onChange={(event) => { setSelectedMonth(event.target.value); setSelectedDate(""); }} type="month" value={selectedMonth} />
+            <input className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold outline-none focus:ring-1 focus:ring-black" max={monthEnd} min={monthStart} onChange={(event) => setSelectedDate(event.target.value)} type="date" value={selectedDate} />
             <select className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} value={statusFilter}>
               <option value="all">Tất cả trạng thái</option>
               <option value="scheduled">Đã xếp</option>
@@ -299,23 +307,28 @@ export const StaffSchedulePage = () => {
         {schedulesQuery.isLoading ? <p className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Đang tải lịch làm việc...</p> : null}
         {schedulesQuery.isError ? <p className="rounded-xl bg-[#ffdad6] p-4 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(schedulesQuery.error, "Không thể tải lịch làm việc.")}</p> : null}
         {!schedulesQuery.isLoading && !schedulesQuery.isError && filteredSchedules.length === 0 ? <p className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Không có ca nào khớp bộ lọc.</p> : null}
-        {Array.from(byWeek.entries()).map(([title, items]) => (
+        {Array.from(byPeriod.entries()).map(([title, items]) => (
           <ShiftSection
             key={title}
             title={`${title} (${items.length})`}
             items={items.map((schedule) => ({
+              attendanceLabel: getAssignedShiftAttendanceLabel(schedule, attendanceByScheduleId.get(schedule.id), today),
+              attendanceTone: getAssignedShiftAttendanceTone(schedule, attendanceByScheduleId.get(schedule.id), today),
               day: formatDateLabel(schedule.workDate),
               role: "Ca làm việc",
               time: `${schedule.shiftStartTime} - ${schedule.shiftEndTime}`,
               location: getAssignedShiftBranchName(schedule),
               status: toAssignedShiftStatusLabel(schedule.status),
               cta: toDateInputValue(schedule.workDate) === today,
+              workedHours: getWorkedHours(attendanceByScheduleId.get(schedule.id)),
             }))}
           />
         ))}
         <section className="mt-8 grid grid-cols-2 gap-4">
-          <StatBlock label="Tổng giờ" meta="Dựa trên chấm công hiện có" value={totalHours.toFixed(1)} />
-          <StatBlock label="Tổng ca" meta="Đã xếp lịch" value={String(schedules.length)} />
+          <StatBlock label="Tổng giờ tháng" meta="Dựa trên check-in/out" value={totalHours.toFixed(1)} />
+          <StatBlock label="Tổng ca tháng" meta="Đã xếp lịch" value={String(schedules.length)} />
+          <StatBlock label="Đã check-in" meta="Có bản ghi chấm công" value={String(checkedInCount)} />
+          <StatBlock label="Chưa check-in" meta="Ca đã qua hoặc hôm nay" value={String(missingCheckInCount)} />
         </section>
       </main>
     </StaffShell>
@@ -940,7 +953,17 @@ const AvatarStack = ({ names }: { names: string[] }) => {
 };
 const QuickActions = () => <section><h2 className="mb-3 px-1 text-sm font-bold uppercase tracking-wider text-[#444748]">Thao tác nhanh</h2><div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#f5f5f5]"><ActionRow icon={<CalendarDays />} title="Xin nghỉ phép" desc="Nghỉ phép, việc riêng hoặc nghỉ ốm" to="/staff/leave-requests" /><ActionRow icon={<Repeat />} title="Đổi ca" desc="Gửi yêu cầu đổi ca với đồng nghiệp" to="/staff/shift-swaps" /></div></section>;
 const ActionRow = ({ desc, icon, title, to }: { desc: string; icon: ReactNode; title: string; to: string }) => <Link className="flex items-center justify-between border-b border-[#e5e7eb] p-4 last:border-b-0 hover:bg-[#ebe7e6]" to={to}><div className="flex items-center gap-4"><span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-[#0058be] [&>svg]:h-5 [&>svg]:w-5">{icon}</span><div><p className="font-semibold">{title}</p><p className="text-xs text-[#444748]">{desc}</p></div></div><ChevronRight className="h-5 w-5 text-[#444748]" /></Link>;
-type StaffScheduleItem = { cta?: boolean; day: string; location: string; role: string; status: string; time: string };
+type StaffScheduleItem = {
+  attendanceLabel: string;
+  attendanceTone: "danger" | "muted" | "success" | "warning";
+  cta?: boolean;
+  day: string;
+  location: string;
+  role: string;
+  status: string;
+  time: string;
+  workedHours: number;
+};
 const ShiftSection = ({ items, title }: { items: StaffScheduleItem[]; title: string }) => <section className="mb-8"><h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-[#858383]">{title}</h2><div className="space-y-4">{items.map((item) => <ShiftCard item={item} key={`${item.day}-${item.time}`} />)}</div></section>;
 const ShiftCard = ({ item }: { item: StaffScheduleItem }) => (
   <div className="rounded-xl border border-transparent bg-[#f5f5f5] p-4 transition hover:border-[#e5e7eb]">
@@ -950,10 +973,12 @@ const ShiftCard = ({ item }: { item: StaffScheduleItem }) => (
           <span className={item.cta ? "mb-1 block text-sm font-semibold text-[#0058be]" : "mb-1 block text-sm font-semibold text-[#444748]"}>{item.day}</span>
           <h3 className="text-2xl font-semibold">{item.role}</h3>
           <span className="mt-2 inline-flex rounded-full bg-[#f1edec] px-2 py-0.5 text-xs font-semibold text-[#444748]">{item.status}</span>
+          <span className={`ml-2 mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getAttendanceToneClassName(item.attendanceTone)}`}>{item.attendanceLabel}</span>
         </div>
         <div className="text-right">
           <p className="font-semibold">{item.time}</p>
           <p className="text-xs text-[#444748]">{getShiftDurationLabel(item.time)}</p>
+          {item.workedHours > 0 ? <p className="text-xs font-semibold text-[#10b981]">{item.workedHours.toFixed(1)} giờ làm</p> : null}
         </div>
       </div>
     </Link>
@@ -983,6 +1008,7 @@ const toDateInputValue = (value: Date | string) => {
   const day = `${date.getDate()}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+const toMonthInputValue = (value: Date | string) => toDateInputValue(value).slice(0, 7);
 const addDays = (date: Date, days: number) => {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
@@ -1032,6 +1058,35 @@ const getShiftDurationLabel = (timeRange: string) => {
   return `${(duration / 60).toFixed(duration % 60 === 0 ? 0 : 1)} giờ`;
 };
 const getAssignedShiftBranchName = (schedule: Pick<AssignedShift, "branchId" | "branchName">) => schedule.branchName ?? schedule.branchId;
+const isPastOrTodayAssignedShift = (schedule: Pick<AssignedShift, "workDate">, today: string) =>
+  toDateInputValue(schedule.workDate) <= today;
+const getAssignedShiftAttendanceLabel = (
+  schedule: Pick<AssignedShift, "status" | "workDate">,
+  attendance: AttendanceRecord | undefined,
+  today: string
+) => {
+  if (attendance?.checkOutTime) return "Đã checkout";
+  if (attendance?.checkInTime) return "Đã check-in";
+  if (attendance?.attendanceStatus === "absent" || schedule.status === "absent") return "Vắng mặt";
+  if (isPastOrTodayAssignedShift(schedule, today)) return "Chưa check-in";
+  return "Chưa tới ca";
+};
+const getAssignedShiftAttendanceTone = (
+  schedule: Pick<AssignedShift, "status" | "workDate">,
+  attendance: AttendanceRecord | undefined,
+  today: string
+): StaffScheduleItem["attendanceTone"] => {
+  if (attendance?.checkOutTime || attendance?.checkInTime) return "success";
+  if (attendance?.attendanceStatus === "absent" || schedule.status === "absent") return "danger";
+  if (isPastOrTodayAssignedShift(schedule, today)) return "warning";
+  return "muted";
+};
+const getAttendanceToneClassName = (tone: StaffScheduleItem["attendanceTone"]) => {
+  if (tone === "success") return "bg-[#10b981]/10 text-[#047857]";
+  if (tone === "danger") return "bg-[#ffdad6] text-[#93000a]";
+  if (tone === "warning") return "bg-orange-50 text-orange-700";
+  return "bg-[#e5e7eb] text-[#444748]";
+};
 const formatLeaveRequestSchedule = (request: LeaveRequest, scheduleLabelById: Map<string, string>) => {
   if (request.schedule) {
     return `${formatDateLabel(toDateInputValue(request.schedule.workDate))} - ${request.schedule.shiftStartTime} - ${request.schedule.shiftEndTime}`;
@@ -1092,8 +1147,8 @@ const isValidAssignedShiftSwapTarget = ({
   !hasAnyAssignedShiftOverlap(fromSchedule, receiverSchedules, [toSchedule.id]) &&
   !hasAnyAssignedShiftOverlap(toSchedule, actorSchedules, [fromSchedule.id]);
 const getInitials = (value: string) => value.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
-const getWorkedHours = (attendance: AttendanceRecord) => {
-  if (!attendance.checkInTime || !attendance.checkOutTime) return 0;
+const getWorkedHours = (attendance?: AttendanceRecord) => {
+  if (!attendance?.checkInTime || !attendance.checkOutTime) return 0;
   return Math.max(0, (new Date(attendance.checkOutTime).getTime() - new Date(attendance.checkInTime).getTime()) / 36e5);
 };
 const chooseBestSchedule = (schedules: AssignedShift[], attendanceByScheduleId: Map<string, AttendanceRecord>) => {

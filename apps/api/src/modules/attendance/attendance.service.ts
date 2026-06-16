@@ -45,6 +45,17 @@ const dateWithTime = (date: Date, time: string) => {
   return next;
 };
 
+const getScheduleInterval = (schedule: ISchedule) => {
+  const start = dateWithTime(schedule.workDate, schedule.shiftStartTime);
+  const end = dateWithTime(schedule.workDate, schedule.shiftEndTime);
+
+  if (end <= start) {
+    end.setDate(end.getDate() + 1);
+  }
+
+  return { start, end };
+};
+
 const minutesBetween = (from: Date, to: Date) =>
   Math.max(0, Math.floor((to.getTime() - from.getTime()) / 60000));
 
@@ -181,8 +192,7 @@ const computeMetrics = (
   checkInTime?: Date,
   checkOutTime?: Date
 ) => {
-  const scheduledStart = dateWithTime(schedule.workDate, schedule.shiftStartTime);
-  const scheduledEnd = dateWithTime(schedule.workDate, schedule.shiftEndTime);
+  const { start: scheduledStart, end: scheduledEnd } = getScheduleInterval(schedule);
   const lateMinutes = checkInTime ? minutesBetween(scheduledStart, checkInTime) : 0;
   const earlyLeaveMinutes = checkOutTime
     ? minutesBetween(checkOutTime, scheduledEnd)
@@ -209,7 +219,7 @@ const computeMetrics = (
 };
 
 const assertCheckInWindow = (schedule: ISchedule, branch: IBranch, checkInTime: Date) => {
-  const scheduledStart = dateWithTime(schedule.workDate, schedule.shiftStartTime);
+  const { start: scheduledStart, end: scheduledEnd } = getScheduleInterval(schedule);
   const allowEarlyMinutes = branch.settings?.allowEarlyCheckInMinutes ?? 0;
   const earliestCheckIn = new Date(
     scheduledStart.getTime() - allowEarlyMinutes * 60 * 1000
@@ -220,6 +230,16 @@ const assertCheckInWindow = (schedule: ISchedule, branch: IBranch, checkInTime: 
       400,
       `Check-in is only allowed within ${allowEarlyMinutes} minutes before shift start`
     );
+  }
+
+  if (checkInTime >= scheduledEnd) {
+    throw new AppError(400, "Check-in is not allowed after the assigned shift has ended");
+  }
+};
+
+const assertCheckOutWindow = (attendance: IAttendance, checkOutTime: Date) => {
+  if (attendance.checkInTime && checkOutTime < attendance.checkInTime) {
+    throw new AppError(400, "Check-out time cannot be before check-in time");
   }
 };
 
@@ -296,7 +316,10 @@ const checkOut = async (actorPayload: AuthTokenPayload, payload: CheckOutInput) 
     throw new AppError(409, "Attendance already checked out");
   }
 
-  attendance.checkOutTime = payload.checkOutTime ?? new Date();
+  const checkOutTime = payload.checkOutTime ?? new Date();
+  assertCheckOutWindow(attendance, checkOutTime);
+
+  attendance.checkOutTime = checkOutTime;
   attendance.qrCodeId = getDocumentId(qrCode);
   attendance.source = "qr";
   applyMetrics(attendance, schedule);

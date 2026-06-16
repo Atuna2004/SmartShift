@@ -167,6 +167,31 @@ test("Check-in: staff checks in with valid QR and late minutes are calculated", 
   assert.equal(attendance.saved, true);
 });
 
+test("Check-in: rejects check-in after assigned shift ended", async () => {
+  const staff = createUserDoc({ _id: staffId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const schedule = createScheduleDoc({ shiftStartTime: "06:00", shiftEndTime: "11:00" });
+  const qrCode = createQrCodeDoc();
+  const attendance = createAttendanceDoc();
+
+  stub(UserModel, "findById", async () => staff);
+  stub(ScheduleModel, "findById", async () => schedule);
+  stub(BranchModel, "findById", async () => branch);
+  stub(DailyQrCodeModel, "findOne", async () => qrCode);
+  stub(AttendanceModel, "findOne", async () => null);
+  stub(AttendanceModel, "create", async () => attendance);
+
+  await assert.rejects(
+    () =>
+      AttendanceService.checkIn(actorPayload(staff), {
+        scheduleId: scheduleId.toString(),
+        qrToken: "qr-token",
+        checkInTime: new Date(2026, 4, 25, 17, 0, 0),
+      }),
+    /Check-in is not allowed after the assigned shift has ended/
+  );
+});
+
 test("Check-out: completes schedule and calculates overtime", async () => {
   const staff = createUserDoc({ _id: staffId, role: "staff", branchId });
   const branch = createBranchDoc();
@@ -192,6 +217,32 @@ test("Check-out: completes schedule and calculates overtime", async () => {
   assert.equal(result.overtimeMinutes, 30);
   assert.equal(schedule.status, "completed");
   assert.equal(schedule.saved, true);
+});
+
+test("Check-out: rejects check-out before check-in time", async () => {
+  const staff = createUserDoc({ _id: staffId, role: "staff", branchId });
+  const branch = createBranchDoc();
+  const schedule = createScheduleDoc();
+  const qrCode = createQrCodeDoc();
+  const attendance = createAttendanceDoc({
+    checkInTime: new Date(2026, 4, 25, 8, 0, 0),
+  });
+
+  stub(UserModel, "findById", async () => staff);
+  stub(ScheduleModel, "findById", async () => schedule);
+  stub(BranchModel, "findById", async () => branch);
+  stub(DailyQrCodeModel, "findOne", async () => qrCode);
+  stub(AttendanceModel, "findOne", async () => attendance);
+
+  await assert.rejects(
+    () =>
+      AttendanceService.checkOut(actorPayload(staff), {
+        scheduleId: scheduleId.toString(),
+        qrToken: "qr-token",
+        checkOutTime: new Date(2026, 4, 25, 7, 59, 0),
+      }),
+    /Check-out time cannot be before check-in time/
+  );
 });
 
 test("Auto Mark Absent: manager marks published schedules without check-in", async () => {
