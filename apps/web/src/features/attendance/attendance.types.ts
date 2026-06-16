@@ -103,8 +103,17 @@ export type AutoMarkAbsentRequest = {
   workDate?: string;
 };
 
+export type UndoMarkAbsentRequest = {
+  scheduleId: string;
+};
+
 export type AutoMarkAbsentResponse = {
   workDate: string;
   totalMarkedAbsent: number;
   data: AttendanceRecord[];
+};
+
+export type UndoMarkAbsentResponse = {
+  scheduleId: string;
+  status: "scheduled";
 };

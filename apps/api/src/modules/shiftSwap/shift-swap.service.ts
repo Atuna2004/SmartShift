@@ -5,6 +5,7 @@ import { BranchModel } from "../branch/branch.model.js";
 import type { IBranch } from "../branch/branch.model.js";
 import { ScheduleModel } from "../schedule/schedule.model.js";
 import type { ISchedule } from "../schedule/schedule.model.js";
+import { NotificationService } from "../notification/notification.service.js";
 import { UserModel } from "../user/user.model.js";
 import type { IUser } from "../user/user.model.js";
 import { ShiftSwapRequestModel } from "./shift-swap.model.js";
@@ -60,6 +61,12 @@ const intervalsOverlap = (
   first: { start: number; end: number },
   second: { start: number; end: number }
 ) => first.start < second.end && second.start < first.end;
+
+const runNotificationTask = (task: Promise<unknown>) => {
+  task.catch((error) => {
+    console.error("Failed to create shift swap notification", error);
+  });
+};
 
 const assertShiftNotStarted = (schedule: ISchedule, label: string) => {
   const interval = getShiftInterval(
@@ -390,6 +397,17 @@ const createShiftSwap = async (
     finalStatus: "pending_receiver",
   });
 
+  runNotificationTask(NotificationService.createSystemNotification({
+    userId: getDocumentId(receiver),
+    organizationId: fromSchedule.organizationId,
+    branchId: getDocumentId(branch),
+    title: "Yêu cầu đổi ca mới",
+    message: `${actor.fullName} muốn đổi hoặc nhờ bạn nhận ca ${fromSchedule.shiftStartTime} - ${fromSchedule.shiftEndTime}.`,
+    type: "shift_swap_requested",
+    relatedId: getDocumentId(shiftSwap),
+    relatedModel: "ShiftSwapRequest",
+  }));
+
   return toPublicShiftSwap(
     shiftSwap,
     new Map([
@@ -424,6 +442,19 @@ const respondReceiver = async (
     shiftSwap.note = payload.note;
   }
   await shiftSwap.save();
+
+  runNotificationTask(NotificationService.createSystemNotification({
+    userId: shiftSwap.fromEmployeeId,
+    organizationId: shiftSwap.organizationId,
+    branchId: shiftSwap.branchId,
+    title: accepted ? "Đồng nghiệp đã nhận yêu cầu đổi ca" : "Yêu cầu đổi ca bị từ chối",
+    message: accepted
+      ? `${actor.fullName} đã đồng ý, yêu cầu đang chờ quản lý duyệt.`
+      : `${actor.fullName} đã từ chối yêu cầu đổi ca.`,
+    type: accepted ? "shift_swap_accepted" : "shift_swap_rejected",
+    relatedId: getDocumentId(shiftSwap),
+    relatedModel: "ShiftSwapRequest",
+  }));
 
   const schedulesById = await getSchedulesById([
     shiftSwap.fromScheduleId,
@@ -519,6 +550,33 @@ const reviewByManager = async (
   }
 
   await shiftSwap.save();
+
+  runNotificationTask(NotificationService.createSystemNotifications([
+    {
+      userId: shiftSwap.fromEmployeeId,
+      organizationId: shiftSwap.organizationId,
+      branchId: shiftSwap.branchId,
+      title: approved ? "Đổi ca đã được duyệt" : "Đổi ca không được duyệt",
+      message: approved
+        ? "Quản lý đã duyệt yêu cầu đổi ca của bạn."
+        : "Quản lý đã từ chối yêu cầu đổi ca của bạn.",
+      type: approved ? "shift_swap_accepted" : "shift_swap_rejected",
+      relatedId: getDocumentId(shiftSwap),
+      relatedModel: "ShiftSwapRequest",
+    },
+    {
+      userId: shiftSwap.toEmployeeId,
+      organizationId: shiftSwap.organizationId,
+      branchId: shiftSwap.branchId,
+      title: approved ? "Đổi ca đã được duyệt" : "Đổi ca không được duyệt",
+      message: approved
+        ? "Quản lý đã duyệt yêu cầu đổi ca liên quan tới bạn."
+        : "Quản lý đã từ chối yêu cầu đổi ca liên quan tới bạn.",
+      type: approved ? "shift_swap_accepted" : "shift_swap_rejected",
+      relatedId: getDocumentId(shiftSwap),
+      relatedModel: "ShiftSwapRequest",
+    },
+  ]));
 
   const schedulesById = await getSchedulesById([
     shiftSwap.fromScheduleId,

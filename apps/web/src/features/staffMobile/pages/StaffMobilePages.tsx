@@ -485,59 +485,59 @@ export const StaffQrCheckInPage = () => {
   const attendanceNotice = submitMutation.isError
     ? {
         className: "rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]",
-        message: getApiErrorMessage(submitMutation.error, "Unable to submit attendance."),
+        message: getApiErrorMessage(submitMutation.error, "Không thể gửi chấm công."),
       }
     : result
       ? {
           className: "rounded-lg bg-[#10b981]/10 px-3 py-2 text-sm font-semibold text-[#10b981]",
-          message: `${result.checkOutTime ? "Check-out" : "Check-in"} saved.`,
+          message: `${result.checkOutTime ? "Check-out" : "Check-in"} đã lưu.`,
         }
       : null;
 
   return (
     <div className="min-h-screen bg-white pb-24">
-      <StaffTop title="Workforce" />
+      <StaffTop title="SmartShift" />
       <QrScanner active={entryMode === "scan"} className="mt-16 h-[42vh] min-h-[280px] max-h-[420px] rounded-b-2xl" onScan={handleScan}>
         <div className="smartstaff-scanner-overlay absolute inset-0 z-10" />
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
           <div className="relative aspect-square w-[58%] max-w-[230px] overflow-hidden rounded-xl border-2 border-white/60"><Corner a="left-0 top-0 border-l-4 border-t-4 rounded-tl-lg" /><Corner a="right-0 top-0 border-r-4 border-t-4 rounded-tr-lg" /><Corner a="bottom-0 left-0 border-b-4 border-l-4 rounded-bl-lg" /><Corner a="bottom-0 right-0 border-b-4 border-r-4 rounded-br-lg" /><div className="smartstaff-scan-line absolute left-0 h-1 w-full bg-[#0058be] shadow-[0_0_15px_rgba(0,88,190,0.8)]" /></div>
-          <div className="mt-5 px-6 text-center text-white"><h1 className="text-xl font-bold drop-shadow">{entryMode === "scan" ? "Scan QR code" : "Enter QR code"}</h1><p className="mt-1 text-sm text-white/80">{mode === "check-in" ? "Clock in" : "Clock out"}</p></div>
+          <div className="mt-5 px-6 text-center text-white"><h1 className="text-xl font-bold drop-shadow">{entryMode === "scan" ? "Quét mã QR" : "Nhập mã QR"}</h1><p className="mt-1 text-sm text-white/80">{mode === "check-in" ? "Vào ca" : "Tan ca"}</p></div>
         </div>
       </QrScanner>
       <main className="mx-auto max-w-md space-y-4 px-4 py-4">
         <section className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#444748]">Selected shift</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight">{selectedSchedule ? `${selectedSchedule.shiftStartTime} - ${selectedSchedule.shiftEndTime}` : "No shift today"}</h1>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#444748]">Ca đã chọn</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight">{selectedSchedule ? `${selectedSchedule.shiftStartTime} - ${selectedSchedule.shiftEndTime}` : "Hôm nay chưa có ca"}</h1>
               <p className="text-sm text-[#444748]">{formatDateLabel(today)}</p>
             </div>
-            <span className={mode === "check-in" ? "rounded-full bg-[#0058be]/10 px-3 py-1 text-xs font-bold uppercase text-[#0058be]" : "rounded-full bg-[#10b981]/10 px-3 py-1 text-xs font-bold uppercase text-[#10b981]"}>{mode === "check-in" ? "Check in" : "Check out"}</span>
+            <span className={mode === "check-in" ? "rounded-full bg-[#0058be]/10 px-3 py-1 text-xs font-bold uppercase text-[#0058be]" : "rounded-full bg-[#10b981]/10 px-3 py-1 text-xs font-bold uppercase text-[#10b981]"}>{mode === "check-in" ? "Vào ca" : "Tan ca"}</span>
           </div>
           <div className="grid grid-cols-2 gap-3 border-t border-[#e5e7eb] pt-3">
-            <div><p className="text-xs text-[#444748]">Checked in</p><p className="font-semibold">{formatTime(selectedAttendance?.checkInTime)}</p></div>
-            <div><p className="text-xs text-[#444748]">Checked out</p><p className="font-semibold">{formatTime(selectedAttendance?.checkOutTime)}</p></div>
+            <div><p className="text-xs text-[#444748]">Đã check-in</p><p className="font-semibold">{formatTime(selectedAttendance?.checkInTime)}</p></div>
+            <div><p className="text-xs text-[#444748]">Đã check-out</p><p className="font-semibold">{formatTime(selectedAttendance?.checkOutTime)}</p></div>
           </div>
         </section>
         <section className="space-y-3 rounded-xl border border-[#e5e7eb] bg-white p-4">
           {attendanceNotice ? <p className={attendanceNotice.className}>{attendanceNotice.message}</p> : null}
           <div className="grid grid-cols-2 gap-2">
-            <button className={mode === "check-in" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-in")} type="button">Check In</button>
-            <button className={mode === "check-out" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-out")} type="button">Check Out</button>
+            <button className={mode === "check-in" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-in")} type="button">Vào ca</button>
+            <button className={mode === "check-out" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-out")} type="button">Tan ca</button>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <button className={entryMode === "scan" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setEntryMode("scan")} type="button">Scan QR</button>
-            <button className={entryMode === "manual" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setEntryMode("manual")} type="button">Enter Code</button>
+            <button className={entryMode === "scan" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setEntryMode("scan")} type="button">Quét QR</button>
+            <button className={entryMode === "manual" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setEntryMode("manual")} type="button">Nhập mã</button>
           </div>
           <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold outline-none" onChange={(event) => setScheduleId(event.target.value)} value={selectedSchedule?.id ?? ""}>
-            {schedules.length === 0 ? <option value="">No shift today</option> : null}
+            {schedules.length === 0 ? <option value="">Hôm nay chưa có ca</option> : null}
             {schedules.map((schedule) => <option key={schedule.id} value={schedule.id}>{schedule.shiftStartTime} - {schedule.shiftEndTime}</option>)}
           </select>
           {entryMode === "manual" ? (
-            <input className="h-11 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setQrToken(event.target.value)} placeholder="Enter QR code manually" value={qrToken} />
+            <input className="h-11 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setQrToken(event.target.value)} placeholder="Nhập mã QR thủ công" value={qrToken} />
           ) : null}
           <button className="h-11 w-full rounded-lg bg-black text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" disabled={!qrToken || !selectedSchedule || submitMutation.isPending || isCurrentActionCompleted} onClick={() => submitToken(normalizeQrToken(qrToken))} type="button">
-            {submitMutation.isPending ? "Submitting..." : "Submit Attendance"}
+            {submitMutation.isPending ? "Đang gửi..." : "Gửi chấm công"}
           </button>
         </section>
       </main>
@@ -566,9 +566,9 @@ export const StaffAttendanceHistoryPage = () => {
         <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3"><div className="relative flex h-48 flex-col justify-between overflow-hidden rounded-xl bg-black p-6 text-white md:col-span-2"><div><p className="text-sm font-bold uppercase tracking-widest text-white/70">Tổng kết tháng</p><p className="mt-2 text-4xl font-semibold">{totalHours.toFixed(1)} <span className="text-2xl font-normal">giờ</span></p><p className="text-white/70">{records.length} bản ghi chấm công</p></div><p className="flex items-center gap-2 font-semibold"><CheckCircle2 className="h-5 w-5 text-[#10b981]" />{punctuality}% đúng giờ</p></div><div className="flex h-48 flex-col justify-between rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-6"><div><p className="text-sm font-bold uppercase tracking-widest text-[#444748]">Đi muộn tháng này</p><p className="mt-2 text-2xl font-bold">{records.filter((record) => record.attendanceStatus === "late").length} lần</p></div><button className="rounded-lg bg-black py-3 text-sm font-semibold text-white" onClick={() => setStatus("late")} type="button">Xem đi muộn</button></div></section>
         <div className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none]">{[["all", "Tất cả"], ["late", "Đi muộn"], ["overtime", "Tăng ca"], ["absent", "Vắng mặt"]].map(([value, label]) => <button className={status === value ? "shrink-0 rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white" : "shrink-0 rounded-full border border-[#e5e7eb] bg-[#f1edec] px-4 py-1.5 text-sm font-semibold text-[#444748]"} key={value} onClick={() => setStatus(value as AttendanceStatus | "all")} type="button">{label}</button>)}</div>
         <section className="space-y-4">
-          {historyQuery.isLoading ? <div className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Loading attendance history...</div> : null}
-          {historyQuery.isError ? <div className="rounded-xl bg-[#ffdad6] p-4 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(historyQuery.error, "Unable to load attendance history.")}</div> : null}
-          {!historyQuery.isLoading && !historyQuery.isError && records.length === 0 ? <div className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">No attendance records found.</div> : null}
+          {historyQuery.isLoading ? <div className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Đang tải lịch sử chấm công...</div> : null}
+          {historyQuery.isError ? <div className="rounded-xl bg-[#ffdad6] p-4 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(historyQuery.error, "Không thể tải lịch sử chấm công.")}</div> : null}
+          {!historyQuery.isLoading && !historyQuery.isError && records.length === 0 ? <div className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Chưa có bản ghi chấm công.</div> : null}
           {records.map((record) => <AttendanceRecordRow record={record} key={record.id} />)}
         </section>
       </main>
@@ -607,13 +607,13 @@ export const StaffShiftSwapsPage = () => {
   return (
     <StaffShell active="requests">
       <main className="px-4 py-6">
-        <PageIntro title="Shift Swaps" desc="Manage your requests and browse available openings." />
-        <Tabs tabs={[["mine", "My Requests"], ["available", "Pending My Response"]]} active={tab} setActive={(v) => setTab(v as typeof tab)} />
-        {actionMutation.isError ? <p className="mb-4 rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(actionMutation.error, "Unable to update shift swap.")}</p> : null}
+        <PageIntro title="Đổi ca" desc="Quản lý yêu cầu của bạn và phản hồi các ca đang chờ." />
+        <Tabs tabs={[["mine", "Yêu cầu của tôi"], ["available", "Chờ tôi phản hồi"]]} active={tab} setActive={(v) => setTab(v as typeof tab)} />
+        {actionMutation.isError ? <p className="mb-4 rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(actionMutation.error, "Không thể cập nhật yêu cầu đổi ca.")}</p> : null}
         <div className="space-y-4">
-          {swapsQuery.isLoading ? <p className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Loading shift swaps...</p> : null}
-          {swapsQuery.isError ? <p className="rounded-xl bg-[#ffdad6] p-4 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(swapsQuery.error, "Unable to load shift swaps.")}</p> : null}
-          {!swapsQuery.isLoading && !swapsQuery.isError && records.length === 0 ? <p className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">No shift swaps found.</p> : null}
+          {swapsQuery.isLoading ? <p className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Đang tải yêu cầu đổi ca...</p> : null}
+          {swapsQuery.isError ? <p className="rounded-xl bg-[#ffdad6] p-4 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(swapsQuery.error, "Không thể tải yêu cầu đổi ca.")}</p> : null}
+          {!swapsQuery.isLoading && !swapsQuery.isError && records.length === 0 ? <p className="rounded-xl border border-[#e5e7eb] bg-white p-4 text-sm font-semibold text-[#444748]">Chưa có yêu cầu đổi ca.</p> : null}
           {records.map((request) => (
             tab === "mine"
               ? <SwapMini key={request.id} onCancel={() => actionMutation.mutate({ action: "cancel", id: request.id })} person={employeeById.get(request.toEmployeeId)?.fullName ?? request.toEmployeeId} request={request} />
@@ -881,7 +881,7 @@ export const StaffSettingsPage = () => {
   );
 };
 
-const StaffShell = ({ active, back, children, noBottomPadding, title = "Workforce" }: { active: StaffTab; back?: boolean; children: ReactNode; noBottomPadding?: boolean; title?: string }) => (
+const StaffShell = ({ active, back, children, noBottomPadding, title = "SmartShift" }: { active: StaffTab; back?: boolean; children: ReactNode; noBottomPadding?: boolean; title?: string }) => (
   <div className={noBottomPadding ? "min-h-screen bg-white text-[#1c1b1b]" : "min-h-screen bg-white pb-24 text-[#1c1b1b]"}>
     <StaffTop back={back} title={title} />
     <div className="mx-auto mt-16 max-w-5xl">{children}</div>
@@ -912,11 +912,11 @@ type StaffTab = "home" | "schedule" | "checkin" | "requests" | "profile";
 
 const StaffBottom = ({ active }: { active: StaffTab }) => (
   <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-[#e5e7eb] bg-[#fdf8f8] px-2 py-3">
-    <BottomLink active={active === "home"} icon={<Home />} label="Home" to="/staff" />
-    <BottomLink active={active === "schedule"} icon={<CalendarDays />} label="Schedule" to="/staff/schedule" />
-    <BottomLink active={active === "checkin"} floating icon={<QrCode />} label="Check-in" to="/staff/check-in" />
-    <BottomLink active={active === "requests"} icon={<CalendarClock />} label="Requests" to="/staff/leave-requests" />
-    <BottomLink active={active === "profile"} icon={<UserRound />} label="Profile" to="/staff/profile" />
+    <BottomLink active={active === "home"} icon={<Home />} label="Trang chủ" to="/staff" />
+    <BottomLink active={active === "schedule"} icon={<CalendarDays />} label="Lịch" to="/staff/schedule" />
+    <BottomLink active={active === "checkin"} floating icon={<QrCode />} label="Chấm công" to="/staff/check-in" />
+    <BottomLink active={active === "requests"} icon={<CalendarClock />} label="Yêu cầu" to="/staff/leave-requests" />
+    <BottomLink active={active === "profile"} icon={<UserRound />} label="Hồ sơ" to="/staff/profile" />
   </nav>
 );
 
@@ -938,7 +938,7 @@ const AvatarStack = ({ names }: { names: string[] }) => {
 
   return <div className="flex -space-x-2">{visible.map((name) => <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#f1edec] text-xs font-bold text-black" key={name}>{getInitials(name)}</div>)}{remaining > 0 ? <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-white text-xs font-bold text-black">+{remaining}</div> : null}</div>;
 };
-const QuickActions = () => <section><h2 className="mb-3 px-1 text-sm font-bold uppercase tracking-wider text-[#444748]">Quick Actions</h2><div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#f5f5f5]"><ActionRow icon={<CalendarDays />} title="Request Time Off" desc="Vacation, personal, or sick leave" to="/staff/leave-requests" /><ActionRow icon={<Repeat />} title="Swap Shift" desc="Offer your shift to team members" to="/staff/shift-swaps" /></div></section>;
+const QuickActions = () => <section><h2 className="mb-3 px-1 text-sm font-bold uppercase tracking-wider text-[#444748]">Thao tác nhanh</h2><div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#f5f5f5]"><ActionRow icon={<CalendarDays />} title="Xin nghỉ phép" desc="Nghỉ phép, việc riêng hoặc nghỉ ốm" to="/staff/leave-requests" /><ActionRow icon={<Repeat />} title="Đổi ca" desc="Gửi yêu cầu đổi ca với đồng nghiệp" to="/staff/shift-swaps" /></div></section>;
 const ActionRow = ({ desc, icon, title, to }: { desc: string; icon: ReactNode; title: string; to: string }) => <Link className="flex items-center justify-between border-b border-[#e5e7eb] p-4 last:border-b-0 hover:bg-[#ebe7e6]" to={to}><div className="flex items-center gap-4"><span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-[#0058be] [&>svg]:h-5 [&>svg]:w-5">{icon}</span><div><p className="font-semibold">{title}</p><p className="text-xs text-[#444748]">{desc}</p></div></div><ChevronRight className="h-5 w-5 text-[#444748]" /></Link>;
 type StaffScheduleItem = { cta?: boolean; day: string; location: string; role: string; status: string; time: string };
 const ShiftSection = ({ items, title }: { items: StaffScheduleItem[]; title: string }) => <section className="mb-8"><h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-[#858383]">{title}</h2><div className="space-y-4">{items.map((item) => <ShiftCard item={item} key={`${item.day}-${item.time}`} />)}</div></section>;
@@ -1040,7 +1040,7 @@ const formatLeaveRequestSchedule = (request: LeaveRequest, scheduleLabelById: Ma
   return scheduleLabelById.get(request.scheduleId) ?? `Ca ${request.scheduleId}`;
 };
 const formatStaffSwapSchedule = (schedule: ShiftSwapRequest["fromSchedule"], fallbackId?: string) =>
-  schedule ? `${formatDateLabel(toDateInputValue(schedule.workDate))} - ${schedule.shiftStartTime} - ${schedule.shiftEndTime}` : fallbackId ? `Schedule ${fallbackId}` : "--";
+  schedule ? `${formatDateLabel(toDateInputValue(schedule.workDate))} - ${schedule.shiftStartTime} - ${schedule.shiftEndTime}` : fallbackId ? `Ca ${fallbackId}` : "--";
 const toWeekStart = (value: Date | string) => {
   const date = typeof value === "string" ? new Date(value) : value;
   const start = new Date(date);
@@ -1144,7 +1144,7 @@ const toStaffSwapStatusLabel = (status: ShiftSwapRequest["finalStatus"]) => {
   if (status === "pending_receiver") return "Pending receiver";
   if (status === "pending_manager") return "Pending manager";
   if (status === "approved") return "Approved";
-  if (status === "rejected") return "Rejected";
+  if (status === "rejected") return "Từ chối";
   return "Cancelled";
 };
 const AttendanceRecordRow = ({ record }: { record: AttendanceRecord }) => (
@@ -1156,7 +1156,7 @@ const AttendanceRecordRow = ({ record }: { record: AttendanceRecord }) => (
       </div>
       <div>
         <h3 className="font-semibold">{record.scheduledStartTime} - {record.scheduledEndTime}</h3>
-        <p className="text-sm text-[#444748]">{formatTime(record.checkInTime)} - {formatTime(record.checkOutTime)} - {getWorkedHours(record).toFixed(1)} hrs</p>
+        <p className="text-sm text-[#444748]">{formatTime(record.checkInTime)} - {formatTime(record.checkOutTime)} - {getWorkedHours(record).toFixed(1)} giờ</p>
       </div>
     </div>
     <div className="flex items-center gap-4"><span className={record.attendanceStatus === "late" || record.attendanceStatus === "absent" ? "hidden rounded-full bg-[#ef4444]/10 px-3 py-1 text-sm font-semibold text-[#ef4444] sm:block" : "hidden rounded-full bg-[#10b981]/10 px-3 py-1 text-sm font-semibold text-[#10b981] sm:block"}>{toAttendanceLabel(record.attendanceStatus)}</span><ChevronRight className="h-5 w-5 text-[#747878]" /></div>
@@ -1166,9 +1166,9 @@ const PageIntro = ({ desc, title }: { desc: string; title: string }) => <section
 const Tabs = ({ active, setActive, tabs }: { active: string; setActive: (v: string) => void; tabs: string[][] }) => <div className="mb-4 flex gap-4 border-b border-[#e5e7eb]">{tabs.map(([value, label]) => <button className={active === value ? "border-b-2 border-black px-2 pb-3 text-sm font-semibold" : "border-b-2 border-transparent px-2 pb-3 text-sm font-semibold text-[#444748]"} onClick={() => setActive(value)} key={value}>{label}</button>)}</div>;
 const SwapMini = ({ onCancel, person, request }: { onCancel: () => void; person: string; request: ShiftSwapRequest }) => {
   const canCancel = request.finalStatus === "pending_receiver" || request.finalStatus === "pending_manager";
-  return <div className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4"><div className="mb-3 flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-wider text-[#444748]">Swap request</p><p className="font-semibold">{formatDate(request.createdAt)}</p></div><span className={request.finalStatus === "approved" ? "rounded-full bg-[#10b981]/10 px-3 py-1 text-xs text-[#10b981]" : request.finalStatus === "rejected" || request.finalStatus === "cancelled" ? "rounded-full bg-[#ef4444]/10 px-3 py-1 text-xs text-[#ef4444]" : "rounded-full bg-[#e5e2e1] px-3 py-1 text-xs text-[#484645]"}>{toStaffSwapStatusLabel(request.finalStatus)}</span></div><div className="flex items-center gap-3 border-t border-[#e5e7eb] py-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e5e2e1] text-xs font-bold">{getInitials(person)}</div><p>Swap requested with <b>{person}</b></p></div><div className="mb-3 grid gap-2 rounded-lg border border-[#e5e7eb] bg-white p-3 text-sm"><p><span className="font-semibold">Ca của bạn:</span> {formatStaffSwapSchedule(request.fromSchedule, request.fromScheduleId)}</p><p><span className="font-semibold">You receive:</span> {request.toSchedule ? formatStaffSwapSchedule(request.toSchedule, request.toScheduleId) : "No return shift - colleague covers your shift"}</p></div>{request.reason ? <p className="pb-3 text-sm text-[#444748]">{request.reason}</p> : null}{canCancel ? <button className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold" onClick={onCancel} type="button">Cancel Request</button> : null}</div>;
+  return <div className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4"><div className="mb-3 flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-wider text-[#444748]">Yêu cầu đổi ca</p><p className="font-semibold">{formatDate(request.createdAt)}</p></div><span className={request.finalStatus === "approved" ? "rounded-full bg-[#10b981]/10 px-3 py-1 text-xs text-[#10b981]" : request.finalStatus === "rejected" || request.finalStatus === "cancelled" ? "rounded-full bg-[#ef4444]/10 px-3 py-1 text-xs text-[#ef4444]" : "rounded-full bg-[#e5e2e1] px-3 py-1 text-xs text-[#484645]"}>{toStaffSwapStatusLabel(request.finalStatus)}</span></div><div className="flex items-center gap-3 border-t border-[#e5e7eb] py-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e5e2e1] text-xs font-bold">{getInitials(person)}</div><p>Đổi ca với <b>{person}</b></p></div><div className="mb-3 grid gap-2 rounded-lg border border-[#e5e7eb] bg-white p-3 text-sm"><p><span className="font-semibold">Ca của bạn:</span> {formatStaffSwapSchedule(request.fromSchedule, request.fromScheduleId)}</p><p><span className="font-semibold">Bạn nhận:</span> {request.toSchedule ? formatStaffSwapSchedule(request.toSchedule, request.toScheduleId) : "Không nhận lại ca - đồng nghiệp phủ ca của bạn"}</p></div>{request.reason ? <p className="pb-3 text-sm text-[#444748]">{request.reason}</p> : null}{canCancel ? <button className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold" onClick={onCancel} type="button">Hủy yêu cầu</button> : null}</div>;
 };
-const AvailableSwap = ({ by, onAccept, onReject, request }: { by: string; onAccept: () => void; onReject: () => void; request: ShiftSwapRequest }) => <div className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4"><div className="mb-3 flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-wider text-[#444748]">Response required</p><p className="font-semibold">{formatDate(request.createdAt)}</p></div><ChevronRight className="h-5 w-5 text-[#444748]" /></div><div className="border-t border-[#e5e7eb] pt-3"><p>Requested by <b>{by}</b></p><div className="my-3 grid gap-2 rounded-lg border border-[#e5e7eb] bg-white p-3 text-sm"><p><span className="font-semibold">Requested shift:</span> {formatStaffSwapSchedule(request.fromSchedule, request.fromScheduleId)}</p><p><span className="font-semibold">They receive:</span> {request.toSchedule ? formatStaffSwapSchedule(request.toSchedule, request.toScheduleId) : "No return shift - cover only"}</p></div>{request.reason ? <p className="mt-1 text-sm text-[#444748]">{request.reason}</p> : null}<div className="mt-3 flex gap-2"><button className="flex-1 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white" onClick={onAccept} type="button">Accept</button><button className="flex-1 rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold" onClick={onReject} type="button">Reject</button></div></div></div>;
+const AvailableSwap = ({ by, onAccept, onReject, request }: { by: string; onAccept: () => void; onReject: () => void; request: ShiftSwapRequest }) => <div className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4"><div className="mb-3 flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-wider text-[#444748]">Cần phản hồi</p><p className="font-semibold">{formatDate(request.createdAt)}</p></div><ChevronRight className="h-5 w-5 text-[#444748]" /></div><div className="border-t border-[#e5e7eb] pt-3"><p>Người yêu cầu: <b>{by}</b></p><div className="my-3 grid gap-2 rounded-lg border border-[#e5e7eb] bg-white p-3 text-sm"><p><span className="font-semibold">Ca được yêu cầu:</span> {formatStaffSwapSchedule(request.fromSchedule, request.fromScheduleId)}</p><p><span className="font-semibold">Họ nhận:</span> {request.toSchedule ? formatStaffSwapSchedule(request.toSchedule, request.toScheduleId) : "Không nhận lại ca - chỉ phủ ca"}</p></div>{request.reason ? <p className="mt-1 text-sm text-[#444748]">{request.reason}</p> : null}<div className="mt-3 flex gap-2"><button className="flex-1 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white" onClick={onAccept} type="button">Đồng ý</button><button className="flex-1 rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-semibold" onClick={onReject} type="button">Từ chối</button></div></div></div>;
 const StaffShiftSwapModal = ({ onClose }: { onClose: () => void }) => {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
@@ -1230,7 +1230,7 @@ const StaffShiftSwapModal = ({ onClose }: { onClose: () => void }) => {
           <button className="rounded-full p-2 hover:bg-[#f7f3f2]" onClick={onClose} type="button"><X className="h-5 w-5" /></button>
         </div>
         <div className="space-y-4 p-4">
-          {createMutation.isError ? <p className="rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(createMutation.error, "Unable to create shift swap.")}</p> : null}
+          {createMutation.isError ? <p className="rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(createMutation.error, "Không thể tạo yêu cầu đổi ca.")}</p> : null}
           <label className="block space-y-1">
             <span className="text-sm font-semibold">Ca của bạn</span>
             <select className="h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-3" onChange={(event) => { setFromScheduleId(event.target.value); setToEmployeeId(""); setToScheduleId(""); setSwapMode("cover"); }} value={fromScheduleId}>

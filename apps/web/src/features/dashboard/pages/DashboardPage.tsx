@@ -651,7 +651,7 @@ const LateEmployee = ({ name, photo, shift, time }: { name: string; photo: strin
     </div>
     <div className="text-right">
       <p className="text-sm font-semibold text-[#ef4444]">{time}</p>
-      <p className="text-xs text-[#444748]">Scheduled: 08:00 AM</p>
+      <p className="text-xs text-[#444748]">Lịch làm: 08:00</p>
     </div>
   </div>
 );

@@ -45,6 +45,18 @@ const assertNotPastWorkDate = (workDate: Date) => {
   }
 };
 
+const assertShiftNotStarted = (
+  workDate: Date,
+  shiftStartTime: string,
+  shiftEndTime: string
+) => {
+  const interval = getShiftInterval(workDate, shiftStartTime, shiftEndTime);
+
+  if (interval.start <= Date.now()) {
+    throw new AppError(400, "Assigned shift start time has already passed");
+  }
+};
+
 const timeToMinutes = (time: string) => {
   const [hours = 0, minutes = 0] = time.split(":").map(Number);
   return hours * 60 + minutes;
@@ -285,6 +297,7 @@ const createAssignedShift = async (
   const shiftEndTime = payload.shiftEndTime ?? shiftTemplate.endTime;
 
   assertNotPastWorkDate(workDate);
+  assertShiftNotStarted(workDate, shiftStartTime, shiftEndTime);
 
   await SubscriptionService.assertActiveOrganizationSubscription(branch.organizationId);
   await assertNoOverlappingAssignedShift(
@@ -359,6 +372,8 @@ const updateAssignedShift = async (
   if (payload.shiftEndTime !== undefined) {
     shiftEndTime = payload.shiftEndTime;
   }
+
+  assertShiftNotStarted(workDate, shiftStartTime, shiftEndTime);
 
   await assertNoOverlappingAssignedShift(
     employeeId,

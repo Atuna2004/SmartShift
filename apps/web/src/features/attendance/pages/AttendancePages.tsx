@@ -76,10 +76,19 @@ export const AttendanceDashboardPage = () => {
       void queryClient.invalidateQueries({ queryKey: ["schedules"] });
     },
   });
+  const undoAbsentMutation = useMutation({
+    mutationFn: (scheduleId: string) => attendanceApi.undoMarkAbsent({ scheduleId }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["attendances"] });
+      void queryClient.invalidateQueries({ queryKey: ["schedules"] });
+    },
+  });
   const branches = branchQuery.data?.data ?? [];
   const employeesById = useMemo(() => new Map((employeeQuery.data?.data ?? []).map((employee) => [employee.id, employee])), [employeeQuery.data?.data]);
   const branchesById = useMemo(() => new Map(branches.map((branch) => [branch.id, branch.name])), [branches]);
-  const todaySchedules = (scheduleQuery.data?.data ?? []).filter((schedule) => toDateInputValue(schedule.workDate) === today);
+  const todaySchedules = (scheduleQuery.data?.data ?? []).filter(
+    (schedule) => toDateInputValue(schedule.workDate) === today && schedule.status !== "cancelled"
+  );
   const attendances = historyQuery.data?.data ?? [];
   const attendanceByScheduleId = useMemo(() => new Map(attendances.map((item) => [item.scheduleId, item])), [attendances]);
   const rows = todaySchedules.map((schedule) => ({
@@ -116,7 +125,8 @@ export const AttendanceDashboardPage = () => {
           </button>
         </div>
       </div>
-      {autoAbsentMutation.isError ? <ApiErrorMessage error={autoAbsentMutation.error} fallback="Unable to mark absent schedules." /> : null}
+      {autoAbsentMutation.isError ? <ApiErrorMessage error={autoAbsentMutation.error} fallback="Không thể đánh dấu vắng." /> : null}
+      {undoAbsentMutation.isError ? <ApiErrorMessage error={undoAbsentMutation.error} fallback="Không thể hủy đánh dấu vắng." /> : null}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard icon={<TrendingUp />} label="Tỷ lệ chấm công" meta={`${attendances.length}/${todaySchedules.length} đã ghi nhận`} tone="success" value={`${attendanceRate}%`} />
@@ -134,22 +144,23 @@ export const AttendanceDashboardPage = () => {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left">
+            <table className="w-full min-w-[960px] text-left">
               <thead className="border-b border-[#e5e7eb] bg-[#f5f5f5] text-xs font-bold uppercase tracking-wider text-[#444748]">
                 <tr>
                   <th className="px-4 py-3">Nhân viên</th>
                   <th className="px-4 py-3">Chi nhánh</th>
                   <th className="px-4 py-3">Lịch</th>
-                  <th className="px-4 py-3 text-center">Check-in</th>
-                  <th className="px-4 py-3 text-center">Check-out</th>
-                  <th className="px-4 py-3 text-right">Status</th>
+                  <th className="px-4 py-3 text-center">Vào ca</th>
+                  <th className="px-4 py-3 text-center">Tan ca</th>
+                  <th className="px-4 py-3 text-right">Trạng thái</th>
+                  <th className="px-4 py-3 text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e5e7eb]">
                 {isLoading ? (
-                  <tr><td className="px-4 py-10 text-center text-sm font-semibold text-[#444748]" colSpan={6}>Đang tải chấm công...</td></tr>
+                  <tr><td className="px-4 py-10 text-center text-sm font-semibold text-[#444748]" colSpan={7}>Đang tải chấm công...</td></tr>
                 ) : rows.length === 0 ? (
-                  <tr><td className="px-4 py-10 text-center text-sm font-semibold text-[#444748]" colSpan={6}>Không tìm thấy lịch đã xuất bản cho hôm nay.</td></tr>
+                  <tr><td className="px-4 py-10 text-center text-sm font-semibold text-[#444748]" colSpan={7}>Không tìm thấy lịch đã xuất bản cho hôm nay.</td></tr>
                 ) : rows.map(({ attendance, employee, schedule }) => {
                   const status = attendance ? toAttendanceLabel(attendance.attendanceStatus) : "Chờ";
                   return (
@@ -168,6 +179,20 @@ export const AttendanceDashboardPage = () => {
                     <td className={attendance?.attendanceStatus === "late" ? "px-4 py-4 text-center font-semibold text-[#ef4444]" : "px-4 py-4 text-center font-semibold"}>{formatTime(attendance?.checkInTime)}</td>
                     <td className="px-4 py-4 text-center text-[#444748]">{formatTime(attendance?.checkOutTime)}</td>
                     <td className="px-4 py-4 text-right"><StatusBadge status={status} /></td>
+                    <td className="px-4 py-4 text-right">
+                      {attendance?.attendanceStatus === "absent" ? (
+                        <button
+                          className="rounded-lg border border-[#e5e7eb] px-3 py-2 text-xs font-semibold hover:bg-[#f7f3f2] disabled:opacity-50"
+                          disabled={undoAbsentMutation.isPending}
+                          onClick={() => undoAbsentMutation.mutate(schedule.id)}
+                          type="button"
+                        >
+                          Hủy vắng
+                        </button>
+                      ) : (
+                        <span className="text-xs text-[#747878]">--</span>
+                      )}
+                    </td>
                   </tr>
                   );
                 })}
@@ -390,7 +415,7 @@ export const StaffQrScannerPage = () => {
   const submitMutation = useMutation({
     mutationFn: async (token: string) => {
       if (!selectedSchedule) {
-        throw new Error("Select a shift before submitting attendance.");
+        throw new Error("Vui lòng chọn ca trước khi chấm công.");
       }
       await dailyQrApi.verify({ qrToken: token, branchId: selectedSchedule.branchId });
       return mode === "check-in"
@@ -439,7 +464,7 @@ export const StaffQrScannerPage = () => {
       </header>
       <div className="flex items-center justify-center gap-2 bg-black px-4 py-3 text-sm font-bold uppercase tracking-wider text-white">
         <MapPin className="h-4 w-4" />
-        {selectedSchedule ? `Scanning for shift ${selectedSchedule.shiftStartTime} - ${selectedSchedule.shiftEndTime}` : "No shift selected"}
+        {selectedSchedule ? `Đang quét cho ca ${selectedSchedule.shiftStartTime} - ${selectedSchedule.shiftEndTime}` : "Chưa chọn ca"}
       </div>
       <QrScanner active={entryMode === "scan"} className="flex min-h-[560px] flex-1 items-center justify-center" onScan={handleScan}>
         <div className="smartshift-scan-overlay absolute inset-0 z-10" />
@@ -452,14 +477,14 @@ export const StaffQrScannerPage = () => {
           <div className="absolute inset-0 flex items-center justify-center"><span className="h-1.5 w-1.5 rounded-full bg-white/40" /></div>
         </div>
         <div className="absolute bottom-12 left-1/2 z-30 w-[80%] max-w-md -translate-x-1/2 rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-center text-sm font-semibold text-white backdrop-blur-md">
-          {entryMode === "scan" ? `Quét QR để ${mode === "check-in" ? "check-in" : "check-out"}` : `Nhập mã để ${mode === "check-in" ? "check-in" : "check-out"}`}
+          {entryMode === "scan" ? `Quét QR để ${mode === "check-in" ? "vào ca" : "tan ca"}` : `Nhập mã để ${mode === "check-in" ? "vào ca" : "tan ca"}`}
         </div>
       </QrScanner>
       <footer className="bg-white px-6 py-6">
         <div className="mx-auto max-w-md space-y-4">
           <div className="grid grid-cols-2 gap-2">
-            <button className={mode === "check-in" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-in")} type="button">Check In</button>
-            <button className={mode === "check-out" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-out")} type="button">Check Out</button>
+            <button className={mode === "check-in" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-in")} type="button">Vào ca</button>
+            <button className={mode === "check-out" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setMode("check-out")} type="button">Tan ca</button>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button className={entryMode === "scan" ? "h-10 rounded-lg bg-black text-sm font-semibold text-white" : "h-10 rounded-lg border border-[#e5e7eb] text-sm font-semibold"} onClick={() => setEntryMode("scan")} type="button">Quét QR</button>
@@ -472,11 +497,11 @@ export const StaffQrScannerPage = () => {
           {entryMode === "manual" ? (
             <input className="h-11 w-full rounded-lg border border-[#e5e7eb] px-3 text-sm outline-none focus:ring-1 focus:ring-black" onChange={(event) => setQrToken(event.target.value)} placeholder="Nhập mã QR thủ công" value={qrToken} />
           ) : null}
-          {submitMutation.isError ? <ApiErrorMessage error={submitMutation.error} fallback="Unable to submit attendance." /> : null}
-          {result ? <p className="rounded-lg bg-[#10b981]/10 px-3 py-2 text-sm font-semibold text-[#10b981]">{toAttendanceActionLabel(mode)} successful at {formatTime(mode === "check-in" ? result.checkInTime : result.checkOutTime)}</p> : null}
+          {submitMutation.isError ? <ApiErrorMessage error={submitMutation.error} fallback="Không thể gửi chấm công." /> : null}
+          {result ? <p className="rounded-lg bg-[#10b981]/10 px-3 py-2 text-sm font-semibold text-[#10b981]">{toAttendanceActionLabel(mode)} thành công lúc {formatTime(mode === "check-in" ? result.checkInTime : result.checkOutTime)}</p> : null}
           <div className="flex items-center justify-center gap-8">
-            <ScannerAction active={flashOn} icon={<Flashlight />} label="Flash" onClick={() => setFlashOn((value) => !value)} />
-            <ScannerAction active={entryMode === "manual"} icon={<Keyboard />} label="Type Code" onClick={() => setEntryMode("manual")} />
+            <ScannerAction active={flashOn} icon={<Flashlight />} label="Đèn" onClick={() => setFlashOn((value) => !value)} />
+            <ScannerAction active={entryMode === "manual"} icon={<Keyboard />} label="Nhập mã" onClick={() => setEntryMode("manual")} />
             <ScannerAction icon={<History />} label="Lịch sử" />
           </div>
           <button className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-black text-sm font-semibold text-white disabled:opacity-50" disabled={!qrToken || !selectedSchedule || submitMutation.isPending} onClick={() => submitToken(normalizeQrToken(qrToken))} type="button">
@@ -496,27 +521,27 @@ export const CheckInSuccessPage = () => (
       <div className="mx-auto mb-8 flex h-32 w-32 items-center justify-center rounded-full bg-[#10b981]/10">
         <CheckCircle2 className="h-16 w-16 text-[#10b981]" />
       </div>
-      <h1 className="mb-2 text-4xl font-semibold tracking-tight text-black">Good morning, Alex!</h1>
-      <p className="mb-12 text-lg text-[#444748]">You are clocked in.</p>
+      <h1 className="mb-2 text-4xl font-semibold tracking-tight text-black">Chấm công thành công</h1>
+      <p className="mb-12 text-lg text-[#444748]">Bạn đã check-in.</p>
       <div className="mb-12 space-y-4">
         <div className="flex items-center justify-between rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4">
-          <span className="flex items-center gap-2 text-sm font-semibold text-[#444748]"><Clock3 className="h-5 w-5" />Clocked In At</span>
+          <span className="flex items-center gap-2 text-sm font-semibold text-[#444748]"><Clock3 className="h-5 w-5" />Giờ check-in</span>
           <span className="text-xl font-semibold text-black">08:56 AM</span>
         </div>
         <div className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4 text-left">
-          <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#444748]"><CalendarDays className="h-4 w-4" />Current Shift</span>
-          <p className="mt-3 text-2xl font-semibold text-black">Morning Shift</p>
+          <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#444748]"><CalendarDays className="h-4 w-4" />Ca hiện tại</span>
+          <p className="mt-3 text-2xl font-semibold text-black">Ca sáng</p>
           <p className="text-base text-[#444748]">09:00 - 17:00</p>
         </div>
       </div>
       <div className="space-y-3">
         <Link className="flex h-12 w-full items-center justify-center rounded-lg bg-black text-sm font-semibold text-white" to="/dashboard/attendance/history">Đi tới lịch sử chấm công</Link>
-        <Link className="flex h-12 w-full items-center justify-center rounded-lg border border-[#e5e7eb] text-sm font-semibold text-black hover:bg-[#f7f3f2]" to="/dashboard/attendance">Close</Link>
+        <Link className="flex h-12 w-full items-center justify-center rounded-lg border border-[#e5e7eb] text-sm font-semibold text-black hover:bg-[#f7f3f2]" to="/dashboard/attendance">Đóng</Link>
       </div>
     </div>
     <div className="fixed bottom-6 left-1/2 w-[calc(100%-48px)] max-w-sm -translate-x-1/2 rounded-full bg-black px-4 py-3 text-white shadow-lg">
       <div className="flex items-center justify-between text-xs">
-        <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />Location verified: HQ Office</span>
+        <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />Đã xác thực vị trí: Văn phòng chính</span>
         <ShieldCheck className="h-4 w-4" />
       </div>
     </div>
@@ -645,11 +670,11 @@ const toAttendanceLabel = (status: AttendanceStatus) => {
   if (status === "on_time") return "Đúng giờ";
   if (status === "late") return "Đi muộn";
   if (status === "absent") return "Vắng";
-  if (status === "early_leave") return "Early Leave";
+  if (status === "early_leave") return "Về sớm";
   return "Tăng ca";
 };
 
-const toAttendanceActionLabel = (mode: "check-in" | "check-out") => mode === "check-in" ? "Check-in" : "Check-out";
+const toAttendanceActionLabel = (mode: "check-in" | "check-out") => mode === "check-in" ? "Vào ca" : "Tan ca";
 
 const getInitials = (name: string) =>
   name
@@ -660,8 +685,8 @@ const getInitials = (name: string) =>
     .join("") || "S";
 
 const toRoleLabel = (employee: Employee) => {
-  if (employee.role === "owner") return "Owner";
-  if (employee.role === "manager") return "Manager";
+  if (employee.role === "owner") return "Chủ quán";
+  if (employee.role === "manager") return "Quản lý";
   return "Nhân viên";
 };
 
@@ -715,7 +740,7 @@ const ActivityFeed = ({ attendances, employeesById }: { attendances: AttendanceR
   <aside className="hidden border-l border-[#e5e7eb] bg-white lg:flex lg:flex-col">
     <div className="border-b border-[#e5e7eb] p-6">
       <h3 className="text-2xl font-semibold tracking-tight text-black">Hoạt động gần đây</h3>
-      <p className="text-xs text-[#444748]">Real-time check-in stream</p>
+      <p className="text-xs text-[#444748]">Luồng chấm công theo thời gian thực</p>
     </div>
     <div className="flex-1 space-y-4 overflow-y-auto p-4">
       {items.length === 0 ? <p className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4 text-sm font-semibold text-[#444748]">Chưa có hoạt động chấm công hôm nay.</p> : items.map((item) => {
@@ -732,7 +757,7 @@ const ActivityFeed = ({ attendances, employeesById }: { attendances: AttendanceR
                 <span className="shrink-0 text-[10px] text-[#444748]">{time ? formatTime(time) : "--"}</span>
               </div>
               <p className="text-xs text-[#444748]">{item.checkOutTime ? "Đã check-out" : "Đã check-in"} - {toAttendanceLabel(item.attendanceStatus)}</p>
-              <p className="mt-2 flex items-center gap-1 text-[10px] font-bold uppercase text-[#10b981]"><span className="h-2 w-2 rounded-full bg-[#10b981]" />Verified</p>
+              <p className="mt-2 flex items-center gap-1 text-[10px] font-bold uppercase text-[#10b981]"><span className="h-2 w-2 rounded-full bg-[#10b981]" />Đã xác thực</p>
             </div>
           </div>
         </div>
@@ -756,11 +781,11 @@ const HistoryEntry = ({ entry }: { entry: AttendanceRecord }) => (
     </div>
     <div className="flex items-center justify-between border-t border-[#e5e7eb] pt-4">
       <div className="flex gap-8">
-        <TimeValue label="Check In" value={formatTime(entry.checkInTime)} />
-        <TimeValue label="Check Out" value={formatTime(entry.checkOutTime)} />
+        <TimeValue label="Vào ca" value={formatTime(entry.checkInTime)} />
+        <TimeValue label="Tan ca" value={formatTime(entry.checkOutTime)} />
       </div>
       <div className="text-right">
-        <p className="text-xs text-[#444748]">Total</p>
+        <p className="text-xs text-[#444748]">Tổng giờ</p>
         <p className="text-xl font-black text-black">{getWorkedHours(entry).toFixed(1)}h</p>
       </div>
     </div>

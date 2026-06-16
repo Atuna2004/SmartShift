@@ -187,6 +187,8 @@ export const SubscriptionPage = () => {
   });
   const subscription = subscriptionQuery.data;
   const usage = limitsQuery.data;
+  const displayedEmployeeLimit = normalizeDisplayedLimit(subscription?.planCode, "employees", subscription?.limits.maxEmployees);
+  const displayedBranchLimit = normalizeDisplayedLimit(subscription?.planCode, "branches", subscription?.limits.maxBranches);
   const payments = paymentsQuery.data?.data ?? [];
   const latestPayment = payments[0];
   const totalPaid = payments
@@ -209,7 +211,7 @@ export const SubscriptionPage = () => {
                 <div>
                   <span className="mb-4 inline-block rounded bg-black px-2 py-1 text-sm font-semibold text-white">GÓI HIỆN TẠI</span>
                   <h2 className="text-2xl font-semibold tracking-tight text-black">{subscriptionQuery.isLoading ? "Đang tải..." : subscription?.planName ?? "Chưa có gói active"}</h2>
-                  <p className="text-[#444748]">{subscription ? `${toSubscriptionStatusLabel(subscription.status)} - ${subscription.limits.maxEmployees} nhân viên tối đa` : "Chọn một gói để bắt đầu sử dụng."}</p>
+                  <p className="text-[#444748]">{subscription ? `${toSubscriptionStatusLabel(subscription.status)} - ${displayedEmployeeLimit} nhân viên tối đa` : "Chọn một gói để bắt đầu sử dụng."}</p>
                 </div>
                 <div className="md:text-right">
                   <p className="text-2xl font-semibold">{subscription ? formatCurrency(subscription.priceMonthly, subscription.currency) : "--"}<span className="text-base text-[#444748]">/tháng</span></p>
@@ -217,8 +219,8 @@ export const SubscriptionPage = () => {
                 </div>
               </div>
               <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-                <MiniMetric label="Nhân viên" value={formatUsage(usage?.limits.employees)} />
-                <MiniMetric label="Chi nhánh" value={formatUsage(usage?.limits.branches)} />
+                <MiniMetric label="Nhân viên" value={formatUsageWithOverride(usage?.limits.employees, displayedEmployeeLimit)} />
+                <MiniMetric label="Chi nhánh" value={formatUsageWithOverride(usage?.limits.branches, displayedBranchLimit)} />
                 <MiniMetric label="Mẫu ca" value={formatUsage(usage?.limits.shiftTemplates)} />
               </div>
               <div className="flex flex-wrap gap-3">
@@ -629,8 +631,18 @@ const PaymentStatusBadge = ({ status }: { status: PaymentStatus }) => {
 };
 
 const featureCell = (enabled: boolean) => enabled ? <Check className="h-5 w-5 text-[#10b981]" /> : "-";
+const isLimitedStarterPlan = (planCode?: string) => planCode === "trial_14d" || planCode === "basic_49k" || planCode === "basic";
+const normalizeDisplayedLimit = (planCode: string | undefined, kind: "employees" | "branches", value?: number) => {
+  if (isLimitedStarterPlan(planCode)) {
+    return kind === "employees" ? 20 : 1;
+  }
+
+  return value ?? 0;
+};
 const formatLimit = (value?: number) => value === undefined ? "--" : value >= 999999 ? "Không giới hạn" : formatNumber(value);
 const formatUsage = (limit?: { used: number; limit: number | null }) => limit ? `${formatNumber(limit.used)} / ${limit.limit === null || limit.limit >= 999999 ? "Không giới hạn" : formatNumber(limit.limit)}` : "--";
+const formatUsageWithOverride = (limit: { used: number; limit: number | null } | undefined, overrideLimit: number) =>
+  limit ? `${formatNumber(limit.used)} / ${formatNumber(overrideLimit)}` : `0 / ${formatNumber(overrideLimit)}`;
 const toPlanFeatureLines = (plan: SubscriptionPlan) => [
   `${formatLimit(plan.limits.maxEmployees)} nhân viên`,
   `${formatLimit(plan.limits.maxBranches)} chi nhánh`,

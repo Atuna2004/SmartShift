@@ -92,6 +92,17 @@ const autoMarkAbsent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const undoMarkAbsent = catchAsync(async (req: Request, res: Response) => {
+  const result = await AttendanceService.undoMarkAbsent(getAuthUser(req), req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Absent mark cancelled successfully",
+    data: result,
+  });
+});
+
 const getAttendanceHistory = catchAsync(async (req: Request, res: Response) => {
   const result = await AttendanceService.getAttendanceHistory(
     getAuthUser(req),
@@ -140,6 +151,7 @@ export const AttendanceController = {
   requestManualCorrection,
   approveManualAttendance,
   autoMarkAbsent,
+  undoMarkAbsent,
   getAttendanceHistory,
   getAttendanceReminders,
   getLateWarnings,

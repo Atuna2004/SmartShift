@@ -278,7 +278,7 @@ export const SchedulePage = () => {
         .filter((item) => !existingKeys.has([item.employeeId, item.workDate, item.shiftTemplateId, item.shiftStartTime, item.shiftEndTime].join("|")));
 
       if (copies.length === 0) {
-        throw new Error("No eligible previous-week shifts available to duplicate.");
+        throw new Error("Không có ca tuần trước phù hợp để sao chép.");
       }
 
       return copies.map((item) => ({
@@ -290,7 +290,7 @@ export const SchedulePage = () => {
     onSuccess: (drafts) => {
       setLocalDrafts((current) => [...current, ...drafts]);
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to duplicate previous week.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể sao chép tuần trước.")),
   });
   const bulkAutoAssignMutation = useMutation({
     mutationFn: async () => {
@@ -335,7 +335,7 @@ export const SchedulePage = () => {
         .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
       if (assignments.length === 0) {
-        throw new Error("No future open weekday slots with active templates were found.");
+        throw new Error("Không còn ngày trống trong tương lai với mẫu ca đang hoạt động.");
       }
 
       return assignments.map((item) => ({
@@ -347,7 +347,7 @@ export const SchedulePage = () => {
     onSuccess: (drafts) => {
       setLocalDrafts((current) => [...current, ...drafts]);
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to auto-assign shifts.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể tự động gán ca.")),
   });
   const publishMutation = useMutation({
     mutationFn: async () => {
@@ -374,14 +374,14 @@ export const SchedulePage = () => {
       setLocalDrafts((current) => current.filter((item) => !visibleLocalDrafts.some((draft) => draft.id === item.id)));
       void queryClient.invalidateQueries({ queryKey: ["schedules", "weekly"] });
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to publish schedule.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể xuất bản lịch.")),
   });
   const deleteMutation = useMutation({
     mutationFn: (assignedShiftId: string) => scheduleApi.delete(assignedShiftId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["schedules", "weekly"] });
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to delete assigned shift.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể xóa ca đã gán.")),
   });
   const totalHours = useMemo(
     () => schedules.reduce((sum, item) => sum + getShiftHours(item.shiftStartTime, item.shiftEndTime), 0),
@@ -391,6 +391,11 @@ export const SchedulePage = () => {
   const draftCount = schedules.filter((item) => !item.published).length;
 
   const deleteAssignedShift = (assignedShiftId: string) => {
+    const confirmed = window.confirm("Bạn có chắc muốn xóa ca làm này không?");
+    if (!confirmed) {
+      return;
+    }
+
     if (isLocalDraftId(assignedShiftId)) {
       setLocalDrafts((current) => current.filter((item) => item.id !== assignedShiftId));
       return;
@@ -452,7 +457,11 @@ export const SchedulePage = () => {
               <button
                 className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#ef4444]/30 px-4 text-sm font-semibold text-[#ef4444] hover:bg-[#ef4444]/10 disabled:text-[#747878] disabled:opacity-60"
                 disabled={localDrafts.length === 0}
-                onClick={clearLocalDrafts}
+                onClick={() => {
+                  if (window.confirm("Bạn có chắc muốn xóa toàn bộ bản nháp đang hiển thị không?")) {
+                    clearLocalDrafts();
+                  }
+                }}
                 type="button"
               >
                 <X className="h-4 w-4" />
@@ -596,9 +605,9 @@ export const MonthlySchedulePage = () => {
     >
       <main className="space-y-6 p-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <MetricCard icon={<Clock3 />} label="Total Labor Hours" value={monthSchedules.reduce((sum, item) => sum + getShiftHours(item.shiftStartTime, item.shiftEndTime), 0).toFixed(1)} sub="scheduled this month" tone="success" tall />
-          <MetricCard icon={<UsersRound />} label="Employees" value={String(employeesQuery.data?.data.filter((employee) => employee.role !== "owner").length ?? 0)} sub="matching filters" tall />
-          <MetricCard icon={<CalendarDays />} label="Assigned Shifts" value={String(monthSchedules.length)} sub="in selected month" tall />
+          <MetricCard icon={<Clock3 />} label="Tổng giờ làm" value={monthSchedules.reduce((sum, item) => sum + getShiftHours(item.shiftStartTime, item.shiftEndTime), 0).toFixed(1)} sub="đã lên lịch trong tháng" tone="success" tall />
+          <MetricCard icon={<UsersRound />} label="Nhân viên" value={String(employeesQuery.data?.data.filter((employee) => employee.role !== "owner").length ?? 0)} sub="theo bộ lọc" tall />
+          <MetricCard icon={<CalendarDays />} label="Ca đã gán" value={String(monthSchedules.length)} sub="trong tháng đã chọn" tall />
         <MetricCard icon={<Sparkles />} label="Ca nháp" value={String(draftCount)} sub="chờ xuất bản" tone={draftCount > 0 ? "danger" : "secondary"} tall />
         </div>
         <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
@@ -960,7 +969,7 @@ const TemplateRow = ({
         onClick={onToggleStatus}
         type="button"
       >
-        {template.status === "active" ? "Disable" : "Activate"}
+        {template.status === "active" ? "Vô hiệu" : "Kích hoạt"}
       </button>
     </div>
   </div>
@@ -1008,7 +1017,7 @@ const WeeklyBoard = ({
         <tbody>
           {employees.length === 0 ? (
             <tr>
-              <td className="p-10 text-center text-sm font-semibold text-[#444748]" colSpan={8}>No active employees found for the current filters.</td>
+              <td className="p-10 text-center text-sm font-semibold text-[#444748]" colSpan={8}>Không có nhân viên đang hoạt động theo bộ lọc hiện tại.</td>
             </tr>
           ) : (
             employees.map((employee) => (
@@ -1118,7 +1127,7 @@ const ShiftPill = ({
     <div className={muted ? "group/pill min-w-0 rounded-lg border-l-4 border-[#747878] bg-[#e5e2e1] p-2" : primary ? "group/pill min-w-0 rounded-lg border-l-4 bg-[#e6e1df] p-2" : "group/pill min-w-0 rounded-lg border-l-4 bg-[#d8e2ff]/30 p-2"} style={{ borderLeftColor: accent }}>
       <div className="flex items-start justify-between gap-2">
         <span className={primary ? "min-w-0 text-xs font-bold text-black" : muted ? "min-w-0 text-xs font-bold text-[#1c1b1b]" : "min-w-0 text-xs font-bold text-[#0058be]"}>{assignedShift.shiftStartTime} - {assignedShift.shiftEndTime}</span>
-        <button className="shrink-0 opacity-0 transition hover:text-[#ef4444] group-hover/pill:opacity-100" onClick={() => onDeleteShift(assignedShift.id)} title="Delete assigned shift" type="button"><X className="h-3.5 w-3.5" /></button>
+        <button className="shrink-0 opacity-0 transition hover:text-[#ef4444] group-hover/pill:opacity-100" onClick={() => onDeleteShift(assignedShift.id)} title="Xóa ca đã gán" type="button"><X className="h-3.5 w-3.5" /></button>
       </div>
       <p className="mt-1 break-words text-[11px] font-medium leading-4">{name}</p>
       <div className="mt-2 flex min-w-0 items-center gap-2 border-t border-black/5 pt-2">
@@ -1136,8 +1145,8 @@ const ShiftPill = ({
 const ScheduleSummary = ({ assignedCount, draftCount, totalHours }: { assignedCount: number; draftCount: number; totalHours: number }) => (
   <footer className="border-t border-[#e5e7eb] bg-white p-6">
     <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-      <SummaryItem label="Total Hours" value={totalHours.toFixed(1)} meta="scheduled this week" tone="success" />
-      <SummaryItem label="Assigned Shifts" value={String(assignedCount)} meta="from schedule API" />
+      <SummaryItem label="Tổng giờ" value={totalHours.toFixed(1)} meta="đã lên lịch trong tuần" tone="success" />
+      <SummaryItem label="Ca đã gán" value={String(assignedCount)} meta="từ dữ liệu lịch" />
       <SummaryItem label="Ca nháp" value={String(draftCount)} meta="chờ xuất bản" tone={draftCount > 0 ? "danger" : undefined} />
       <div><span className="text-xs font-bold uppercase tracking-wider text-[#444748]">Trạng thái</span><div className="mt-2 flex items-center gap-2"><span className={`h-3 w-3 rounded-full ${draftCount > 0 ? "bg-[#ef4444]" : "bg-[#10b981]"}`} /><b>{draftCount > 0 ? "Còn bản nháp" : "Đã xuất bản"}</b></div></div>
     </div>
@@ -1220,7 +1229,7 @@ const AssignedShiftModal = ({
     setError("");
 
     if (!selectedTemplate) {
-      setError("Select an active shift template before assigning shifts.");
+      setError("Vui lòng chọn mẫu ca đang hoạt động trước khi gán ca.");
       return;
     }
 
@@ -1259,22 +1268,22 @@ const AssignedShiftModal = ({
         </div>
         <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
-            {branches.length === 0 ? <div className="rounded-lg border border-[#ef4444]/20 bg-[#ffdad6]/40 p-4 text-sm font-semibold text-[#93000a]">Create an active branch before assigning shifts.</div> : null}
+            {branches.length === 0 ? <div className="rounded-lg border border-[#ef4444]/20 bg-[#ffdad6]/40 p-4 text-sm font-semibold text-[#93000a]">Hãy tạo chi nhánh đang hoạt động trước khi gán ca.</div> : null}
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="space-y-2"><span className="text-sm font-semibold">Branch</span><select className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none" onChange={(event) => setSelectedBranchId(event.target.value)} required value={selectedBranchId}><option value="">Select branch</option>{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
-              <label className="space-y-2"><span className="text-sm font-semibold">Work Date</span><input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-4 outline-none" min={toDateInputValue(new Date())} onChange={(event) => setWorkDate(event.target.value)} required type="date" value={workDate} /></label>
+              <label className="space-y-2"><span className="text-sm font-semibold">Chi nhánh</span><select className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none" onChange={(event) => setSelectedBranchId(event.target.value)} required value={selectedBranchId}><option value="">Chọn chi nhánh</option>{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
+              <label className="space-y-2"><span className="text-sm font-semibold">Ngày làm việc</span><input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-4 outline-none" min={toDateInputValue(new Date())} onChange={(event) => setWorkDate(event.target.value)} required type="date" value={workDate} /></label>
               <label className="space-y-2"><span className="text-sm font-semibold">Mẫu ca</span><select className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none" onChange={(event) => setShiftTemplateId(event.target.value)} required value={shiftTemplateId}><option value="">Chọn mẫu</option>{branchTemplates.map((template) => <option key={template.id} value={template.id}>{template.name} ({template.startTime} - {template.endTime})</option>)}</select></label>
               <div className="col-span-full space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold">Employees</span>
+                  <span className="text-sm font-semibold">Nhân viên</span>
                   <div className="flex gap-2">
-                    <button className="rounded-lg border border-[#e5e7eb] px-3 py-1 text-xs font-semibold hover:bg-[#f7f3f2]" onClick={() => setEmployeeIds(branchEmployees.map((employee) => employee.id))} type="button">Select all</button>
-                    <button className="rounded-lg border border-[#e5e7eb] px-3 py-1 text-xs font-semibold hover:bg-[#f7f3f2]" onClick={() => setEmployeeIds([])} type="button">Clear</button>
+                    <button className="rounded-lg border border-[#e5e7eb] px-3 py-1 text-xs font-semibold hover:bg-[#f7f3f2]" onClick={() => setEmployeeIds(branchEmployees.map((employee) => employee.id))} type="button">Chọn tất cả</button>
+                    <button className="rounded-lg border border-[#e5e7eb] px-3 py-1 text-xs font-semibold hover:bg-[#f7f3f2]" onClick={() => setEmployeeIds([])} type="button">Bỏ chọn</button>
                   </div>
                 </div>
                 <div className="max-h-36 overflow-y-auto rounded-lg border border-[#e5e7eb] bg-white p-2">
                   {branchEmployees.length === 0 ? (
-                    <p className="px-2 py-3 text-sm font-semibold text-[#747878]">No active employees in this branch.</p>
+                    <p className="px-2 py-3 text-sm font-semibold text-[#747878]">Không có nhân viên đang hoạt động trong chi nhánh này.</p>
                   ) : (
                     <div className="grid gap-1 md:grid-cols-2">
                       {branchEmployees.map((employee) => (
@@ -1289,7 +1298,7 @@ const AssignedShiftModal = ({
                     </div>
                   )}
                 </div>
-                <p className="text-xs font-semibold text-[#444748]">{employeeIds.length} selected</p>
+                <p className="text-xs font-semibold text-[#444748]">Đã chọn {employeeIds.length} nhân viên</p>
               </div>
               <div className="col-span-full grid grid-cols-2 gap-4 rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] p-3"><div><span className="text-xs text-[#444748]">Giờ bắt đầu</span><p className="text-xl font-semibold">{selectedTemplate?.startTime ?? "--:--"}</p></div><div><span className="text-xs text-[#444748]">Giờ kết thúc</span><p className="text-xl font-semibold">{selectedTemplate?.endTime ?? "--:--"}</p></div></div>
               <label className="col-span-full space-y-2"><span className="text-sm font-semibold">Ghi chú ca</span><textarea className="min-h-20 w-full resize-none rounded-lg border border-[#e5e7eb] px-4 py-2 outline-none" onChange={(event) => setNote(event.target.value)} placeholder="Nhiệm vụ cụ thể, yêu cầu phủ ca hoặc nhắc nhở..." value={note} /></label>
@@ -1338,11 +1347,9 @@ const ShiftTemplateModal = ({
   const queryClient = useQueryClient();
   const [branchId, setBranchId] = useState(template?.branchId ?? branches[0]?.id ?? "");
   const [name, setName] = useState(template?.name ?? "");
-  const [code, setCode] = useState(template?.code ?? "");
   const [startTime, setStartTime] = useState(template?.startTime ?? "08:00");
   const [endTime, setEndTime] = useState(template?.endTime ?? "16:00");
   const [breakMinutes, setBreakMinutes] = useState(String(template?.breakMinutes ?? 0));
-  const [color, setColor] = useState(template?.color ?? "#000000");
   const [description, setDescription] = useState(template?.description ?? "");
   const [error, setError] = useState("");
 
@@ -1350,11 +1357,9 @@ const ShiftTemplateModal = ({
     mutationFn: () => {
       const payload = {
         name,
-        ...(code ? { code } : {}),
         startTime,
         endTime,
         breakMinutes: Number(breakMinutes),
-        color,
         ...(description ? { description } : {}),
       };
 
@@ -1375,7 +1380,7 @@ const ShiftTemplateModal = ({
         navigate(closeTo, { replace: true });
       }
     },
-    onError: (err) => setError(getApiErrorMessage(err, "Unable to save shift template.")),
+    onError: (err) => setError(getApiErrorMessage(err, "Không thể lưu mẫu ca.")),
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -1396,7 +1401,7 @@ const ShiftTemplateModal = ({
         <div className="flex items-center justify-between border-b border-[#e5e7eb] bg-[#fdf8f8] px-6 py-4">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-black">{mode === "edit" ? "Chỉnh sửa mẫu ca" : "Tạo mẫu ca"}</h2>
-            <p className="text-xs text-[#444748]">Reusable shift pattern for schedule planning.</p>
+            <p className="text-xs text-[#444748]">Mẫu ca dùng để gán nhanh vào lịch làm việc.</p>
           </div>
           {closeControl}
         </div>
@@ -1404,12 +1409,12 @@ const ShiftTemplateModal = ({
           <div className="space-y-6 p-6">
             {branches.length === 0 && mode === "create" ? (
               <div className="rounded-lg border border-[#ef4444]/20 bg-[#ffdad6]/40 p-4 text-sm font-semibold text-[#93000a]">
-                Create an active branch before adding shift templates.
+                Hãy tạo chi nhánh đang hoạt động trước khi thêm mẫu ca.
               </div>
             ) : null}
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-sm font-semibold">Branch</span>
+                <span className="text-sm font-semibold">Chi nhánh</span>
                 <select
                   className="h-10 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 outline-none"
                   disabled={mode === "edit"}
@@ -1417,23 +1422,15 @@ const ShiftTemplateModal = ({
                   required
                   value={branchId}
                 >
-                  <option value="">Select branch</option>
+                  <option value="">Chọn chi nhánh</option>
                   {branches.map((branch) => (
                     <option key={branch.id} value={branch.id}>{branch.name}</option>
                   ))}
                 </select>
               </label>
               <label className="space-y-2">
-                <span className="text-sm font-semibold">Template Name</span>
+                <span className="text-sm font-semibold">Tên mẫu ca</span>
                 <input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-4 outline-none" onChange={(event) => setName(event.target.value)} required value={name} />
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm font-semibold">Code</span>
-                <input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-4 uppercase outline-none" onChange={(event) => setCode(event.target.value)} value={code} />
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm font-semibold">Color</span>
-                <input className="h-10 w-full rounded-lg border border-[#e5e7eb] px-2 outline-none" onChange={(event) => setColor(event.target.value)} type="color" value={color} />
               </label>
               <label className="space-y-2">
                 <span className="text-sm font-semibold">Giờ bắt đầu</span>
@@ -1475,9 +1472,9 @@ const StatePanel = ({ description, title }: { description: string; title: string
 
 const ViewSwitcher = ({ active }: { active: "day" | "week" | "month" }) => (
   <div className="rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] p-1">
-    <Link className={active === "day" ? "inline-block rounded-md bg-white px-4 py-1 text-sm font-semibold shadow-sm" : "inline-block px-4 py-1 text-sm font-semibold text-[#444748]"} to="/dashboard/schedule/daily">Day</Link>
-    <Link className={active === "week" ? "inline-block rounded-md bg-white px-4 py-1 text-sm font-semibold shadow-sm" : "inline-block px-4 py-1 text-sm font-semibold text-[#444748]"} to="/dashboard/schedule">Week</Link>
-    <Link className={active === "month" ? "inline-block rounded-md bg-white px-4 py-1 text-sm font-semibold shadow-sm" : "inline-block px-4 py-1 text-sm font-semibold text-[#444748]"} to="/dashboard/schedule/monthly">Month</Link>
+    <Link className={active === "day" ? "inline-block rounded-md bg-white px-4 py-1 text-sm font-semibold shadow-sm" : "inline-block px-4 py-1 text-sm font-semibold text-[#444748]"} to="/dashboard/schedule/daily">Ngày</Link>
+    <Link className={active === "week" ? "inline-block rounded-md bg-white px-4 py-1 text-sm font-semibold shadow-sm" : "inline-block px-4 py-1 text-sm font-semibold text-[#444748]"} to="/dashboard/schedule">Tuần</Link>
+    <Link className={active === "month" ? "inline-block rounded-md bg-white px-4 py-1 text-sm font-semibold shadow-sm" : "inline-block px-4 py-1 text-sm font-semibold text-[#444748]"} to="/dashboard/schedule/monthly">Tháng</Link>
   </div>
 );
 
@@ -1498,7 +1495,7 @@ const MonthlyCalendar = ({
   employeesById: Map<string, Employee>;
   templatesById: Map<string, ShiftTemplate>;
 }) => {
-  const labels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+  const labels = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
   return (
     <>
@@ -1531,13 +1528,13 @@ const CalendarCell = ({
         const employee = employeesById.get(shift.employeeId);
         return (
           <div className="rounded-sm border-l-2 bg-[#0058be]/10 px-1 py-0.5" key={shift.id} style={{ borderLeftColor: template?.color ?? "#0058be" }}>
-            <p className="truncate text-[10px] font-bold text-[#0058be]">{shift.shiftStartTime} {employee?.fullName ?? template?.name ?? "Shift"}</p>
+            <p className="truncate text-[10px] font-bold text-[#0058be]">{shift.shiftStartTime} {employee?.fullName ?? template?.name ?? "Ca làm"}</p>
           </div>
         );
       })}
       {cell.shifts.length > 3 ? (
         <div className="rounded-sm border-l-2 border-black bg-black/5 px-1 py-0.5">
-          <p className="truncate text-[10px] font-bold text-black">+{cell.shifts.length - 3} more</p>
+          <p className="truncate text-[10px] font-bold text-black">+{cell.shifts.length - 3} ca</p>
         </div>
       ) : null}
     </div>
