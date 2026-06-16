@@ -429,13 +429,13 @@ export const SchedulePage = () => {
       title="Lịch làm việc"
     >
       <main className="min-h-screen bg-white">
-        <div className="sticky top-0 z-20 border-b border-[#e5e7eb] bg-white/95 px-6 py-5 backdrop-blur">
+        <div className="sticky top-32 z-30 border-b border-[#e5e7eb] bg-white px-4 py-4 shadow-sm md:top-16 md:px-6 md:py-5">
           <div className="mb-4 flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-black">Lịch tuần</h1>
               <p className="text-base text-[#444748]">{formatDateLabel(weekStart)} - {formatDateLabel(weekEnd)}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex w-full flex-wrap gap-2 xl:w-auto xl:justify-end">
               <button
                 className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#e5e7eb] px-4 text-sm font-semibold text-[#444748] hover:bg-[#f7f3f2] disabled:text-[#747878] disabled:opacity-60"
                 disabled={duplicatePreviousMutation.isPending}
@@ -510,7 +510,7 @@ export const SchedulePage = () => {
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <span className="ml-auto text-xs italic text-[#444748]">Đang hiển thị {visibleEmployees.length} nhân viên - {schedules.length} ca đã gán</span>
+            <span className="w-full text-xs italic text-[#444748] lg:ml-auto lg:w-auto">Đang hiển thị {visibleEmployees.length} nhân viên - {schedules.length} ca đã gán</span>
           </div>
           {error ? <p className="mt-4 rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
@@ -629,7 +629,12 @@ export const MonthlySchedulePage = () => {
           {monthQuery.isLoading || employeesQuery.isLoading || templatesQuery.isLoading ? (
             <StatePanel title="Đang tải lịch tháng..." description="Đang lấy dữ liệu lịch cho календар." />
           ) : (
-            <MonthlyCalendar cells={cells} employeesById={employeesById} templatesById={templatesById} />
+            <>
+              <div className="hidden md:block">
+                <MonthlyCalendar cells={cells} employeesById={employeesById} templatesById={templatesById} />
+              </div>
+              <MonthlyMobileList cells={cells} employeesById={employeesById} templatesById={templatesById} />
+            </>
           )}
         </section>
       </main>
@@ -743,9 +748,9 @@ const ShiftShell = ({
   title: string;
 }) => (
   <div className="min-h-screen bg-white">
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-6">
-      <div className="flex min-w-0 items-center gap-6">
-        <h2 className="shrink-0 text-2xl font-semibold tracking-tight text-black">{title}</h2>
+    <header className="sticky top-14 z-40 flex min-h-16 flex-col gap-3 border-b border-[#e5e7eb] bg-white px-4 py-3 shadow-sm md:top-0 md:h-16 md:flex-row md:items-center md:justify-between md:px-6 md:py-0">
+      <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
+        <h2 className="min-w-0 truncate text-xl font-semibold tracking-tight text-black md:shrink-0 md:text-2xl">{title}</h2>
         <div className="relative hidden w-96 lg:block">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#444748]" />
           <input
@@ -756,7 +761,7 @@ const ShiftShell = ({
           />
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex w-full items-center justify-between gap-3 md:w-auto md:justify-end md:gap-4">
         <Bell className="h-5 w-5 text-[#444748]" />
         {action}
       </div>
@@ -1003,7 +1008,8 @@ const WeeklyBoard = ({
   }, [schedules]);
 
   return (
-    <div className="isolate overflow-x-auto">
+    <>
+    <div className="hidden isolate overflow-x-auto md:block">
       <table className="w-full min-w-[1200px] table-fixed border-collapse">
         <thead className="bg-white">
           <tr>
@@ -1034,8 +1040,76 @@ const WeeklyBoard = ({
         </tbody>
       </table>
     </div>
+    <WeeklyMobileList
+      employees={employees}
+      onDeleteShift={onDeleteShift}
+      schedulesByEmployeeDay={schedulesByEmployeeDay}
+      templatesById={templatesById}
+      weekDays={weekDays}
+    />
+    </>
   );
 };
+
+const WeeklyMobileList = ({
+  employees,
+  onDeleteShift,
+  schedulesByEmployeeDay,
+  templatesById,
+  weekDays,
+}: {
+  employees: Employee[];
+  onDeleteShift: (assignedShiftId: string) => void;
+  schedulesByEmployeeDay: Map<string, AssignedShift[]>;
+  templatesById: Map<string, ShiftTemplate>;
+  weekDays: Array<{ date: string; dateLabel: string; name: string }>;
+}) => (
+  <div className="space-y-4 p-4 md:hidden">
+    {employees.length === 0 ? (
+      <p className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4 text-sm font-semibold text-[#444748]">Không có nhân viên đang hoạt động theo bộ lọc hiện tại.</p>
+    ) : (
+      employees.map((employee) => (
+        <section className="rounded-xl border border-[#e5e7eb] bg-white p-4" key={employee.id}>
+          <div className="mb-4 flex items-center gap-3">
+            <StaffAvatar employee={employee} />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-black">{employee.fullName}</p>
+              <p className="text-xs text-[#444748]">{toEmployeeRoleLabel(employee.role)}</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            {weekDays.map((day) => {
+              const assignedShifts = schedulesByEmployeeDay.get(`${employee.id}-${day.date}`) ?? [];
+              return (
+                <div className="rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] p-3" key={`${employee.id}-${day.date}`}>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-black">{day.name}</p>
+                    <span className="text-xs font-semibold text-[#444748]">{day.dateLabel}</span>
+                  </div>
+                  {assignedShifts.length === 0 ? (
+                    <p className="text-xs font-semibold text-[#747878]">Chưa có ca</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {assignedShifts.map((assignedShift) => (
+                        <ShiftPill
+                          assignedShift={assignedShift}
+                          employee={employee}
+                          key={assignedShift.id}
+                          onDeleteShift={onDeleteShift}
+                          shiftTemplate={templatesById.get(assignedShift.shiftTemplateId)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))
+    )}
+  </div>
+);
 
 const ScheduleRow = ({
   employee,
@@ -1260,7 +1334,7 @@ const AssignedShiftModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/20 p-3 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-2xl">
         <div className="flex shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-[#fdf8f8] px-5 py-3">
           <div><h2 className="text-xl font-semibold tracking-tight text-black">Gán ca</h2><p className="text-xs text-[#444748]">Tạo một lịch ca từ mẫu ca đang hoạt động.</p></div>
@@ -1305,7 +1379,7 @@ const AssignedShiftModal = ({
             </div>
             {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
           </div>
-          <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[#e5e7eb] bg-[#fdf8f8] px-5 py-3">
+          <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-[#e5e7eb] bg-[#fdf8f8] px-5 py-3 sm:flex-row sm:items-center sm:justify-end">
             <button className="rounded-lg border border-[#e5e7eb] px-6 py-2 text-sm font-semibold hover:bg-[#f7f3f2]" onClick={onClose} type="button">Hủy</button>
             <button className="rounded-lg bg-black px-8 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={!selectedBranchId || employeeIds.length === 0 || !shiftTemplateId} type="submit">{`Thêm ${employeeIds.length} bản nháp`}</button>
           </div>
@@ -1396,8 +1470,8 @@ const ShiftTemplateModal = ({
   );
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-black/20 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[640px] overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-2xl">
+    <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-y-auto bg-black/20 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-[640px] flex-col overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-[#e5e7eb] bg-[#fdf8f8] px-6 py-4">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-black">{mode === "edit" ? "Chỉnh sửa mẫu ca" : "Tạo mẫu ca"}</h2>
@@ -1405,8 +1479,8 @@ const ShiftTemplateModal = ({
           </div>
           {closeControl}
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-6 p-6">
+        <form className="min-h-0 overflow-y-auto" onSubmit={handleSubmit}>
+          <div className="space-y-6 p-4 sm:p-6">
             {branches.length === 0 && mode === "create" ? (
               <div className="rounded-lg border border-[#ef4444]/20 bg-[#ffdad6]/40 p-4 text-sm font-semibold text-[#93000a]">
                 Hãy tạo chi nhánh đang hoạt động trước khi thêm mẫu ca.
@@ -1451,7 +1525,7 @@ const ShiftTemplateModal = ({
             </div>
             {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
           </div>
-          <div className="flex items-center justify-end gap-3 border-t border-[#e5e7eb] bg-[#fdf8f8] px-6 py-4">
+          <div className="flex flex-col-reverse gap-3 border-t border-[#e5e7eb] bg-[#fdf8f8] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
             {onClose ? <button className="rounded-lg border border-[#e5e7eb] px-6 py-2 text-sm font-semibold hover:bg-[#f7f3f2]" onClick={onClose} type="button">Hủy</button> : <Link className="rounded-lg border border-[#e5e7eb] px-6 py-2 text-sm font-semibold hover:bg-[#f7f3f2]" to={closeTo}>Hủy</Link>}
             <button className="rounded-lg bg-black px-8 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={saveMutation.isPending || (mode === "create" && !branchId)} type="submit">
               {saveMutation.isPending ? "Đang lưu..." : mode === "edit" ? "Lưu thay đổi" : "Tạo mẫu"}
@@ -1540,3 +1614,45 @@ const CalendarCell = ({
     </div>
   </div>
 );
+
+const MonthlyMobileList = ({
+  cells,
+  employeesById,
+  templatesById,
+}: {
+  cells: MonthCell[];
+  employeesById: Map<string, Employee>;
+  templatesById: Map<string, ShiftTemplate>;
+}) => {
+  const activeCells = cells.filter((cell) => cell.inMonth && cell.shifts.length > 0);
+
+  return (
+    <div className="space-y-3 p-4 md:hidden">
+      {activeCells.length === 0 ? (
+        <p className="rounded-xl border border-[#e5e7eb] bg-[#f7f3f2] p-4 text-sm font-semibold text-[#444748]">Chưa có ca trong tháng này.</p>
+      ) : (
+        activeCells.map((cell) => (
+          <section className="rounded-xl border border-[#e5e7eb] bg-white p-4" key={cell.date}>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-black">{formatDateLabel(cell.date)}</p>
+              <span className="rounded-full bg-[#f1edec] px-2 py-1 text-xs font-semibold text-[#444748]">{cell.shifts.length} ca</span>
+            </div>
+            <div className="space-y-2">
+              {cell.shifts.map((shift) => {
+                const template = templatesById.get(shift.shiftTemplateId);
+                const employee = employeesById.get(shift.employeeId);
+                return (
+                  <div className="rounded-lg border-l-4 bg-[#f7f3f2] p-3" key={shift.id} style={{ borderLeftColor: template?.color ?? "#0058be" }}>
+                    <p className="text-sm font-semibold text-black">{shift.shiftStartTime} - {shift.shiftEndTime}</p>
+                    <p className="text-xs font-semibold text-[#444748]">{employee?.fullName ?? "Nhân viên chưa rõ"}</p>
+                    <p className="text-xs text-[#747878]">{template?.name ?? "Ca đã gán"}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))
+      )}
+    </div>
+  );
+};
