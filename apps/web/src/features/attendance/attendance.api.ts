@@ -12,6 +12,8 @@ import type {
   CheckOutRequest,
   LateWarningResponse,
   ManualCorrectionRequest,
+  UndoMarkAbsentRequest,
+  UndoMarkAbsentResponse,
 } from "./attendance.types";
 
 export const attendanceApi = {
@@ -22,6 +24,7 @@ export const attendanceApi = {
   approveManual: (attendanceId: string, payload: ApproveManualAttendanceRequest) =>
     api.patch<AttendanceRecord>(`/attendances/${attendanceId}/approve-manual`, payload),
   autoMarkAbsent: (payload: AutoMarkAbsentRequest) => api.post<AutoMarkAbsentResponse>("/attendances/auto-mark-absent", payload),
+  undoMarkAbsent: (payload: UndoMarkAbsentRequest) => api.post<UndoMarkAbsentResponse>("/attendances/undo-mark-absent", payload),
   history: (query: AttendanceHistoryQuery) => api.get<AttendanceHistoryResponse>("/attendances/history", query),
   reminders: (query?: AttendanceAlertQuery) => api.get<AttendanceReminderResponse>("/attendances/reminders", query),
   lateWarnings: (query?: AttendanceAlertQuery) => api.get<LateWarningResponse>("/attendances/late-warnings", query),

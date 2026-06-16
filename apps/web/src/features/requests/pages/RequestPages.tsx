@@ -921,7 +921,7 @@ const Meta = ({ label, value }: { label: string; value: string }) => (
 );
 
 const FilterSelect = ({ label, onChange, options, value }: { label: string; onChange: (value: string) => void; options: string[][]; value: string }) => (
-  <select className="h-10 rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => onChange(event.target.value)} value={value}>
+  <select className="h-10 min-w-[150px] rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-semibold" onChange={(event) => onChange(event.target.value)} value={value}>
     <option value="">{label}</option>
     {options.map(([optionValue, optionLabel]) => <option key={optionValue} value={optionValue}>{optionLabel}</option>)}
   </select>

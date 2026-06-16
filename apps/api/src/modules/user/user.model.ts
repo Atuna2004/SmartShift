@@ -136,6 +136,9 @@ const userSchema = new Schema<IUser>(
 userSchema.index({ branchId: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
-userSchema.index({ employeeCode: 1 });
+userSchema.index(
+  { organizationId: 1, employeeCode: 1 },
+  { unique: true, partialFilterExpression: { employeeCode: { $exists: true } } }
+);
 
 export const UserModel = mongoose.model<IUser>("User", userSchema);

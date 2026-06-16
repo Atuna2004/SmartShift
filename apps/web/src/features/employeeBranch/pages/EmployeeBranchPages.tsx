@@ -341,7 +341,7 @@ export const BranchManagementPage = () => {
           <StatCard icon={<Store />} label="Tổng chi nhánh" value={String(branchesQuery.data?.meta.total ?? branchList.length)} />
           <StatCard icon={<CheckCircle2 />} label="Chi nhánh hoạt động" value={String(activeCount)} meta="TRỰC TIẾP" />
           <StatCard icon={<AlertTriangle />} label="Chi nhánh vô hiệu" value={String(disabledCount)} />
-          <StatCard icon={<Badge />} label="Current Page" value={`${branchesQuery.data?.meta.page ?? 1}/${branchesQuery.data?.meta.totalPages ?? 1}`} />
+          <StatCard icon={<Badge />} label="Trang hiện tại" value={`${branchesQuery.data?.meta.page ?? 1}/${branchesQuery.data?.meta.totalPages ?? 1}`} />
         </div>
         {branchesQuery.isLoading ? (
           <StatePanel title="Đang tải chi nhánh..." description="Đang lấy dữ liệu chi nhánh từ API." />
@@ -374,7 +374,7 @@ export const BranchManagementPage = () => {
               </div>
               <div>
                 <p className="text-sm font-semibold text-black">Đăng ký chi nhánh mới</p>
-                <p className="text-xs text-[#444748]">Expand your business network</p>
+                <p className="text-xs text-[#444748]">Mở rộng hệ thống chi nhánh</p>
               </div>
             </Link>
           </div>
@@ -742,13 +742,13 @@ const EmployeeCreateModal = () => {
     <Modal title="Tạo nhân viên mới" subtitle="Nhập thông tin để thêm thành viên mới vào đội ngũ." closeTo="/dashboard/employees">
       <form onSubmit={handleSubmit}>
         <div className="space-y-4 p-6">
-          <InputField label="Full Name" onChange={setFullName} placeholder="e.g. John Smith" required value={fullName} />
+          <InputField label="Họ và tên" onChange={setFullName} placeholder="Ví dụ: Nguyễn Văn An" required value={fullName} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Email Address" onChange={setEmail} placeholder="john@company.com" required type="email" value={email} />
-            <InputField label="Temporary Password" onChange={setPassword} placeholder="Minimum 8 characters" required type="password" value={password} />
+            <InputField label="Email" onChange={setEmail} placeholder="john@company.com" required type="email" value={email} />
+            <InputField label="Mật khẩu tạm thời" onChange={setPassword} placeholder="Tối thiểu 8 ký tự" required type="password" value={password} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Phone Number" onChange={setPhone} placeholder="+84 900 000 000" value={phone} />
+            <InputField label="Số điện thoại" onChange={setPhone} placeholder="+84 900 000 000" value={phone} />
             <InputField label="Mã nhân viên" onChange={setEmployeeCode} placeholder="EMP-001" value={employeeCode} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -757,8 +757,8 @@ const EmployeeCreateModal = () => {
               <option value="manager">Quản lý</option>
             </SelectControl>
             <SelectControl label="Loại nhân viên" onChange={(value) => setEmployeeType(value as EmployeeType)} value={employeeType}>
-              <option value="full_time">Full-time</option>
-              <option value="part_time">Part-time</option>
+              <option value="full_time">Toàn thời gian</option>
+              <option value="part_time">Bán thời gian</option>
             </SelectControl>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -768,7 +768,7 @@ const EmployeeCreateModal = () => {
                 <option key={branch.id} value={branch.id}>{branch.name}</option>
               ))}
             </SelectControl>
-            <InputField label="Join Date" onChange={setJoinDate} type="date" value={joinDate} />
+            <InputField label="Ngày vào làm" onChange={setJoinDate} type="date" value={joinDate} />
           </div>
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
@@ -838,16 +838,16 @@ const BranchCreateModal = () => {
           <InputField label="Tên chi nhánh" onChange={setName} placeholder="Ví dụ: Chi nhánh chính Downtown" required value={name} />
           <div className="grid gap-4 sm:grid-cols-2">
             <InputField label="Mã chi nhánh" onChange={setCode} placeholder="DOWNTOWN" value={code} />
-            <InputField label="Phone" onChange={setPhone} placeholder="+84 900 000 000" value={phone} />
+            <InputField label="Số điện thoại" onChange={setPhone} placeholder="+84 900 000 000" value={phone} />
           </div>
-          <InputField label="Physical Address" onChange={setAddress} placeholder="Enter full street address" value={address} />
+          <InputField label="Địa chỉ" onChange={setAddress} placeholder="Nhập địa chỉ đầy đủ" value={address} />
           <div className="grid gap-4 sm:grid-cols-3">
             <InputField label="Múi giờ" onChange={setTimezone} required value={timezone} />
-            <InputField label="Opening Time" onChange={setOpeningTime} required type="time" value={openingTime} />
-            <InputField label="Closing Time" onChange={setClosingTime} required type="time" value={closingTime} />
+            <InputField label="Giờ mở cửa" onChange={setOpeningTime} required type="time" value={openingTime} />
+            <InputField label="Giờ đóng cửa" onChange={setClosingTime} required type="time" value={closingTime} />
           </div>
           <InputField
-            label="Late Grace Period"
+            label="Số phút cho phép đi muộn"
             onChange={(value) => setLateThresholdMinutes(Number(value))}
             required
             type="number"
@@ -978,12 +978,12 @@ const EmployeeProfileHeader = ({
 
 const EmployeeInfoPanel = ({ branchName, employee }: { branchName?: string; employee: Employee }) => (
   <Panel title="Thông tin nhân viên" icon={<UserCheck />}>
-    <InfoRow label="Email Address" value={employee.email} />
-    <InfoRow label="Phone Number" value={employee.phone ?? "Not set"} />
+    <InfoRow label="Email" value={employee.email} />
+    <InfoRow label="Số điện thoại" value={employee.phone ?? "Chưa thiết lập"} />
     <InfoRow label="Chi nhánh" value={branchName ?? "Chưa gán"} />
     <InfoRow label="Loại nhân viên" value={employee.employeeType ? toEmployeeTypeLabel(employee.employeeType) : "Chưa thiết lập"} />
-    <InfoRow label="Join Date" value={formatDate(employee.joinDate)} />
-    <InfoRow label="Last Login" value={formatDate(employee.lastLoginAt)} />
+    <InfoRow label="Ngày vào làm" value={formatDate(employee.joinDate)} />
+    <InfoRow label="Đăng nhập gần nhất" value={formatDate(employee.lastLoginAt)} />
   </Panel>
 );
 
@@ -1031,9 +1031,9 @@ const EmployeeEditModal = ({
     <Modal title="Chỉnh sửa nhân viên" closeTo={`/dashboard/employees/${employee.id}`}>
       <form onSubmit={handleSubmit}>
         <div className="space-y-4 p-6">
-          <InputField label="Full Name" onChange={setFullName} required value={fullName} />
+          <InputField label="Họ và tên" onChange={setFullName} required value={fullName} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Phone Number" onChange={setPhone} value={phone} />
+            <InputField label="Số điện thoại" onChange={setPhone} value={phone} />
             <InputField label="Mã nhân viên" onChange={setEmployeeCode} value={employeeCode} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -1042,8 +1042,8 @@ const EmployeeEditModal = ({
               <option value="manager">Quản lý</option>
             </SelectControl>
             <SelectControl label="Loại nhân viên" onChange={(value) => setEmployeeType(value as EmployeeType)} value={employeeType}>
-              <option value="full_time">Full-time</option>
-              <option value="part_time">Part-time</option>
+              <option value="full_time">Toàn thời gian</option>
+              <option value="part_time">Bán thời gian</option>
             </SelectControl>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -1053,14 +1053,14 @@ const EmployeeEditModal = ({
                 <option key={branch.id} value={branch.id}>{branch.name}</option>
               ))}
             </SelectControl>
-            <InputField label="Join Date" onChange={setJoinDate} type="date" value={joinDate} />
+            <InputField label="Ngày vào làm" onChange={setJoinDate} type="date" value={joinDate} />
           </div>
           {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
         </div>
         <div className="flex justify-end gap-4 border-t border-[#e5e7eb] bg-[#f7f3f2] p-6">
           <button className="h-11 px-6 py-3 text-sm font-semibold text-[#444748] hover:text-black" onClick={onClose} type="button">Hủy</button>
           <button className="h-11 rounded-lg bg-black px-8 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50" disabled={updateMutation.isPending} type="submit">
-            {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            {updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
           </button>
         </div>
       </form>
@@ -1083,10 +1083,10 @@ const toEmployeeRoleLabel = (role: EmployeeRole) => {
 };
 
 const toEmployeeStatusLabel = (status: EmployeeStatus) => (status === "active" ? "Đang hoạt động" : "Ngừng hoạt động");
-const toEmployeeTypeLabel = (type: EmployeeType) => (type === "full_time" ? "Full-time" : "Part-time");
+const toEmployeeTypeLabel = (type: EmployeeType) => (type === "full_time" ? "Toàn thời gian" : "Bán thời gian");
 
 const formatDate = (value?: string) => {
-  if (!value) return "Not set";
+  if (!value) return "Chưa thiết lập";
   return new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(value));
 };
 
@@ -1130,14 +1130,14 @@ const RecentActivityPanel = () => (
   <section className="h-full rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-6">
     <h3 className="mb-6 text-sm font-semibold text-black">Hoạt động gần đây</h3>
     <div className="relative space-y-6 before:absolute before:bottom-2 before:left-[11px] before:top-2 before:w-[2px] before:bg-[#c4c7c7]">
-      <ActivityNode icon={<UserCheck />} title="Clocked In" time="Today, 03:58 PM" detail="Verified via QR: DT-Main-01" active />
-      <ActivityNode icon={<CalendarX />} title="Leave Request" time="Yesterday, 02:15 PM">
+      <ActivityNode icon={<UserCheck />} title="Đã check-in" time="Hôm nay, 15:58" detail="Xác thực qua QR: DT-Main-01" active />
+      <ActivityNode icon={<CalendarX />} title="Yêu cầu nghỉ phép" time="Hôm qua, 14:15">
         <div className="mt-2 rounded border border-[#e5e7eb] bg-white p-2">
-          <p className="text-[11px] font-bold uppercase text-[#10b981]">Approved</p>
-          <p className="text-xs">June 12 - Vacation</p>
+          <p className="text-[11px] font-bold uppercase text-[#10b981]">Đã duyệt</p>
+          <p className="text-xs">12/06 - Nghỉ phép</p>
         </div>
       </ActivityNode>
-      <ActivityNode icon={<Repeat />} title="Shift Swap Sent" time="May 21, 09:40 AM" />
+      <ActivityNode icon={<Repeat />} title="Đã gửi đổi ca" time="21/05, 09:40" />
     </div>
   </section>
 );
@@ -1206,7 +1206,7 @@ const BranchCard = ({
     </div>
     <div className="p-6 pt-0">
       <div className="mb-4 flex justify-between">
-        <div><h4 className="text-sm font-bold">{branch.name}</h4><p className="flex items-center gap-1 text-xs text-[#444748]"><MapPin className="h-3 w-3" />{branch.address || "No address yet"}</p></div>
+        <div><h4 className="text-sm font-bold">{branch.name}</h4><p className="flex items-center gap-1 text-xs text-[#444748]"><MapPin className="h-3 w-3" />{branch.address || "Chưa có địa chỉ"}</p></div>
         <button
           className="rounded-lg p-1 text-[#444748] hover:bg-[#f1edec] disabled:opacity-50"
           disabled={isUpdating}
@@ -1218,9 +1218,9 @@ const BranchCard = ({
       </div>
       <div className="grid grid-cols-2 gap-4 border-y border-[#e5e7eb] py-4">
         <div>
-          <p className="mb-1 text-xs uppercase tracking-wider text-[#444748]">Phone</p>
+          <p className="mb-1 text-xs uppercase tracking-wider text-[#444748]">Số điện thoại</p>
           <div className="flex items-center gap-1">
-            <p className="text-xs font-semibold">{branch.phone || "Not set"}</p>
+            <p className="text-xs font-semibold">{branch.phone || "Chưa thiết lập"}</p>
           </div>
         </div>
         <div>
@@ -1235,9 +1235,9 @@ const BranchCard = ({
           onClick={onToggleStatus}
           type="button"
         >
-          {branch.status === "active" ? "Disable" : "Enable"}
+          {branch.status === "active" ? "Vô hiệu" : "Kích hoạt"}
         </button>
-        <Link className="inline-flex items-center gap-1 text-sm font-semibold text-[#0058be] hover:underline" to={`/dashboard/branches/${branch.id}/settings`}>View Details <ChevronRight className="h-4 w-4" /></Link>
+        <Link className="inline-flex items-center gap-1 text-sm font-semibold text-[#0058be] hover:underline" to={`/dashboard/branches/${branch.id}/settings`}>Xem chi tiết <ChevronRight className="h-4 w-4" /></Link>
       </div>
     </div>
   </article>
@@ -1355,24 +1355,24 @@ const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
                 <div className="grid gap-6 md:grid-cols-2">
                   <InputField label="Tên chi nhánh" onChange={setName} required value={name} />
                   <InputField label="Mã chi nhánh" onChange={setCode} value={code} />
-                  <InputField label="Phone" onChange={setPhone} value={phone} />
+                  <InputField label="Số điện thoại" onChange={setPhone} value={phone} />
                   <InputField label="Múi giờ" onChange={setTimezone} required value={timezone} />
-                  <div className="md:col-span-2"><InputField label="Physical Address" onChange={setAddress} value={address} /></div>
+                  <div className="md:col-span-2"><InputField label="Địa chỉ" onChange={setAddress} value={address} /></div>
                 </div>
               </SettingsSection>
               <SettingsSection icon={<Badge />} title="Chấm công QR">
                 <div className="grid gap-6 md:grid-cols-2">
                   <ToggleField checked={qrEnabled} label="Bật chấm công QR" onChange={setQrEnabled} />
-                  <ToggleField checked={requireGps} label="Require GPS verification" onChange={setRequireGps} />
-                  <InputField label="QR Refresh Interval Seconds" onChange={setRefreshIntervalSeconds} required type="number" value={refreshIntervalSeconds} />
-                  <InputField label="QR Expiry Seconds" onChange={setQrExpiresInSeconds} required type="number" value={qrExpiresInSeconds} />
+                  <ToggleField checked={requireGps} label="Yêu cầu xác thực GPS" onChange={setRequireGps} />
+                  <InputField label="Chu kỳ làm mới QR (giây)" onChange={setRefreshIntervalSeconds} required type="number" value={refreshIntervalSeconds} />
+                  <InputField label="Thời gian hết hạn QR (giây)" onChange={setQrExpiresInSeconds} required type="number" value={qrExpiresInSeconds} />
                 </div>
               </SettingsSection>
               <SettingsSection icon={<Clock3 />} title="Chính sách chấm công">
                 <div className="grid gap-6 md:grid-cols-3">
-                  <InputField label="Opening Time" onChange={setOpeningTime} required type="time" value={openingTime} />
-                  <InputField label="Closing Time" onChange={setClosingTime} required type="time" value={closingTime} />
-                  <InputField label="Late Grace Period" onChange={setLateThresholdMinutes} required type="number" value={lateThresholdMinutes} />
+                  <InputField label="Giờ mở cửa" onChange={setOpeningTime} required type="time" value={openingTime} />
+                  <InputField label="Giờ đóng cửa" onChange={setClosingTime} required type="time" value={closingTime} />
+                  <InputField label="Số phút cho phép đi muộn" onChange={setLateThresholdMinutes} required type="number" value={lateThresholdMinutes} />
                 </div>
               </SettingsSection>
               {error ? <p className="rounded-lg bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]">{error}</p> : null}
@@ -1380,7 +1380,7 @@ const BranchSettingsForm = ({ branchId }: { branchId: string }) => {
               <footer className="flex flex-col items-center justify-end gap-4 border-t border-[#e5e7eb] pt-8 sm:flex-row">
                 <Link className="w-full rounded-lg px-8 py-3 text-center text-sm font-semibold text-[#444748] hover:bg-[#f1edec] sm:w-auto" to="/dashboard/branches">Hủy</Link>
                 <button className="w-full rounded-lg bg-black px-12 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 sm:w-auto" disabled={saveMutation.isPending} type="submit">
-                  {saveMutation.isPending ? "Saving..." : "Save Changes"}
+                  {saveMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
                 </button>
               </footer>
             </form>

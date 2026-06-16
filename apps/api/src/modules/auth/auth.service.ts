@@ -73,9 +73,9 @@ const ensureTrialPlan = async () => {
         priceMonthly: 0,
         currency: "VND",
         limits: {
-          maxBranches: 999999,
-          maxEmployees: 999999,
-          maxManagers: 999999,
+          maxBranches: 1,
+          maxEmployees: 20,
+          maxManagers: 2,
           maxShiftTemplates: 999999,
           maxAssignedShiftsPerMonth: 999999,
         },

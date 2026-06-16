@@ -57,6 +57,14 @@ export const autoMarkAbsentSchema = z.object({
   query: z.object({}).optional(),
 });
 
+export const undoMarkAbsentSchema = z.object({
+  body: z.object({
+    scheduleId: objectIdSchema,
+  }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
+});
+
 export const attendanceHistorySchema = z.object({
   body: z.object({}).optional(),
   params: z.object({}).optional(),
@@ -89,5 +97,6 @@ export type ApproveManualAttendanceInput = z.infer<
   typeof approveManualAttendanceSchema
 >["body"];
 export type AutoMarkAbsentInput = z.infer<typeof autoMarkAbsentSchema>["body"];
+export type UndoMarkAbsentInput = z.infer<typeof undoMarkAbsentSchema>["body"];
 export type AttendanceHistoryQuery = z.infer<typeof attendanceHistorySchema>["query"];
 export type AttendanceAlertQuery = z.infer<typeof attendanceAlertSchema>["query"];

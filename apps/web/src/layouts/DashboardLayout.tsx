@@ -73,6 +73,9 @@ export const DashboardLayout = () => {
     location.pathname.startsWith("/dashboard/reports") ||
     location.pathname.startsWith("/dashboard/subscription") ||
     location.pathname.startsWith("/dashboard/payments/success");
+  const activeNavItem = [...navItems, ...visibleSystemItems]
+    .filter((item) => location.pathname === item.path || location.pathname.startsWith(`${item.path}/`))
+    .sort((a, b) => b.path.length - a.path.length)[0];
 
   const handleSignOut = async () => {
     try {
@@ -112,26 +115,43 @@ export const DashboardLayout = () => {
 
         <nav className="flex-1 space-y-1 overflow-y-auto">
           {navItems.map((item, index) => (
-            <SidebarLink end={item.path === "/dashboard"} item={item} key={`${item.path}-${index}`} />
+            <SidebarLink end={item.path === "/dashboard"} item={item} key={`${item.path}-${index}`} onNavigate={() => setIsMobileNavOpen(false)} />
           ))}
           <div className="mt-4 border-t border-[#e5e7eb] pt-4">
             {visibleSystemItems.map((item) => (
-              <SidebarLink item={item} key={item.path} />
+              <SidebarLink item={item} key={item.path} onNavigate={() => setIsMobileNavOpen(false)} />
             ))}
           </div>
         </nav>
 
-        <div className="mt-4 flex items-center gap-2 rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] px-4 py-2">
-          <img alt="" className="h-9 w-9 rounded-full border border-[#e5e7eb] object-cover" src={profilePhoto} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-black">{displayName}</p>
-            <p className="truncate text-xs text-[#444748]">{roleLabel}</p>
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center gap-2 rounded-lg border border-[#e5e7eb] bg-[#f5f5f5] px-4 py-2">
+            <img alt="" className="h-9 w-9 rounded-full border border-[#e5e7eb] object-cover" src={profilePhoto} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-black">{displayName}</p>
+              <p className="truncate text-xs text-[#444748]">{roleLabel}</p>
+            </div>
           </div>
+          <Button className="w-full justify-center" onClick={handleSignOut} size="sm" variant="secondary">
+            <LogOut className="h-4 w-4" />
+            Đăng xuất
+          </Button>
         </div>
       </aside>
 
       <div className="md:pl-64">
-        {usesPageChrome ? null : (
+        {usesPageChrome ? (
+          <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 md:hidden">
+            <Button aria-label="Mở điều hướng" className="px-3" onClick={() => setIsMobileNavOpen(true)} variant="ghost">
+              <Menu className="h-5 w-5" />
+            </Button>
+            <p className="truncate px-3 text-sm font-semibold text-black">{activeNavItem?.label ?? "SmartShift"}</p>
+            <button className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#444748] transition hover:bg-[#f7f3f2]">
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ef4444] ring-2 ring-white" />
+            </button>
+          </header>
+        ) : (
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 md:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-8">
             <Button aria-label="Mở điều hướng" className="px-3 md:hidden" onClick={() => setIsMobileNavOpen(true)} variant="ghost">
@@ -156,10 +176,6 @@ export const DashboardLayout = () => {
               <Bell className="h-5 w-5" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ef4444] ring-2 ring-white" />
             </button>
-            <Button onClick={handleSignOut} size="sm" variant="secondary">
-              <LogOut className="h-4 w-4" />
-              Đăng xuất
-            </Button>
           </div>
         </header>
         )}
@@ -175,9 +191,11 @@ export const DashboardLayout = () => {
 const SidebarLink = ({
   end = false,
   item,
+  onNavigate,
 }: {
   end?: boolean;
   item: { label: string; path: string; icon: ComponentType<{ className?: string }> };
+  onNavigate?: () => void;
 }) => {
   const Icon = item.icon;
 
@@ -190,6 +208,7 @@ const SidebarLink = ({
         )
       }
       end={end}
+      onClick={onNavigate}
       to={item.path}
     >
       <Icon className="h-5 w-5" />

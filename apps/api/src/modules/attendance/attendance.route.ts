@@ -9,6 +9,7 @@ import {
   checkInSchema,
   checkOutSchema,
   manualCorrectionSchema,
+  undoMarkAbsentSchema,
 } from "./attendance.validation.js";
 import { AttendanceController } from "./attendance.controller.js";
 
@@ -32,6 +33,11 @@ router.post(
   "/auto-mark-absent",
   validateRequest(autoMarkAbsentSchema),
   AttendanceController.autoMarkAbsent
+);
+router.post(
+  "/undo-mark-absent",
+  validateRequest(undoMarkAbsentSchema),
+  AttendanceController.undoMarkAbsent
 );
 router.get(
   "/history",
