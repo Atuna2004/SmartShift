@@ -5,6 +5,7 @@ import { AlertCircle, LoaderCircle } from "lucide-react";
 import { AuthShell } from "@/features/auth/components/AuthShell";
 import { authApi } from "@/features/auth/auth.api";
 import { getApiErrorMessage } from "@/shared/api";
+import { trackLogin } from "@/shared/analytics/ga";
 import { useAuthStore } from "@/store";
 
 const googleIcon =
@@ -30,6 +31,7 @@ export const LoginPage = () => {
       });
 
       setAuth(result);
+      trackLogin(result.user);
       navigate(result.user.role === "admin" ? "/admin" : result.user.role === "staff" ? "/staff" : "/dashboard", {
         replace: true,
       });

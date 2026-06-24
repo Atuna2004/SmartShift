@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { clearAnalyticsUser, identifyAnalyticsUser } from "@/shared/analytics/ga";
 
 export type AuthUser = {
   id: string;
@@ -39,24 +40,31 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       user: null,
-      setAuth: ({ accessToken, refreshToken, user }) =>
+      setAuth: ({ accessToken, refreshToken, user }) => {
+        identifyAnalyticsUser(user);
         set((state) => ({
           accessToken,
           refreshToken: refreshToken ?? state.refreshToken,
           user,
-        })),
-      setUser: (user) => set({ user }),
+        }));
+      },
+      setUser: (user) => {
+        identifyAnalyticsUser(user);
+        set({ user });
+      },
       setTokens: ({ accessToken, refreshToken }) =>
         set((state) => ({
           accessToken,
           refreshToken: refreshToken ?? state.refreshToken,
         })),
-      clearAuth: () =>
+      clearAuth: () => {
+        clearAnalyticsUser();
         set({
           accessToken: null,
           refreshToken: null,
           user: null,
-        }),
+        });
+      },
     }),
     {
       name: "smartshift-auth",
