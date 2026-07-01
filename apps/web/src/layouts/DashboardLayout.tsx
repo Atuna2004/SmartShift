@@ -4,6 +4,7 @@
   Building2,
   CalendarDays,
   CreditCard,
+  BadgeDollarSign,
   MapPin,
   LayoutDashboard,
   Layers,
@@ -33,6 +34,7 @@ const navItems = [
   { label: "Lịch làm việc", path: "/dashboard/schedule", icon: CalendarDays },
   { label: "Chấm công", path: "/dashboard/attendance", icon: QrCode },
   { label: "Quét QR", path: "/dashboard/attendance/qr", icon: QrCode },
+  { label: "Tăng ca & lương", path: "/dashboard/compensations", icon: BadgeDollarSign },
   { label: "Đổi ca", path: "/dashboard/shift-swaps", icon: Repeat },
   { label: "Nghỉ phép", path: "/dashboard/leave-requests", icon: UserRound },
 ];
@@ -67,6 +69,7 @@ export const DashboardLayout = () => {
     location.pathname.startsWith("/dashboard/shifts") ||
     location.pathname.startsWith("/dashboard/schedule") ||
     location.pathname.startsWith("/dashboard/attendance") ||
+    location.pathname.startsWith("/dashboard/compensations") ||
     location.pathname.startsWith("/dashboard/shift-swaps") ||
     location.pathname.startsWith("/dashboard/leave-requests") ||
     location.pathname.startsWith("/dashboard/notifications") ||

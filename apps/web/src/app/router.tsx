@@ -20,6 +20,7 @@ import {
   CheckInSuccessPage,
   StaffQrScannerPage,
 } from "@/features/attendance/pages/AttendancePages";
+import { CompensationPage } from "@/features/compensation/pages/CompensationPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import {
   BranchCreatePage,
@@ -65,6 +66,7 @@ import {
   StaffHomePage,
   StaffLeaveRequestsPage,
   StaffNotificationsPage,
+  StaffOvertimePage,
   StaffProfilePage,
   StaffQrCheckInPage,
   StaffSchedulePage,
@@ -177,6 +179,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["staff"]}>
             <StaffLeaveRequestsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/staff/overtime",
+        element: (
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffOvertimePage />
           </ProtectedRoute>
         ),
       },
@@ -362,6 +372,10 @@ export const router = createBrowserRouter([
           {
             path: "attendance/success",
             element: <CheckInSuccessPage />,
+          },
+          {
+            path: "compensations",
+            element: <CompensationPage />,
           },
           {
             path: "leave-requests",

@@ -12,6 +12,8 @@ export type NotificationType =
   | "checkin_reminder"
   | "checkout_reminder"
   | "attendance_warning"
+  | "compensation_bonus"
+  | "compensation_penalty"
   | "system";
 
 export interface INotification extends Document {
@@ -72,6 +74,8 @@ const notificationSchema = new Schema<INotification>(
         "checkin_reminder",
         "checkout_reminder",
         "attendance_warning",
+        "compensation_bonus",
+        "compensation_penalty",
         "system",
       ],
       required: true,

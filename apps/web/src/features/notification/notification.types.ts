@@ -10,6 +10,8 @@ export type NotificationType =
   | "checkin_reminder"
   | "checkout_reminder"
   | "attendance_warning"
+  | "compensation_bonus"
+  | "compensation_penalty"
   | "system";
 
 export type Notification = {

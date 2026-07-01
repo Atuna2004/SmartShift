@@ -47,6 +47,8 @@ import { QrScanner } from "@/features/attendance/components/QrScanner";
 import type { AttendanceRecord, AttendanceStatus } from "@/features/attendance/attendance.types";
 import { dailyQrApi } from "@/features/attendance/dailyQr.api";
 import { authApi } from "@/features/auth/auth.api";
+import { compensationApi } from "@/features/compensation/compensation.api";
+import type { OvertimeRequest } from "@/features/compensation/compensation.types";
 import { employeeApi } from "@/features/employeeBranch/employee.api";
 import { leaveRequestApi } from "@/features/requests/leaveRequest.api";
 import type { LeaveRequest } from "@/features/requests/leaveRequest.types";
@@ -719,12 +721,142 @@ export const StaffLeaveRequestsPage = () => {
   );
 };
 
+export const StaffOvertimePage = () => {
+  const queryClient = useQueryClient();
+  const today = toDateInputValue(new Date());
+  const monthStart = toDateInputValue(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [form, setForm] = useState({
+    workDate: today,
+    startTime: "18:00",
+    endTime: "20:00",
+    reason: "",
+  });
+  const [clientError, setClientError] = useState("");
+  const overtimeQuery = useQuery({
+    queryKey: ["compensations", "overtime", "staff", { monthStart }],
+    queryFn: () => compensationApi.overtime.list({ from: monthStart, limit: 100 }),
+  });
+  const overtimeRequests = overtimeQuery.data?.data ?? [];
+  const pendingCount = overtimeRequests.filter((request) => request.status === "pending").length;
+  const approvedRequests = overtimeRequests.filter((request) => request.status === "approved");
+  const approvedHours = approvedRequests.reduce((sum, request) => sum + request.hours, 0);
+  const approvedAmount = approvedRequests.reduce((sum, request) => sum + request.amount, 0);
+  const validationMessage = getStaffOvertimeValidationMessage(form, overtimeRequests);
+  const createMutation = useMutation({
+    mutationFn: () =>
+      compensationApi.overtime.create({
+        workDate: form.workDate,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        reason: form.reason.trim(),
+      }),
+    onSuccess: () => {
+      setForm((current) => ({ ...current, reason: "" }));
+      setClientError("");
+      void queryClient.invalidateQueries({ queryKey: ["compensations", "overtime"] });
+      void queryClient.invalidateQueries({ queryKey: ["compensations", "summary"] });
+    },
+  });
+
+  const handleSubmit = () => {
+    if (validationMessage) {
+      setClientError(validationMessage);
+      return;
+    }
+
+    setClientError("");
+    createMutation.mutate();
+  };
+
+  return (
+    <StaffShell active="requests" title="Tăng ca">
+      <main className="space-y-6 px-4 py-6">
+        <section className="rounded-2xl bg-black p-6 text-white">
+          <p className="text-sm font-semibold text-white/70">Tổng tăng ca đã duyệt</p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight">{approvedHours.toFixed(1)}h</h1>
+          <p className="mt-2 text-sm text-white/70">Tạm tính {formatStaffCurrency(approvedAmount)} trong tháng này</p>
+        </section>
+
+        <section className="grid grid-cols-2 gap-3">
+          <StaffOvertimeStat icon={<CalendarClock />} label="Chờ duyệt" value={String(pendingCount)} />
+          <StaffOvertimeStat icon={<Banknote />} label="Đã duyệt" value={String(approvedRequests.length)} />
+        </section>
+
+        <section className="rounded-xl border border-[#e5e7eb] bg-white p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">Gửi đơn tăng ca</h2>
+              <p className="text-sm text-[#444748]">Quản lý sẽ duyệt và xác nhận đơn giá.</p>
+            </div>
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f1edec] text-black">
+              <Banknote className="h-5 w-5" />
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <label className="block space-y-1">
+              <span className="text-sm font-semibold">Ngày tăng ca</span>
+              <input className={staffFieldClassName} onChange={(event) => setForm((current) => ({ ...current, workDate: event.target.value }))} type="date" value={form.workDate} />
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block space-y-1">
+                <span className="text-sm font-semibold">Bắt đầu</span>
+                <input className={staffFieldClassName} onChange={(event) => setForm((current) => ({ ...current, startTime: event.target.value }))} type="time" value={form.startTime} />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-sm font-semibold">Kết thúc</span>
+                <input className={staffFieldClassName} onChange={(event) => setForm((current) => ({ ...current, endTime: event.target.value }))} type="time" value={form.endTime} />
+              </label>
+            </div>
+            <div className="rounded-lg border border-[#e5e7eb] bg-[#f7f3f2] px-3 py-2 text-sm font-semibold text-[#444748]">
+              Thời lượng: {getStaffOvertimeHours(form.workDate, form.startTime, form.endTime).toFixed(1)} giờ
+            </div>
+            <label className="block space-y-1">
+              <span className="text-sm font-semibold">Lý do</span>
+              <textarea
+                className="min-h-24 w-full resize-none rounded-lg border border-[#e5e7eb] p-3 text-sm outline-none focus:ring-1 focus:ring-black"
+                onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))}
+                placeholder="Ví dụ: hỗ trợ đóng ca, kiểm kê, xử lý khách đông..."
+                value={form.reason}
+              />
+            </label>
+            {clientError ? <p className="rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]">{clientError}</p> : null}
+            {createMutation.isError ? <p className="rounded-lg bg-[#ffdad6] px-3 py-2 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(createMutation.error, "Không thể gửi đơn tăng ca.")}</p> : null}
+            {createMutation.isSuccess ? <p className="rounded-lg bg-[#10b981]/10 px-3 py-2 text-sm font-semibold text-[#047857]">Đã gửi đơn tăng ca.</p> : null}
+            <button
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-sm font-semibold text-white disabled:opacity-50"
+              disabled={createMutation.isPending}
+              onClick={handleSubmit}
+              type="button"
+            >
+              <Plus className="h-4 w-4" />
+              {createMutation.isPending ? "Đang gửi..." : "Gửi đơn tăng ca"}
+            </button>
+          </div>
+        </section>
+
+        <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
+          <div className="flex items-center justify-between border-b border-[#e5e7eb] bg-[#f7f3f2] px-4 py-3">
+            <h2 className="text-xl font-semibold">Lịch sử tăng ca</h2>
+            <span className="text-xs font-semibold text-[#444748]">{overtimeRequests.length} đơn</span>
+          </div>
+          {overtimeQuery.isLoading ? <p className="p-4 text-sm font-semibold text-[#444748]">Đang tải đơn tăng ca...</p> : null}
+          {overtimeQuery.isError ? <p className="p-4 text-sm font-semibold text-[#93000a]">{getApiErrorMessage(overtimeQuery.error, "Không thể tải đơn tăng ca.")}</p> : null}
+          {!overtimeQuery.isLoading && !overtimeQuery.isError && overtimeRequests.length === 0 ? <p className="p-4 text-sm font-semibold text-[#444748]">Bạn chưa có đơn tăng ca nào.</p> : null}
+          {overtimeRequests.map((request) => <StaffOvertimeHistoryItem key={request.id} request={request} />)}
+        </section>
+      </main>
+    </StaffShell>
+  );
+};
+
 export const StaffNotificationsPage = () => {
   const queryClient = useQueryClient();
-  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [filter, setFilter] = useState<"all" | "compensation" | "unread">("all");
   const notificationsQuery = useQuery({
     queryKey: ["notifications", "staff", filter],
     queryFn: () => notificationApi.list({ limit: 50, ...(filter === "unread" ? { isRead: false } : {}) }),
+    refetchInterval: 15000,
   });
   const markAllReadMutation = useMutation({
     mutationFn: () => notificationApi.markAllAsRead(),
@@ -732,7 +864,11 @@ export const StaffNotificationsPage = () => {
       void queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
-  const notifications = notificationsQuery.data?.data ?? [];
+  const allNotifications = notificationsQuery.data?.data ?? [];
+  const notifications = filter === "compensation"
+    ? allNotifications.filter((notification) => notification.type === "compensation_bonus" || notification.type === "compensation_penalty")
+    : allNotifications;
+  const unreadCount = notificationsQuery.data?.meta.unreadCount ?? 0;
 
   return (
     <StaffShell active="requests">
@@ -910,13 +1046,15 @@ const StaffTopContent = ({ back, title }: { back?: boolean; title: string }) => 
   const unreadQuery = useQuery({
     queryKey: ["notifications", "unread-count"],
     queryFn: () => notificationApi.unreadCount(),
+    refetchInterval: 15000,
   });
   const unreadCount = unreadQuery.data?.unreadCount ?? 0;
+  const unreadLabel = unreadCount > 99 ? "99+" : String(unreadCount);
 
   return (
     <header className="fixed left-0 top-0 z-50 flex h-16 w-full items-center justify-between border-b border-[#e5e7eb] bg-[#fdf8f8] px-4">
       <div className="flex items-center gap-3">{back ? <Link className="rounded-full p-2 hover:bg-[#ebe7e6]" to="/staff"><ArrowLeft className="h-5 w-5" /></Link> : <button className="rounded-full p-2 hover:bg-[#ebe7e6]"><Menu className="h-5 w-5" /></button>}<h1 className="text-2xl font-black">{title}</h1></div>
-      <div className="flex items-center gap-2"><Link className="relative rounded-full p-2 hover:bg-[#ebe7e6]" to="/staff/notifications"><Bell className="h-5 w-5" />{unreadCount > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#ef4444]" /> : null}</Link>{back ? null : <Link className="h-8 w-8 overflow-hidden rounded-full border border-[#e5e7eb]" to="/staff/profile"><img alt="" className="h-full w-full object-cover" src={profileImage} /></Link>}</div>
+      <div className="flex items-center gap-2"><Link aria-label="Thông báo" className="relative rounded-full p-2 hover:bg-[#ebe7e6]" to="/staff/notifications"><Bell className="h-5 w-5" />{unreadCount > 0 ? <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[#ef4444] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[#fdf8f8]">{unreadLabel}</span> : null}</Link>{back ? null : <Link className="h-8 w-8 overflow-hidden rounded-full border border-[#e5e7eb]" to="/staff/profile"><img alt="" className="h-full w-full object-cover" src={profileImage} /></Link>}</div>
     </header>
   );
 };
@@ -951,8 +1089,31 @@ const AvatarStack = ({ names }: { names: string[] }) => {
 
   return <div className="flex -space-x-2">{visible.map((name) => <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#f1edec] text-xs font-bold text-black" key={name}>{getInitials(name)}</div>)}{remaining > 0 ? <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-white text-xs font-bold text-black">+{remaining}</div> : null}</div>;
 };
-const QuickActions = () => <section><h2 className="mb-3 px-1 text-sm font-bold uppercase tracking-wider text-[#444748]">Thao tác nhanh</h2><div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#f5f5f5]"><ActionRow icon={<CalendarDays />} title="Xin nghỉ phép" desc="Nghỉ phép, việc riêng hoặc nghỉ ốm" to="/staff/leave-requests" /><ActionRow icon={<Repeat />} title="Đổi ca" desc="Gửi yêu cầu đổi ca với đồng nghiệp" to="/staff/shift-swaps" /></div></section>;
+const QuickActions = () => <section><h2 className="mb-3 px-1 text-sm font-bold uppercase tracking-wider text-[#444748]">Thao tác nhanh</h2><div className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#f5f5f5]"><ActionRow icon={<CalendarDays />} title="Xin nghỉ phép" desc="Nghỉ phép, việc riêng hoặc nghỉ ốm" to="/staff/leave-requests" /><ActionRow icon={<Banknote />} title="Tăng ca" desc="Gửi đơn tăng ca để quản lý duyệt" to="/staff/overtime" /><ActionRow icon={<Repeat />} title="Đổi ca" desc="Gửi yêu cầu đổi ca với đồng nghiệp" to="/staff/shift-swaps" /></div></section>;
 const ActionRow = ({ desc, icon, title, to }: { desc: string; icon: ReactNode; title: string; to: string }) => <Link className="flex items-center justify-between border-b border-[#e5e7eb] p-4 last:border-b-0 hover:bg-[#ebe7e6]" to={to}><div className="flex items-center gap-4"><span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-[#0058be] [&>svg]:h-5 [&>svg]:w-5">{icon}</span><div><p className="font-semibold">{title}</p><p className="text-xs text-[#444748]">{desc}</p></div></div><ChevronRight className="h-5 w-5 text-[#444748]" /></Link>;
+const staffFieldClassName = "h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-black";
+const StaffOvertimeStat = ({ icon, label, value }: { icon: ReactNode; label: string; value: string }) => <div className="rounded-xl border border-[#e5e7eb] bg-[#f5f5f5] p-4"><span className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-white text-black [&>svg]:h-5 [&>svg]:w-5">{icon}</span><p className="text-xs font-semibold uppercase tracking-wide text-[#444748]">{label}</p><p className="mt-1 text-3xl font-semibold">{value}</p></div>;
+const StaffOvertimeHistoryItem = ({ request }: { request: OvertimeRequest }) => {
+  const status = toStaffOvertimeStatusLabel(request.status);
+  const tone = request.status === "approved" ? "bg-[#10b981]/10 text-[#047857]" : request.status === "pending" ? "bg-[#0058be]/10 text-[#0058be]" : "bg-[#ffdad6] text-[#93000a]";
+
+  return (
+    <div className="border-b border-[#e5e7eb] p-4 last:border-b-0">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold">{formatDateLabel(toDateInputValue(request.workDate))}</p>
+          <p className="text-sm text-[#444748]">{request.startTime} - {request.endTime} ({request.hours}h)</p>
+          <p className="mt-2 line-clamp-2 text-sm text-[#444748]">{request.reason}</p>
+          {request.managerNote ? <p className="mt-1 text-xs text-[#444748]">Ghi chú: {request.managerNote}</p> : null}
+        </div>
+        <div className="shrink-0 text-right">
+          <span className={`rounded-full px-3 py-1 text-xs font-bold ${tone}`}>{status}</span>
+          {request.status === "approved" ? <p className="mt-2 text-sm font-semibold">{formatStaffCurrency(request.amount)}</p> : null}
+        </div>
+      </div>
+    </div>
+  );
+};
 type StaffScheduleItem = {
   attendanceLabel: string;
   attendanceTone: "danger" | "muted" | "success" | "warning";
@@ -1017,6 +1178,7 @@ const addDays = (date: Date, days: number) => {
 const formatDateLabel = (value: string) => new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(`${toDateInputValue(value)}T00:00:00`));
 const formatDate = (value: string) => new Intl.DateTimeFormat("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 const formatTime = (value?: string) => value ? new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit" }).format(new Date(value)) : "--:--";
+const formatStaffCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
 const formatRelativeTime = (value: string) => {
   const diffMs = Date.now() - new Date(value).getTime();
   const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
@@ -1028,6 +1190,7 @@ const formatRelativeTime = (value: string) => {
   return `${diffDays} ngày trước`;
 };
 const getNotificationIcon = (type: Notification["type"]) => {
+  if (type.includes("compensation")) return <Banknote />;
   if (type.includes("leave")) return <Plane />;
   if (type.includes("shift_swap")) return <Repeat />;
   if (type.includes("checkin") || type.includes("checkout") || type === "attendance_warning") return <CalendarClock />;
@@ -1035,6 +1198,8 @@ const getNotificationIcon = (type: Notification["type"]) => {
   return <Bell />;
 };
 const getNotificationTone = (notification: Notification): "default" | "success" | "secondary" | "danger" => {
+  if (notification.type === "compensation_bonus") return "success";
+  if (notification.type === "compensation_penalty") return "danger";
   if (notification.type === "leave_approved" || notification.type === "shift_swap_accepted") return "success";
   if (notification.type === "leave_rejected" || notification.type === "shift_swap_rejected" || notification.type === "attendance_warning") return "danger";
   if (notification.type === "schedule_published" || notification.type === "shift_changed") return "secondary";
@@ -1106,6 +1271,58 @@ const toWeekStart = (value: Date | string) => {
 const assignedShiftTimeToMinutes = (time: string) => {
   const [hours = 0, minutes = 0] = time.split(":").map(Number);
   return hours * 60 + minutes;
+};
+const getStaffOvertimeInterval = (workDate: string, startTime: string, endTime: string) => {
+  const dayStart = new Date(`${toDateInputValue(workDate)}T00:00:00`).getTime();
+  const startMinutes = assignedShiftTimeToMinutes(startTime);
+  const endMinutes = assignedShiftTimeToMinutes(endTime);
+  const endOffset = endMinutes <= startMinutes ? endMinutes + 24 * 60 : endMinutes;
+
+  return {
+    start: dayStart + startMinutes * 60 * 1000,
+    end: dayStart + endOffset * 60 * 1000,
+  };
+};
+const getStaffOvertimeHours = (workDate: string, startTime: string, endTime: string) => {
+  if (!workDate || !startTime || !endTime) return 0;
+  const interval = getStaffOvertimeInterval(workDate, startTime, endTime);
+  return Math.max(0, Math.round(((interval.end - interval.start) / 36e5) * 10) / 10);
+};
+const staffOvertimeIntervalsOverlap = (
+  first: { start: number; end: number },
+  second: { start: number; end: number }
+) => first.start < second.end && second.start < first.end;
+const getStaffOvertimeValidationMessage = (
+  form: { workDate: string; startTime: string; endTime: string; reason: string },
+  requests: OvertimeRequest[]
+) => {
+  if (!form.workDate) return "Vui lòng chọn ngày tăng ca.";
+  if (!form.startTime || !form.endTime) return "Vui lòng nhập giờ bắt đầu và kết thúc.";
+  if (!form.reason.trim()) return "Vui lòng nhập lý do tăng ca.";
+  if (form.reason.trim().length > 1000) return "Lý do tăng ca không được vượt quá 1000 ký tự.";
+
+  const hours = getStaffOvertimeHours(form.workDate, form.startTime, form.endTime);
+  if (hours < 0.25) return "Thời lượng tăng ca tối thiểu là 15 phút.";
+  if (hours > 24) return "Thời lượng tăng ca không được vượt quá 24 giờ.";
+
+  const proposed = getStaffOvertimeInterval(form.workDate, form.startTime, form.endTime);
+  const hasOverlap = requests
+    .filter((request) => request.status === "pending" || request.status === "approved")
+    .some((request) =>
+      staffOvertimeIntervalsOverlap(
+        proposed,
+        getStaffOvertimeInterval(toDateInputValue(request.workDate), request.startTime, request.endTime)
+      )
+    );
+
+  if (hasOverlap) return "Bạn đã có đơn tăng ca đang chờ hoặc đã duyệt bị trùng giờ.";
+  return "";
+};
+const toStaffOvertimeStatusLabel = (status: OvertimeRequest["status"]) => {
+  if (status === "approved") return "Đã duyệt";
+  if (status === "rejected") return "Từ chối";
+  if (status === "cancelled") return "Đã hủy";
+  return "Chờ duyệt";
 };
 const getAssignedShiftInterval = (schedule: Pick<AssignedShift, "workDate" | "shiftStartTime" | "shiftEndTime">) => {
   const dayStart = new Date(`${toDateInputValue(schedule.workDate)}T00:00:00`).getTime();
